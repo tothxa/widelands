@@ -499,6 +499,24 @@ bool InteractiveGameBase::handle_key(bool down, SDL_Keysym code) {
 	return false;
 }
 
+bool InteractiveGameBase::handle_mousewheel(uint32_t which, int32_t x, int32_t y) {
+	if (which != 0) {
+		return false;
+	}
+	if ((get_config_bool("ctrl_zoom", false)) && !(SDL_GetModState() & KMOD_CTRL)) {
+		return false;
+	}
+	if (abs(x) > abs(2 * y)) {
+		if (x > 0) {
+			decrease_gamespeed(kSpeedSlow * x);
+		} else {
+			increase_gamespeed(-kSpeedSlow * x);
+		}
+		return true;
+	}
+	return false;
+}
+
 /// \return a pointer to the running \ref Game instance.
 Widelands::Game* InteractiveGameBase::get_game() const {
 	return dynamic_cast<Widelands::Game*>(&egbase());

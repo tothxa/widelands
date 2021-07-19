@@ -583,22 +583,26 @@ bool MapView::handle_mousewheel(uint32_t which, int32_t x, int32_t y) {
 		return false;
 	}
 	if ((get_config_bool("ctrl_zoom", false)) && !(SDL_GetModState() & KMOD_CTRL)) {
-		const uint16_t scroll_distance_y = g_gr->get_yres() / 20;
-		const uint16_t scroll_distance_x = g_gr->get_xres() / 20;
-		int32_t scroll_x = x * scroll_distance_x;
-		int32_t scroll_y = y * scroll_distance_y;
-		pan_by(Vector2i(invert_movement_ ? scroll_x : -scroll_x,
-		                invert_movement_ ? scroll_y : -scroll_y),
-		       Transition::Jump);
+		if (!is_animating()) {
+			const uint16_t scroll_distance_y = g_gr->get_yres() / 20;
+			const uint16_t scroll_distance_x = g_gr->get_xres() / 20;
+			int32_t scroll_x = x * scroll_distance_x;
+			int32_t scroll_y = y * scroll_distance_y;
+			pan_by(Vector2i(invert_movement_ ? scroll_x : -scroll_x,
+                               invert_movement_ ? scroll_y : -scroll_y),
+                               Transition::Jump);
+		}
 		return true;
 	}
-	if (is_animating()) {
+	if (abs(y) > abs(2*x)) {
+		if (!is_animating()) {
+			constexpr float kPercentPerMouseWheelTick = 0.02f;
+			float zoom = view_.zoom * static_cast<float>(std::pow(1.f - kPercentPerMouseWheelTick, y));
+			zoom_around(zoom, last_mouse_pos_.cast<float>(), Transition::Jump);
+		}
 		return true;
 	}
-	constexpr float kPercentPerMouseWheelTick = 0.02f;
-	float zoom = view_.zoom * static_cast<float>(std::pow(1.f - kPercentPerMouseWheelTick, y));
-	zoom_around(zoom, last_mouse_pos_.cast<float>(), Transition::Jump);
-	return true;
+	return false;
 }
 
 void MapView::zoom_around(float new_zoom,
@@ -728,15 +732,21 @@ bool MapView::handle_key(bool down, SDL_Keysym code) {
 	}
 
 	if (matches_shortcut(KeyboardShortcut::kCommonZoomIn, code)) {
-		increase_zoom();
+		if (!is_animating()) {
+			increase_zoom();
+		}
 		return true;
 	}
 	if (matches_shortcut(KeyboardShortcut::kCommonZoomOut, code)) {
-		decrease_zoom();
+		if (!is_animating()) {
+			decrease_zoom();
+		}
 		return true;
 	}
 	if (matches_shortcut(KeyboardShortcut::kCommonZoomReset, code)) {
-		reset_zoom();
+		if (!is_animating()) {
+			reset_zoom();
+		}
 		return true;
 	}
 
