@@ -589,12 +589,12 @@ bool MapView::handle_mousewheel(uint32_t which, int32_t x, int32_t y) {
 			int32_t scroll_x = x * scroll_distance_x;
 			int32_t scroll_y = y * scroll_distance_y;
 			pan_by(Vector2i(invert_movement_ ? scroll_x : -scroll_x,
-                               invert_movement_ ? scroll_y : -scroll_y),
-                               Transition::Jump);
+			       invert_movement_ ? scroll_y : -scroll_y),
+			       Transition::Jump);
 		}
 		return true;
 	}
-	if (abs(y) > abs(2*x)) {
+	if (abs(y) > abs(2 * x)) {
 		if (!is_animating()) {
 			constexpr float kPercentPerMouseWheelTick = 0.02f;
 			float zoom = view_.zoom * static_cast<float>(std::pow(1.f - kPercentPerMouseWheelTick, y));
@@ -649,7 +649,7 @@ void MapView::zoom_around(float new_zoom,
 
 void MapView::reset_zoom() {
 	zoom_around(1.f, Vector2f(get_w() / 2.f, get_h() / 2.f),
-		    animate_map_panning_ ? Transition::Smooth : Transition::Jump);
+	            animate_map_panning_ ? Transition::Smooth : Transition::Jump);
 }
 void MapView::increase_zoom() {
 	zoom_around(animation_target_view().view.zoom - kZoomPercentPerKeyPress,
