@@ -250,17 +250,47 @@ bool Slider::handle_key(bool down, SDL_Keysym code) {
 			set_value((code.mod & KMOD_CTRL) ? get_max_value() : get_value() + 1);
 			return true;
 		default:
+			int32_t num = -1;
 			if (code.sym >= SDLK_1 && code.sym <= SDLK_9) {
-				set_value(get_min_value() + code.sym - SDLK_1);
+				num = code.sym - SDLK_1;
 			} else if (code.sym >= SDLK_KP_1 && code.sym <= SDLK_KP_9 && !(code.mod & KMOD_NUM)) {
-				set_value(get_min_value() + code.sym - SDLK_KP_1);
-			} else {
-				break;
+				num = code.sym - SDLK_KP_1;
 			}
-			return true;
+			if (num >= 0) {
+				constexpr int32_t max_num = 9 - 1;
+				int32_t min = get_min_value();
+				int32_t max = get_max_value();
+
+				if (num == 0) {
+					set_value(min);
+				} else if (num == max_num) {
+					set_value(max);
+				} else if (max - min <= max_num) {
+					set_value(min + num);
+				} else {
+					set_value(min + ((max - min) * num) / max_num);
+				}
+				return true;
+			}
 		}
 	}
 	return Panel::handle_key(down, code);
+}
+
+bool Slider::handle_mousewheel(uint32_t, int32_t x, int32_t y) {
+	if (!(enabled_ && has_mouse_inside())) {
+		return false;
+	}
+
+	int32_t change = y - x;
+	SDL_Keymod modstate = SDL_GetModState();
+
+	if (modstate == KMOD_NONE) {
+		set_value(get_value() + change);
+		return true;
+	}
+
+	return false;
 }
 
 /**
