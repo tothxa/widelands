@@ -589,7 +589,7 @@ bool MapView::handle_mousewheel(uint32_t which, int32_t x, int32_t y) {
 			int32_t scroll_x = x * scroll_distance_x;
 			int32_t scroll_y = y * scroll_distance_y;
 			pan_by(Vector2i(invert_movement_ ? scroll_x : -scroll_x,
-			       invert_movement_ ? scroll_y : -scroll_y),
+			                invert_movement_ ? scroll_y : -scroll_y),
 			       Transition::Jump);
 		}
 		return true;
