@@ -254,6 +254,23 @@ bool SpinBox::handle_key(bool down, SDL_Keysym code) {
 	return Panel::handle_key(down, code);
 }
 
+bool SpinBox::handle_mousewheel(uint32_t, int32_t x, int32_t y) {
+	Vector2i mousepos = get_mouse_position();
+	if ((mousepos.x >= 0) && (mousepos.y >=0) &&
+            (mousepos.x <= get_w()) && (mousepos.y <= get_h()) &&
+	    !SDL_GetModState()) {
+		int32_t change = y - x;
+		if ((change > 0) && (sbi_->button_plus)) {
+			change_value(change * sbi_->step_size);
+		}
+		if ((change < 0) && (sbi_->button_minus)) {
+			change_value(change * sbi_->step_size);
+		}
+		return true;
+	}
+	return false;
+}
+
 void SpinBox::layout() {
 	// Do not layout if the size hasn't been set yet.
 	if (get_w() == 0 && get_h() == 0) {
