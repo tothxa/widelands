@@ -255,11 +255,14 @@ bool SpinBox::handle_key(bool down, SDL_Keysym code) {
 }
 
 bool SpinBox::handle_mousewheel(uint32_t, int32_t x, int32_t y) {
-	Vector2i mousepos = get_mouse_position();
-	if ((mousepos.x >= 0) && (mousepos.y >=0) &&
-            (mousepos.x <= get_w()) && (mousepos.y <= get_h()) &&
-	    !SDL_GetModState()) {
-		int32_t change = y - x;
+	if (!has_mouse_inside()) {
+		return false;
+	}
+
+	int32_t change = y - x;
+	SDL_Keymod modstate = SDL_GetModState();
+
+	if (modstate == KMOD_NONE) {
 		if ((change > 0) && (sbi_->button_plus)) {
 			change_value(change * sbi_->step_size);
 		}
@@ -268,6 +271,17 @@ bool SpinBox::handle_mousewheel(uint32_t, int32_t x, int32_t y) {
 		}
 		return true;
 	}
+
+	if ((modstate & KMOD_CTRL) && !(modstate & ~KMOD_CTRL)) {
+		if ((change > 0) && (sbi_->button_ten_plus)) {
+			change_value(change * sbi_->big_step_size);
+		}
+		if ((change < 0) && (sbi_->button_ten_minus)) {
+			change_value(change * sbi_->big_step_size);
+		}
+		return true;
+	}
+
 	return false;
 }
 

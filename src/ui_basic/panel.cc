@@ -1617,6 +1617,12 @@ bool Panel::ui_mousewheel(uint32_t which, int32_t x, int32_t y) {
 	return p->do_mousewheel(which, x, y, p->get_mouse_position());
 }
 
+bool Panel::has_mouse_inside() {
+	Vector2i mousepos = get_mouse_position();
+	return ((mousepos.x >= 0) && (mousepos.y >=0) &&
+	        (mousepos.x <= get_w()) && (mousepos.y <= get_h()));
+}
+
 /**
  * Input callback function. Pass the key event to the currently modal panel
  */
