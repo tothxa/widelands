@@ -868,6 +868,21 @@ bool EditorInteractive::handle_key(bool const down, SDL_Keysym const code) {
 	return InteractiveBase::handle_key(down, code);
 }
 
+bool EditorInteractive::handle_mousewheel(uint32_t which, int32_t x, int32_t y) {
+	if (which != 0) {
+		return false;
+	}
+	if ((get_config_bool("ctrl_zoom", false)) && !(SDL_GetModState() & KMOD_CTRL)) {
+		return false;
+	}
+	if (x && !y) {
+		set_sel_radius_and_update_menu(
+		   std::max(0, std::min(static_cast<int32_t>(get_sel_radius()) - x, MAX_TOOL_AREA)));
+		return true;
+	}
+	return false;
+}
+
 void EditorInteractive::select_tool(EditorTool& primary, EditorTool::ToolIndex const which) {
 	if (which == EditorTool::First && &primary != tools_->current_pointer) {
 		if (primary.has_size_one()) {
