@@ -382,6 +382,20 @@ bool InputQueueDisplay::handle_mousemove(
 	return true;
 }
 
+bool InputQueueDisplay::handle_mousewheel(uint32_t which, int32_t x, int32_t y) {
+	if (which != 0 || show_only_ || !can_act_) {
+		return false;
+	}
+	if ((SDL_GetModState() == KMOD_NONE) && x) {
+		clicked_desired_fill(-x);
+		return true;
+	}
+	if (has_priority_) {
+		return priority_.handle_mousewheel(which, x, y);
+	}
+	return false;
+}
+
 void InputQueueDisplay::set_priority(const Widelands::WarePriority& priority) {
 	MutexLock m(MutexLock::ID::kObjects);
 	Widelands::Building* b = building_.get(ibase_.egbase());

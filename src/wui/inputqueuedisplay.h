@@ -60,6 +60,7 @@ protected:
 	void draw_overlay(RenderTarget&) override;
 	bool handle_mousepress(uint8_t, int32_t, int32_t) override;
 	bool handle_mousemove(uint8_t, int32_t, int32_t, int32_t, int32_t) override;
+	bool handle_mousewheel(uint32_t which, int32_t x, int32_t y) override;
 
 private:
 	// Common constructor
