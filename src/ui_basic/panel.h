@@ -286,8 +286,6 @@ public:
 	void set_handle_mouse(bool yes);
 	void grab_mouse(bool grab);
 
-	bool has_mouse_inside();
-
 	void set_can_focus(bool yes);
 	bool get_can_focus() const {
 		return flags_ & pf_can_focus;

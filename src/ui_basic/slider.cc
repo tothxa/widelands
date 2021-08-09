@@ -278,7 +278,7 @@ bool Slider::handle_key(bool down, SDL_Keysym code) {
 }
 
 bool Slider::handle_mousewheel(uint32_t, int32_t x, int32_t y) {
-	if (!(enabled_ && has_mouse_inside())) {
+	if (!enabled_) {
 		return false;
 	}
 

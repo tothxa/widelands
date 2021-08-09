@@ -255,10 +255,6 @@ bool SpinBox::handle_key(bool down, SDL_Keysym code) {
 }
 
 bool SpinBox::handle_mousewheel(uint32_t, int32_t x, int32_t y) {
-	if (!has_mouse_inside()) {
-		return false;
-	}
-
 	int32_t change = y - x;
 	SDL_Keymod modstate = SDL_GetModState();
 
