@@ -367,6 +367,11 @@ bool AttackBox::ListOfSoldiers::handle_mousemove(uint8_t, int32_t x, int32_t y, 
 	return true;
 }
 
+// whole window
+bool AttackBox::handle_mousewheel(uint32_t which, int32_t x, int32_t y) {
+	return soldiers_slider_->handle_mousewheel(which, x, y);
+}
+
 Widelands::Extent AttackBox::ListOfSoldiers::size() const {
 	const size_t nr_soldiers = count_soldiers();
 	uint32_t rows = nr_soldiers / current_size_;

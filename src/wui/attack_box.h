@@ -82,6 +82,9 @@ private:
 	void send_less_soldiers();
 	void send_more_soldiers();
 
+public:
+	bool handle_mousewheel(uint32_t which, int32_t x, int32_t y) override;
+
 private:
 	Widelands::Player* player_;
 	const Widelands::Map& map_;
