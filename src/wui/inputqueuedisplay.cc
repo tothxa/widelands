@@ -387,13 +387,22 @@ bool InputQueueDisplay::handle_mousewheel(uint32_t which, int32_t x, int32_t y) 
 		return false;
 	}
 	SDL_Keymod modstate = SDL_GetModState();
-	if ((modstate == KMOD_NONE) && x) {
-		clicked_desired_fill(-x);
-		return true;
+	if (x) {
+		if (modstate & KMOD_SHIFT) {
+			recurse([x](InputQueueDisplay& i) { i.clicked_desired_fill(-x); });
+			return true;
+		}
+		if (modstate == KMOD_NONE) {
+			clicked_desired_fill(-x);
+			return true;
+		}
 	}
-	if (has_priority_ && (modstate == KMOD_NONE) && y) {
-		priority_.change_value_by(y);
-		return true;
+	if (has_priority_ && y) {
+		// KMOD_SHIFT + change is already connected to recurse
+		if ((modstate == KMOD_NONE) || (modstate & KMOD_SHIFT)) {
+			priority_.change_value_by(y);
+			return true;
+		}
 	}
 	return false;
 }
