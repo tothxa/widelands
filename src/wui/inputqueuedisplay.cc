@@ -386,12 +386,14 @@ bool InputQueueDisplay::handle_mousewheel(uint32_t which, int32_t x, int32_t y) 
 	if (which != 0 || show_only_ || !can_act_) {
 		return false;
 	}
-	if ((SDL_GetModState() == KMOD_NONE) && x) {
+	SDL_Keymod modstate = SDL_GetModState();
+	if ((modstate == KMOD_NONE) && x) {
 		clicked_desired_fill(-x);
 		return true;
 	}
-	if (has_priority_) {
-		return priority_.handle_mousewheel(which, x, y);
+	if (has_priority_ && (modstate == KMOD_NONE) && y) {
+		priority_.change_value_by(y);
+		return true;
 	}
 	return false;
 }
