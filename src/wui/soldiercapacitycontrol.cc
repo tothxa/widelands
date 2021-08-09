@@ -35,6 +35,9 @@ using Widelands::SoldierControl;
 struct SoldierCapacityControl : UI::Box {
 	SoldierCapacityControl(UI::Panel* parent, InteractiveBase& ib, Widelands::Building& building);
 
+public:
+	bool handle_mousewheel(uint32_t which, int32_t x, int32_t y) override;
+
 protected:
 	void think() override;
 
@@ -124,6 +127,24 @@ void SoldierCapacityControl::click_increase() {
 	change_soldier_capacity((SDL_GetModState() & KMOD_CTRL) ?
                               soldiers->max_soldier_capacity() - soldiers->soldier_capacity() :
                               1);
+}
+
+bool SoldierCapacityControl::handle_mousewheel(uint32_t which, int32_t x, int32_t y) {
+	if (which != 0) {
+		return false;
+	}
+	if (SDL_GetModState() == KMOD_NONE) {
+		int32_t change = y - x;
+		if (change > 0) {
+			click_increase();
+		}
+		if (change < 0) {
+			click_decrease();
+		}
+		// also consume event if change is 0
+		return true;
+	}
+	return false;
 }
 
 UI::Panel* create_soldier_capacity_control(UI::Panel& parent,
