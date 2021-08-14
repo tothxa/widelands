@@ -54,6 +54,8 @@ public:
 	}
 	void check_boundaries();
 
+	bool handle_mousewheel(uint32_t which, int32_t x, int32_t y) override;
+
 private:
 	std::unique_ptr<Notifications::Subscriber<GraphicResolutionChanged>>
 	   graphic_resolution_changed_subscriber_;
@@ -113,6 +115,7 @@ private:
 	uint32_t but_w() const;
 	uint32_t but_h() const;
 
+	InteractiveBase& ibase_;
 	View view_;
 	UI::Button button_terrn;
 	UI::Button button_owner;

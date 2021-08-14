@@ -138,6 +138,7 @@ inline uint32_t MiniMap::but_h() const {
 }
 MiniMap::MiniMap(InteractiveBase& ibase, Registry* const registry)
    : UI::UniqueWindow(&ibase, UI::WindowStyle::kWui, "minimap", registry, 0, 0, _("Map")),
+     ibase_(ibase),
      view_(*this, &registry->minimap_layers, &registry->minimap_type, 0, 0, 0, 0, ibase),
 
      button_terrn(this,
@@ -277,4 +278,14 @@ void MiniMap::check_boundaries() {
 	} else {
 		resize();
 	}
+}
+
+bool MiniMap::handle_mousewheel(uint32_t which, int32_t x, int32_t y) {
+	// pass wheel events to parent
+	if (!ibase_.map_view()->handle_mousewheel(which, x, y)) {
+		ibase_.handle_mousewheel(which, x, y);
+	}
+
+	// but don't pass them to other underlying windows
+	return true;
 }
