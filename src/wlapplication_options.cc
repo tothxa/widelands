@@ -701,7 +701,7 @@ static const std::map<SDL_Keycode, SDL_Keycode> kNumpadIdentifications = {
    {SDLK_KP_PLUS, SDLK_PLUS},
 };
 
-bool matches_keymod(const uint16_t mod1, const uint16_t mod2){
+bool matches_keymod(const uint16_t mod1, const uint16_t mod2) {
 	const bool ctrl1 = mod1 & KMOD_CTRL;
 	const bool shift1 = mod1 & KMOD_SHIFT;
 	const bool alt1 = mod1 & KMOD_ALT;
