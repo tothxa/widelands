@@ -23,6 +23,7 @@
 #include "graphic/style_manager.h"
 #include "graphic/text_layout.h"
 #include "logic/player.h"
+#include "wlapplication_options.h"
 #include "wui/interactive_base.h"
 
 constexpr int8_t kButtonSize = 25;
@@ -382,28 +383,137 @@ bool InputQueueDisplay::handle_mousemove(
 	return true;
 }
 
-bool InputQueueDisplay::handle_mousewheel(uint32_t which, int32_t x, int32_t y) {
-	if (which != 0 || show_only_ || !can_act_) {
+bool InputQueueDisplay::handle_mousewheel(uint32_t, int32_t x, int32_t y) {
+	if (show_only_ || !can_act_) {
 		return false;
 	}
+	int32_t change = 0;
 	SDL_Keymod modstate = SDL_GetModState();
-	if (x) {
-		if (modstate & KMOD_SHIFT) {
-			recurse([x](InputQueueDisplay& i) { i.clicked_desired_fill(-x); });
+	if (get_config_bool("mousewheel", "inputqueue_unified", false)) {
+
+		// Unified handling of desired fill and priority:
+		// Either value can be changed anywhere inside the control,
+		// each having its own modifier and direction settings.
+
+		if (matches_keymod(modstate & ~KMOD_SHIFT,  // shift has special meaning, prevent
+		                                            // it to work as part of modifier
+		                   get_config_int("mousewheel", "inputqueue_fill_modifier", KMOD_NONE))) {
+			change = 0;
+			if (x && get_config_bool("mousewheel", "inputqueue_fill_x", false)) {
+				if (get_config_bool("mousewheel", "change_value_x_invert", false)) {
+					change += x;
+				} else {
+					change -= x;  // left is positive for normal direction
+				}
+			}
+			if (y && get_config_bool("mousewheel", "inputqueue_fill_y", false)) {
+				if (get_config_bool("mousewheel", "change_value_y_invert", false)) {
+					change -= y;
+				} else {
+					change += y;
+				}
+			}
+			if (change) {
+				if (modstate & KMOD_SHIFT) {
+					recurse([change](InputQueueDisplay& i) { i.clicked_desired_fill(change); });
+				} else {
+					clicked_desired_fill(change);
+				}
+				return true;
+			}
+		}
+
+		if (has_priority_ &&
+		    (matches_keymod(
+		       modstate & ~KMOD_SHIFT,  // shift has special meaning, prevent it to work
+		                                // as part of modifier
+		       get_config_int("mousewheel", "inputqueue_priority_modifier", KMOD_NONE)))) {
+			change = 0;
+			if (x && get_config_bool("mousewheel", "inputqueue_priority_x", false)) {
+				if (get_config_bool("mousewheel", "change_value_x_invert", false)) {
+					change += x;
+				} else {
+					change -= x;  // left is positive for normal direction
+				}
+			}
+			if (y && get_config_bool("mousewheel", "inputqueue_priority_y", false)) {
+				if (get_config_bool("mousewheel", "change_value_y_invert", false)) {
+					change -= y;
+				} else {
+					change += y;
+				}
+			}
+
+			// KMOD_SHIFT + changedto is already connected to recurse
+			if (change) {
+				priority_.change_value_by(change);
+				return true;
+			}
+		}
+
+	} else if (get_mouse_position().x < priority_.get_x() - kButtonSize / 4) {
+
+		// Separate handling of desired fill, same as slider or spinbox,
+		// but change all inputs together when shift is held down.
+
+		if (matches_keymod(modstate & ~KMOD_SHIFT,  // shift has special meaning, prevent
+		                                            // it to work as part of modifier
+		                   get_config_int("mousewheel", "change_value_modifier", KMOD_NONE))) {
+			change = 0;
+			if (x && get_config_bool("mousewheel", "change_value_x", false)) {
+				if (get_config_bool("mousewheel", "change_value_x_invert", false)) {
+					change += x;
+				} else {
+					change -= x;  // left is positive for normal direction
+				}
+			}
+			if (y && get_config_bool("mousewheel", "change_value_y", false)) {
+				if (get_config_bool("mousewheel", "change_value_y_invert", false)) {
+					change -= y;
+				} else {
+					change += y;
+				}
+			}
+			if (modstate & KMOD_SHIFT) {
+				recurse([change](InputQueueDisplay& i) { i.clicked_desired_fill(change); });
+			} else {
+				clicked_desired_fill(change);
+			}
 			return true;
 		}
-		if (modstate == KMOD_NONE) {
-			clicked_desired_fill(-x);
+
+	} else {
+
+		// Separate handling of priority, same as slider or spinbox.
+		// Can't just use method from Spinbox, because of the special
+		// meaning of shift to change all input priorities together.
+
+		if (has_priority_ &&
+		    matches_keymod(modstate & ~KMOD_SHIFT,  // shift has special meaning, prevent
+		                                            // it to work as part of modifier
+		                   get_config_int("mousewheel", "change_value_modifier", KMOD_NONE))) {
+			change = 0;
+			if (x && get_config_bool("mousewheel", "change_value_x", false)) {
+				if (get_config_bool("mousewheel", "change_value_x_invert", false)) {
+					change += x;
+				} else {
+					change -= x;  // left is positive for normal direction
+				}
+			}
+			if (y && get_config_bool("mousewheel", "change_value_y", false)) {
+				if (get_config_bool("mousewheel", "change_value_y_invert", false)) {
+					change -= y;
+				} else {
+					change += y;
+				}
+			}
+
+			// KMOD_SHIFT + changedto is already connected to recurse
+			priority_.change_value_by(change);
 			return true;
 		}
 	}
-	if (has_priority_ && y) {
-		// KMOD_SHIFT + change is already connected to recurse
-		if ((modstate == KMOD_NONE) || (modstate & KMOD_SHIFT)) {
-			priority_.change_value_by(y);
-			return true;
-		}
-	}
+
 	return false;
 }
 

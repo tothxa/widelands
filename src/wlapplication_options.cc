@@ -701,6 +701,23 @@ static const std::map<SDL_Keycode, SDL_Keycode> kNumpadIdentifications = {
    {SDLK_KP_PLUS, SDLK_PLUS},
 };
 
+bool matches_keymod(const uint16_t mod1, const uint16_t mod2){
+	const bool ctrl1 = mod1 & KMOD_CTRL;
+	const bool shift1 = mod1 & KMOD_SHIFT;
+	const bool alt1 = mod1 & KMOD_ALT;
+	const bool gui1 = mod1 & KMOD_GUI;
+	const bool ctrl2 = mod2 & KMOD_CTRL;
+	const bool shift2 = mod2 & KMOD_SHIFT;
+	const bool alt2 = mod2 & KMOD_ALT;
+	const bool gui2 = mod2 & KMOD_GUI;
+
+	if (ctrl1 != ctrl2 || shift1 != shift2 || alt1 != alt2 || gui1 != gui2) {
+		return false;
+	}
+
+	return true;
+}
+
 bool matches_shortcut(const KeyboardShortcut id, const SDL_Keysym code) {
 	return matches_shortcut(id, code.sym, code.mod);
 }
@@ -710,16 +727,7 @@ bool matches_shortcut(const KeyboardShortcut id, const SDL_Keycode code, const i
 		return false;
 	}
 
-	const bool ctrl1 = key.mod & KMOD_CTRL;
-	const bool shift1 = key.mod & KMOD_SHIFT;
-	const bool alt1 = key.mod & KMOD_ALT;
-	const bool gui1 = key.mod & KMOD_GUI;
-	const bool ctrl2 = mod & KMOD_CTRL;
-	const bool shift2 = mod & KMOD_SHIFT;
-	const bool alt2 = mod & KMOD_ALT;
-	const bool gui2 = mod & KMOD_GUI;
-
-	if (ctrl1 != ctrl2 || shift1 != shift2 || alt1 != alt2 || gui1 != gui2) {
+	if (!matches_keymod(key.mod, mod)) {
 		return false;
 	}
 

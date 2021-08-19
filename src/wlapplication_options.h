@@ -220,6 +220,8 @@ enum class KeyboardShortcut : uint16_t {
 bool set_shortcut(KeyboardShortcut, SDL_Keysym, KeyboardShortcut* conflict);
 SDL_Keysym get_shortcut(KeyboardShortcut);
 SDL_Keysym get_default_shortcut(KeyboardShortcut);
+bool matches_keymod(uint16_t, uint16_t);  // implicit conversion from SDL_Keymod works,
+                                          // but int to SDL_Keymod doesn't
 bool matches_shortcut(KeyboardShortcut, SDL_Keysym);
 bool matches_shortcut(KeyboardShortcut, SDL_Keycode, int modifiers);
 std::string matching_fastplace_shortcut(SDL_Keysym);
