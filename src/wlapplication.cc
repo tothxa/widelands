@@ -1124,6 +1124,9 @@ bool WLApplication::init_settings() {
 	// Keyboard shortcuts
 	init_shortcuts();
 
+	// Mousewheel options
+	init_mousewheel_settings();
+
 	int64_t last_start = get_config_int("last_start", 0);
 	int64_t now = time(nullptr);
 	if (last_start + 12 * 60 * 60 < now || get_config_string("uuid", "").empty()) {

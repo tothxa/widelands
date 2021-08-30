@@ -220,8 +220,7 @@ enum class KeyboardShortcut : uint16_t {
 bool set_shortcut(KeyboardShortcut, SDL_Keysym, KeyboardShortcut* conflict);
 SDL_Keysym get_shortcut(KeyboardShortcut);
 SDL_Keysym get_default_shortcut(KeyboardShortcut);
-bool matches_keymod(uint16_t, uint16_t);  // implicit conversion from SDL_Keymod works,
-                                          // but int to SDL_Keymod doesn't
+bool matches_keymod(uint16_t, uint16_t);
 bool matches_shortcut(KeyboardShortcut, SDL_Keysym);
 bool matches_shortcut(KeyboardShortcut, SDL_Keycode, int modifiers);
 std::string matching_fastplace_shortcut(SDL_Keysym);
@@ -232,6 +231,91 @@ std::string shortcut_string_for(SDL_Keysym, bool rt_escape = true);
 std::string shortcut_string_for(KeyboardShortcut, bool rt_escape = true);
 void set_fastplace_shortcut(KeyboardShortcut, const std::string& building);
 const std::string& get_fastplace_shortcut(KeyboardShortcut);
+
+/*
+ * Mousewheel options
+ */
+
+// Config file options
+enum class MousewheelOptionID : uint16_t {
+	k__Begin = 0,
+
+	kUIChangeValueMod = k__Begin,
+	kUIChangeValueX,
+	kUIChangeValueY,
+	kUIChangeValueInvertX,
+	kUIChangeValueInvertY,
+	kUITabMod,
+	kUITabX,
+	kUITabY,
+	kUITabInvertX,
+	kUITabInvertY,
+	kWUIUnifiedInputQueue,
+	kWUIInputFillMod,
+	kWUIInputFillX,
+	kWUIInputFillY,
+	kWUIInputPriorityMod,
+	kWUIInputPriorityX,
+	kWUIInputPriorityY,
+	kMapZoomMod,
+	kMapZoomX,
+	kMapZoomY,
+	kMapZoomInvertX,
+	kMapZoomInvertY,
+	kMapScrollMod,
+	kMapScroll,
+	kMapScrollInvert,
+	kMapScrollHorizYMod,
+	kMapScrollHorizYInvert,
+	kGameSpeedMod,
+	kGameSpeedX,
+	kGameSpeedY,
+	kGameSpeedInvertX,
+	kGameSpeedInvertY,
+	kEditorToolsizeMod,
+	kEditorToolsizeX,
+	kEditorToolsizeY,
+	kEditorToolsizeInvertX,
+	kEditorToolsizeInvertY,
+
+	k__End = kEditorToolsizeInvertY,
+
+	kDisabled
+};
+
+void set_mousewheel_option_bool(const MousewheelOptionID, const bool);
+bool get_mousewheel_option_bool(const MousewheelOptionID);
+
+void set_mousewheel_keymod(const MousewheelOptionID, const uint16_t);
+uint16_t get_mousewheel_keymod(const MousewheelOptionID);
+
+// Map config options to handlers
+enum class MousewheelHandlerConfigID : uint16_t {
+	k__Begin = 0,
+
+	kChangeValue = k__Begin,
+	kTabBar,
+	kWUIInputFill,
+	kWUIInputPriority,
+	kZoom,
+	kMapScroll,
+	kMapScrollHorizY,
+	kGameSpeed,
+	kEditorToolsize,
+
+	k__End = kEditorToolsize
+};
+
+void init_mousewheel_settings(bool force_defaults = false, bool use_2D_defaults = false);
+void update_mousewheel_settings();
+int32_t get_mousewheel_change(const MousewheelHandlerConfigID handler_id,
+                              const int32_t x,
+                              const int32_t y,
+                              const uint16_t modstate);
+Vector2i get_mousewheel_change_2D(const MousewheelHandlerConfigID handler_id,
+                                  const int32_t x,
+                                  const int32_t y,
+                                  const uint16_t modstate);
 
 /*
  * Sets the directory where to read/write kConfigFile.
