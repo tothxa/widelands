@@ -410,9 +410,9 @@ bool InputQueueDisplay::handle_mousewheel(uint32_t, int32_t x, int32_t y) {
 		                               modstate & ~KMOD_SHIFT);
 		if (change) {
 			if (modstate & KMOD_SHIFT) {
-				recurse([change](InputQueueDisplay& i) { i.clicked_desired_fill(change); });
+				recurse([change](InputQueueDisplay& i) { i.change_desired_fill(change); });
 			} else {
-				clicked_desired_fill(change);
+				change_desired_fill(change);
 			}
 			return true;
 		}
@@ -439,9 +439,9 @@ bool InputQueueDisplay::handle_mousewheel(uint32_t, int32_t x, int32_t y) {
 			if (get_mouse_position().x < priority_.get_x() - kButtonSize / 4) {
 				// Separate handling of desired fill
 				if (modstate & KMOD_SHIFT) {
-					recurse([change](InputQueueDisplay& i) { i.clicked_desired_fill(change); });
+					recurse([change](InputQueueDisplay& i) { i.change_desired_fill(change); });
 				} else {
-					clicked_desired_fill(change);
+					change_desired_fill(change);
 				}
 				return true;
 			} else if (has_priority_) {
@@ -499,6 +499,42 @@ void InputQueueDisplay::clicked_desired_fill(const int8_t delta) {
 
 	const bool ctrl_down = SDL_GetModState() & KMOD_CTRL;
 	const unsigned new_fill = ctrl_down ? delta < 0 ? 0 : max_fill : desired_fill + delta;
+
+	if (Widelands::Game* game = ibase_.get_game()) {
+		game->send_player_set_input_max_fill(*b, index_, type_, new_fill, settings_ != nullptr);
+	} else {
+		if (queue_) {
+			queue_->set_max_fill(new_fill);
+		} else {
+			get_setting()->desired_fill = new_fill;
+		}
+	}
+}
+
+void InputQueueDisplay::change_desired_fill(const int8_t delta) {
+	assert(delta != 0);
+	MutexLock m(MutexLock::ID::kObjects);
+	Widelands::Building* b = building_.get(ibase_.egbase());
+	if (!b) {
+		return;
+	}
+
+	const unsigned desired_fill = queue_ ? queue_->get_max_fill() : get_setting()->desired_fill;
+	const unsigned max_fill = queue_ ? queue_->get_max_size() : get_setting()->max_fill;
+	assert(desired_fill <= max_fill);
+
+	if (!can_act_ || desired_fill == (delta < 0 ? 0 : max_fill)) {
+		return;
+	}
+
+	unsigned new_fill;
+	if (delta < 0 && static_cast<int>(desired_fill) <= -delta) {
+		new_fill = 0;
+	} else if (delta > 0 && desired_fill >= max_fill - delta) {
+		new_fill = max_fill;
+	} else {
+		new_fill = desired_fill + delta;
+	}
 
 	if (Widelands::Game* game = ibase_.get_game()) {
 		game->send_player_set_input_max_fill(*b, index_, type_, new_fill, settings_ != nullptr);
