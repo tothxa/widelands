@@ -380,4 +380,3 @@ void init_mousewheel_settings(const bool force_defaults, const bool use_2D_defau
 	}
 	update_mousewheel_settings();
 }
-
