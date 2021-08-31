@@ -81,6 +81,7 @@
 #include "ui_fsmenu/mapselect.h"
 #include "ui_fsmenu/options.h"
 #include "wlapplication_messages.h"
+#include "wlapplication_mousewheel_options.h"
 #include "wlapplication_options.h"
 #include "wui/interactive_player.h"
 #include "wui/interactive_spectator.h"
