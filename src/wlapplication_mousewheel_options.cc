@@ -39,13 +39,15 @@ struct MousewheelOption {
 	}
 
 	void get_config() {
+		const uint16_t def =
+		   get_mousewheel_option_bool(MousewheelOptionID::kUse2Ddefaults) ? default_2D : default_;
 		if (!(internal_name.empty())) {
 			if (type_ == MousewheelOptionType::kBool) {
 				current = static_cast<uint16_t>(
-				   get_config_bool("mousewheel", internal_name, static_cast<bool>(default_)));
+				   get_config_bool("mousewheel", internal_name, static_cast<bool>(def)));
 			} else {
 				assert(type_ == MousewheelOptionType::kKeymod);
-				current = get_config_int("mousewheel", internal_name, default_);
+				current = get_config_int("mousewheel", internal_name, def);
 			}
 		}
 	}
@@ -234,7 +236,10 @@ static std::map<MousewheelOptionID, MousewheelOption> mousewheel_options = {
    {MousewheelOptionID::kEditorToolsizeInvertY,
     MousewheelOption("editor_toolsize_y_invert", MousewheelOptionType::kBool, false, false)},
 
-   {MousewheelOptionID::kDisabled, MousewheelOption("", MousewheelOptionType::kBool, false, false)}
+   {MousewheelOptionID::kDisabled, MousewheelOption("", MousewheelOptionType::kBool, false, false)},
+
+   {MousewheelOptionID::kUse2Ddefaults,
+    MousewheelOption("use_2d_defaults", MousewheelOptionType::kBool, false, true)},
 
 };
 
@@ -365,7 +370,10 @@ void update_mousewheel_settings() {
 	}
 }
 
-void init_mousewheel_settings(const bool force_defaults, const bool use_2D_defaults) {
+void init_mousewheel_settings(const bool force_defaults) {
+	mousewheel_options.at(MousewheelOptionID::kUse2Ddefaults).get_config();
+	const bool use_2D_defaults = get_mousewheel_option_bool(MousewheelOptionID::kUse2Ddefaults);
+
 	for (MousewheelOptionID i = MousewheelOptionID::k__Begin; i <= MousewheelOptionID::k__End;
 	     i = static_cast<MousewheelOptionID>(static_cast<uint16_t>(i) + 1)) {
 		if (force_defaults) {

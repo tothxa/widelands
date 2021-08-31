@@ -72,7 +72,9 @@ enum class MousewheelOptionID : uint16_t {
 
 	k__End = kEditorToolsizeInvertY,
 
-	kDisabled
+	kDisabled,
+
+	kUse2Ddefaults
 };
 
 void set_mousewheel_option_bool(const MousewheelOptionID, const bool);
@@ -98,12 +100,19 @@ enum class MousewheelHandlerConfigID : uint16_t {
 	k__End = kEditorToolsize
 };
 
-void init_mousewheel_settings(bool force_defaults = false, bool use_2D_defaults = false);
+// Read settings from config file or write all default values to config file
+void init_mousewheel_settings(bool force_defaults = false);
+
+// Apply settings to handlers
 void update_mousewheel_settings();
+
+// Primary handler function
 int32_t get_mousewheel_change(const MousewheelHandlerConfigID handler_id,
                               const int32_t x,
                               const int32_t y,
                               const uint16_t modstate);
+
+// Handler function for 2D scrolling
 Vector2i get_mousewheel_change_2D(const MousewheelHandlerConfigID handler_id,
                                   const int32_t x,
                                   const int32_t y,
