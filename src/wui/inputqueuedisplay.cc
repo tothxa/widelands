@@ -512,14 +512,16 @@ void InputQueueDisplay::clicked_desired_fill(const int8_t delta) {
 }
 
 void InputQueueDisplay::change_desired_fill(const int8_t delta) {
-	assert(delta != 0);
+	if (delta == 0) {
+		return;
+	}
 	MutexLock m(MutexLock::ID::kObjects);
 	Widelands::Building* b = building_.get(ibase_.egbase());
 	if (!b) {
 		return;
 	}
 
-	const unsigned desired_fill = queue_ ? queue_->get_max_fill() : get_setting()->desired_fill;
+	unsigned desired_fill = queue_ ? queue_->get_max_fill() : get_setting()->desired_fill;
 	const unsigned max_fill = queue_ ? queue_->get_max_size() : get_setting()->max_fill;
 	assert(desired_fill <= max_fill);
 
@@ -527,22 +529,22 @@ void InputQueueDisplay::change_desired_fill(const int8_t delta) {
 		return;
 	}
 
-	unsigned new_fill;
 	if (delta < 0 && static_cast<int>(desired_fill) <= -delta) {
-		new_fill = 0;
-	} else if (delta > 0 && desired_fill >= max_fill - delta) {
-		new_fill = max_fill;
+		desired_fill = 0;
 	} else {
-		new_fill = desired_fill + delta;
+		desired_fill += delta;
+		if (desired_fill > max_fill) {
+			desired_fill = max_fill;
+		}
 	}
 
 	if (Widelands::Game* game = ibase_.get_game()) {
-		game->send_player_set_input_max_fill(*b, index_, type_, new_fill, settings_ != nullptr);
+		game->send_player_set_input_max_fill(*b, index_, type_, desired_fill, settings_ != nullptr);
 	} else {
 		if (queue_) {
-			queue_->set_max_fill(new_fill);
+			queue_->set_max_fill(desired_fill);
 		} else {
-			get_setting()->desired_fill = new_fill;
+			get_setting()->desired_fill = desired_fill;
 		}
 	}
 }
