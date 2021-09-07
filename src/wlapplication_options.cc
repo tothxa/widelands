@@ -694,12 +694,33 @@ SDL_Keysym get_shortcut(const KeyboardShortcut id) {
 }
 
 static const std::map<SDL_Keycode, SDL_Keycode> kNumpadIdentifications = {
-   {SDLK_KP_9, SDLK_PAGEUP},      {SDLK_KP_8, SDLK_UP},         {SDLK_KP_7, SDLK_HOME},
-   {SDLK_KP_6, SDLK_RIGHT},       {SDLK_KP_4, SDLK_LEFT},       {SDLK_KP_3, SDLK_PAGEDOWN},
-   {SDLK_KP_2, SDLK_DOWN},        {SDLK_KP_1, SDLK_END},        {SDLK_KP_0, SDLK_INSERT},
-   {SDLK_KP_PERIOD, SDLK_DELETE}, {SDLK_KP_ENTER, SDLK_RETURN}, {SDLK_KP_MINUS, SDLK_MINUS},
-   {SDLK_KP_PLUS, SDLK_PLUS},
+   {SDLK_KP_9, SDLK_PAGEUP},     {SDLK_KP_8, SDLK_UP},          {SDLK_KP_7, SDLK_HOME},
+   {SDLK_KP_6, SDLK_RIGHT},      {SDLK_KP_5, SDLK_UNKNOWN},     {SDLK_KP_4, SDLK_LEFT},
+   {SDLK_KP_3, SDLK_PAGEDOWN},   {SDLK_KP_2, SDLK_DOWN},        {SDLK_KP_1, SDLK_END},
+   {SDLK_KP_0, SDLK_INSERT},     {SDLK_KP_PERIOD, SDLK_DELETE}, {SDLK_KP_ENTER, SDLK_RETURN},
+   {SDLK_KP_MINUS, SDLK_MINUS},  {SDLK_KP_PLUS, SDLK_PLUS},     {SDLK_KP_DIVIDE, SDLK_SLASH},
+   {SDLK_KP_MULTIPLY, SDLK_ASTERISK}
 };
+
+void normalize_numpad(SDL_Keysym &keysym) {
+	auto search = kNumpadIdentifications.find(keysym.sym);
+	if (search == kNumpadIdentifications.end()) {
+		return;
+	}
+	if (keysym.mod & KMOD_NUM) {
+		if (keysym.sym >= SDLK_KP_1 && keysym.sym <= SDLK_KP_9) {
+			keysym.sym = keysym.sym - SDLK_KP_1 + SDLK_1;
+			return;
+		} else if (keysym.sym == SDLK_KP_0) {
+			keysym.sym = SDLK_0;
+			return;
+		} else if (keysym.sym == SDLK_KP_PERIOD) {
+			keysym.sym = SDLK_PERIOD;
+			return;
+		}
+	}  // Not else, because '/', '*', '-' and '+' stay the same.
+	keysym.sym = search->second;
+}
 
 bool matches_keymod(const uint16_t mod1, const uint16_t mod2) {
 	const bool ctrl1 = mod1 & KMOD_CTRL;
@@ -975,6 +996,43 @@ void init_shortcuts(const bool force_defaults) {
 				break;
 			}
 		}
+	}
+}
+
+kChangeValue get_keyboard_change(SDL_Keysym keysym, bool enable_big_step) {
+	bool to_limit = false;
+	if (matches_keymod(keysym.mod, KMOD_CTRL)) {
+		to_limit = true;
+	} else if (keysym.mod != KMOD_NONE) {
+		return kChangeValue::kNone;
+	}
+	switch (keysym.sym) {
+	case SDLK_HOME:
+		return kChangeValue::kSetMin;
+	case SDLK_END:
+		return kChangeValue::kSetMax;
+	case SDLK_MINUS:
+	case SDLK_DOWN:
+	case SDLK_LEFT:
+		return to_limit ? kChangeValue::kSetMin : kChangeValue::kMinus;
+	case SDLK_PLUS:
+	case SDLK_UP:
+	case SDLK_RIGHT:
+		return to_limit ? kChangeValue::kSetMax : kChangeValue::kPlus;
+	case SDLK_PAGEDOWN:
+		if (enable_big_step) {
+			return to_limit ? kChangeValue::kSetMin : kChangeValue::kBigMinus;
+		} else {
+			return kChangeValue::kNone;
+		}
+	case SDLK_PAGEUP:
+		if (enable_big_step) {
+			return to_limit ? kChangeValue::kSetMax : kChangeValue::kBigPlus;
+		} else {
+			return kChangeValue::kNone;
+		}
+	default:
+		return kChangeValue::kNone;
 	}
 }
 
