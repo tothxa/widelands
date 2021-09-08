@@ -718,7 +718,26 @@ void normalize_numpad(SDL_Keysym &keysym) {
 			keysym.sym = SDLK_PERIOD;
 			return;
 		}
-	}  // Not else, because '/', '*', '-' and '+' stay the same.
+	}  // Not else, because '/', '*', '-' and '+' are not affected by NumLock state
+
+	if (get_config_bool("numpad_diagonalscrolling", false)) {
+		// If this option is enabled and one of the numpad keys 1,3,7,9 was pressed,
+		// ignore any shortcuts assigned to PageUp/PageDown/Home/End and move the map instead
+		switch (keysym.sym) {
+		case SDLK_KP_1:
+		case SDLK_KP_3:
+		case SDLK_KP_7:
+		case SDLK_KP_9:
+			return;
+		case SDLK_KP_5:
+			// Allow going back to HQ
+			keysym.sym = SDLK_HOME;
+			return;
+		default:
+			break;
+		}
+	}
+
 	keysym.sym = search->second;
 }
 
@@ -759,6 +778,10 @@ bool matches_shortcut(const KeyboardShortcut id, const SDL_Keycode code, const i
 	// Some extra checks so we can identify keypad keys with their "normal" equivalents,
 	// e.g. pressing '+' or numpad_'+' should always have the same effect
 
+	// This is now only required for config file backward compatibility, as all keyboard
+	// events get converted to "normal" keys (except for the numpad keys used for diagonal
+	// scrolling if it is enabled)
+
 	if (mod & KMOD_NUM) {
 		// If numlock is on and a number was pressed, only compare the entered number value.
 		// Annoyingly, there seems to be no strict rule whether the SDLK_ constants are
@@ -774,6 +797,19 @@ bool matches_shortcut(const KeyboardShortcut id, const SDL_Keycode code, const i
 		}
 		if (code >= SDLK_KP_1 && code <= SDLK_KP_9) {
 			return key.sym == code + SDLK_1 - SDLK_KP_1;
+		}
+	}
+
+	if (get_config_bool("numpad_diagonalscrolling", false)) {
+		// Allow it to work
+		switch (code) {
+		case SDLK_KP_1:
+		case SDLK_KP_3:
+		case SDLK_KP_7:
+		case SDLK_KP_9:
+			return false;
+		default:
+			break;
 		}
 	}
 
