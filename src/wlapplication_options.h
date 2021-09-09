@@ -234,18 +234,20 @@ void set_fastplace_shortcut(KeyboardShortcut, const std::string& building);
 const std::string& get_fastplace_shortcut(KeyboardShortcut);
 
 // Return values for changing value of spinbox, slider, etc.
-enum class kChangeValue : int32_t {
-	kSetMin = INT32_MIN,  // set value to minimum -- keys: Home, Ctrl + decrease keys
-	kBigMinus = -10,      // decrease by big step -- key: PageDown
-	kMinus = -1,          // decrease  -- keys: Left, Down, Minus
-	kNone = 0,            // no change -- all other keys
-	kPlus = 1,            // increase  -- keys: Right, Up, Plus
-	kBigPlus = 10,        // increase by big step -- key: PageUp
-	kSetMax = INT32_MAX   // set value to minimum -- keys: Home, Ctrl + increase keys
+enum class ChangeType : int32_t {
+	kSetMin = std::numeric_limits<int32_t>::min(),  // set value to minimum
+	                                                //     -- keys: Home, Ctrl + decrease keys
+	kBigMinus = -10,                                // decrease by big step -- key: PageDown
+	kMinus = -1,                                    // decrease  -- keys: Left, Down, Minus
+	kNone = 0,                                      // no change -- all other keys
+	kPlus = 1,                                      // increase  -- keys: Right, Up, Plus
+	kBigPlus = 10,                                  // increase by big step -- key: PageUp
+	kSetMax = std::numeric_limits<int32_t>::max()   // set value to maximum
+	                                                //     -- keys: End, Ctrl + increase keys
 };
 
 // Helper function for spinbox, slider, etc. handle_key(...)
-kChangeValue get_keyboard_change(SDL_Keysym, bool enable_big_step);
+ChangeType get_keyboard_change(SDL_Keysym, bool enable_big_step = false);
 
 /*
  * Sets the directory where to read/write kConfigFile.

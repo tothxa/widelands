@@ -694,15 +694,14 @@ SDL_Keysym get_shortcut(const KeyboardShortcut id) {
 }
 
 static const std::map<SDL_Keycode, SDL_Keycode> kNumpadIdentifications = {
-   {SDLK_KP_9, SDLK_PAGEUP},     {SDLK_KP_8, SDLK_UP},          {SDLK_KP_7, SDLK_HOME},
-   {SDLK_KP_6, SDLK_RIGHT},      {SDLK_KP_5, SDLK_UNKNOWN},     {SDLK_KP_4, SDLK_LEFT},
-   {SDLK_KP_3, SDLK_PAGEDOWN},   {SDLK_KP_2, SDLK_DOWN},        {SDLK_KP_1, SDLK_END},
-   {SDLK_KP_0, SDLK_INSERT},     {SDLK_KP_PERIOD, SDLK_DELETE}, {SDLK_KP_ENTER, SDLK_RETURN},
-   {SDLK_KP_MINUS, SDLK_MINUS},  {SDLK_KP_PLUS, SDLK_PLUS},     {SDLK_KP_DIVIDE, SDLK_SLASH},
-   {SDLK_KP_MULTIPLY, SDLK_ASTERISK}
-};
+   {SDLK_KP_9, SDLK_PAGEUP},         {SDLK_KP_8, SDLK_UP},          {SDLK_KP_7, SDLK_HOME},
+   {SDLK_KP_6, SDLK_RIGHT},          {SDLK_KP_5, SDLK_UNKNOWN},     {SDLK_KP_4, SDLK_LEFT},
+   {SDLK_KP_3, SDLK_PAGEDOWN},       {SDLK_KP_2, SDLK_DOWN},        {SDLK_KP_1, SDLK_END},
+   {SDLK_KP_0, SDLK_INSERT},         {SDLK_KP_PERIOD, SDLK_DELETE}, {SDLK_KP_ENTER, SDLK_RETURN},
+   {SDLK_KP_MINUS, SDLK_MINUS},      {SDLK_KP_PLUS, SDLK_PLUS},     {SDLK_KP_DIVIDE, SDLK_SLASH},
+   {SDLK_KP_MULTIPLY, SDLK_ASTERISK}};
 
-void normalize_numpad(SDL_Keysym &keysym) {
+void normalize_numpad(SDL_Keysym& keysym) {
 	auto search = kNumpadIdentifications.find(keysym.sym);
 	if (search == kNumpadIdentifications.end()) {
 		return;
@@ -721,22 +720,12 @@ void normalize_numpad(SDL_Keysym &keysym) {
 	}  // Not else, because '/', '*', '-' and '+' are not affected by NumLock state
 
 	if (get_config_bool("numpad_diagonalscrolling", false)) {
-		// If this option is enabled and one of the numpad keys 1,3,7,9 was pressed,
-		// ignore any shortcuts assigned to PageUp/PageDown/Home/End and move the map instead
-		switch (keysym.sym) {
-		case SDLK_KP_1:
-		case SDLK_KP_3:
-		case SDLK_KP_7:
-		case SDLK_KP_9:
+		// If this option is enabled, reserve numpad movement keys for map scrolling
+		// Numpad 5 becomes go to HQ
+		if (keysym.sym >= SDLK_KP_1 && keysym.sym <= SDLK_KP_9) {
 			return;
-		case SDLK_KP_5:
-			// Allow going back to HQ
-			keysym.sym = SDLK_HOME;
-			return;
-		default:
-			break;
 		}
-	}
+	}  // Not else, because there are 7 more keys which are not affected
 
 	keysym.sym = search->second;
 }
@@ -800,17 +789,10 @@ bool matches_shortcut(const KeyboardShortcut id, const SDL_Keycode code, const i
 		}
 	}
 
-	if (get_config_bool("numpad_diagonalscrolling", false)) {
-		// Allow it to work
-		switch (code) {
-		case SDLK_KP_1:
-		case SDLK_KP_3:
-		case SDLK_KP_7:
-		case SDLK_KP_9:
-			return false;
-		default:
-			break;
-		}
+	if (get_config_bool("numpad_diagonalscrolling", false) &&
+	    (code >= SDLK_KP_1 && code <= SDLK_KP_9)) {
+		// Reserve numpad movement keys for map scrolling
+		return false;
 	}
 
 	for (const auto& pair : kNumpadIdentifications) {
@@ -1035,40 +1017,40 @@ void init_shortcuts(const bool force_defaults) {
 	}
 }
 
-kChangeValue get_keyboard_change(SDL_Keysym keysym, bool enable_big_step) {
+ChangeType get_keyboard_change(SDL_Keysym keysym, bool enable_big_step) {
 	bool to_limit = false;
 	if (matches_keymod(keysym.mod, KMOD_CTRL)) {
 		to_limit = true;
 	} else if (keysym.mod != KMOD_NONE) {
-		return kChangeValue::kNone;
+		return ChangeType::kNone;
 	}
 	switch (keysym.sym) {
 	case SDLK_HOME:
-		return kChangeValue::kSetMin;
+		return ChangeType::kSetMin;
 	case SDLK_END:
-		return kChangeValue::kSetMax;
+		return ChangeType::kSetMax;
 	case SDLK_MINUS:
 	case SDLK_DOWN:
 	case SDLK_LEFT:
-		return to_limit ? kChangeValue::kSetMin : kChangeValue::kMinus;
+		return to_limit ? ChangeType::kSetMin : ChangeType::kMinus;
 	case SDLK_PLUS:
 	case SDLK_UP:
 	case SDLK_RIGHT:
-		return to_limit ? kChangeValue::kSetMax : kChangeValue::kPlus;
+		return to_limit ? ChangeType::kSetMax : ChangeType::kPlus;
 	case SDLK_PAGEDOWN:
 		if (enable_big_step) {
-			return to_limit ? kChangeValue::kSetMin : kChangeValue::kBigMinus;
+			return to_limit ? ChangeType::kSetMin : ChangeType::kBigMinus;
 		} else {
-			return kChangeValue::kNone;
+			return ChangeType::kNone;
 		}
 	case SDLK_PAGEUP:
 		if (enable_big_step) {
-			return to_limit ? kChangeValue::kSetMax : kChangeValue::kBigPlus;
+			return to_limit ? ChangeType::kSetMax : ChangeType::kBigPlus;
 		} else {
-			return kChangeValue::kNone;
+			return ChangeType::kNone;
 		}
 	default:
-		return kChangeValue::kNone;
+		return ChangeType::kNone;
 	}
 }
 
