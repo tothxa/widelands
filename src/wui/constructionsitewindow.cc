@@ -513,66 +513,21 @@ void ConstructionSoldierCapacityBox::update() {
 }
 bool ConstructionSoldierCapacityBox::handle_key(bool down, SDL_Keysym code) {
 	if (enabled && down) {
-		switch (code.sym) {
-
-		// Up and Right behave like clicking the Increase button
-		case SDLK_KP_6:
-		case SDLK_KP_8:
-			if (code.mod & KMOD_NUM) {
-				break;
-			}
-			FALLS_THROUGH;
-		case SDLK_UP:
-		case SDLK_RIGHT:
-		case SDLK_PLUS:
-		case SDLK_KP_PLUS:
-			if (code.mod & KMOD_CTRL) {
-				set_current(max);
-			} else {
-				change_current(1);
-			}
+		switch (get_keyboard_change(code)) {
+		case ChangeType::kNone:
+			break;
+		case ChangeType::kPlus:
+			change_current(1);
 			return true;
-
-		// Down and Left behave like clicking the Decrease button
-		case SDLK_KP_2:
-		case SDLK_KP_4:
-			if (code.mod & KMOD_NUM) {
-				break;
-			}
-			FALLS_THROUGH;
-		case SDLK_DOWN:
-		case SDLK_LEFT:
-		case SDLK_MINUS:
-		case SDLK_KP_MINUS:
-			if (code.mod & KMOD_CTRL) {
-				set_current(min);
-			} else {
-				change_current(-1);
-			}
+		case ChangeType::kMinus:
+			change_current(-1);
 			return true;
-
-		// Home sets to minimum capacity
-		case SDLK_KP_7:
-			if (code.mod & KMOD_NUM) {
-				break;
-			}
-			FALLS_THROUGH;
-		case SDLK_HOME:
-			set_current(min);
-			return true;
-
-		// End sets to maximum capacity
-		case SDLK_KP_1:
-			if (code.mod & KMOD_NUM) {
-				break;
-			}
-			FALLS_THROUGH;
-		case SDLK_END:
+		case ChangeType::kSetMax:
 			set_current(max);
 			return true;
-
-		default:
-			break;
+		case ChangeType::kSetMin:
+			set_current(min);
+			return true;
 		}
 	}
 	return false;

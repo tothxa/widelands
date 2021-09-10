@@ -30,6 +30,7 @@
 #include "graphic/rendertarget.h"
 #include "logic/map_objects/descriptions.h"
 #include "wlapplication.h"
+#include "wlapplication_mousewheel_options.h"
 #include "wlapplication_options.h"
 #include "wui/mapviewpixelfunctions.h"
 
@@ -578,30 +579,34 @@ void MapView::think() {
 	}
 }
 
-bool MapView::handle_mousewheel(uint32_t which, int32_t x, int32_t y) {
-	if (which != 0) {
-		return false;
-	}
-	if ((get_config_bool("ctrl_zoom", false)) && !(SDL_GetModState() & KMOD_CTRL)) {
-		if (!is_animating()) {
-			const uint16_t scroll_distance_y = g_gr->get_yres() / 20;
-			const uint16_t scroll_distance_x = g_gr->get_xres() / 20;
-			int32_t scroll_x = x * scroll_distance_x;
-			int32_t scroll_y = y * scroll_distance_y;
-			pan_by(Vector2i(invert_movement_ ? scroll_x : -scroll_x,
-			                invert_movement_ ? scroll_y : -scroll_y),
-			       Transition::Jump);
-		}
+bool MapView::handle_mousewheel(uint32_t, int32_t x, int32_t y) {
+	if (is_animating()) {
 		return true;
 	}
-	if (abs(y) > abs(2 * x)) {
-		if (!is_animating()) {
-			constexpr float kPercentPerMouseWheelTick = 0.02f;
-			float zoom = view_.zoom * static_cast<float>(std::pow(1.f - kPercentPerMouseWheelTick, y));
-			zoom_around(zoom, last_mouse_pos_.cast<float>(), Transition::Jump);
-		}
+	uint16_t modstate = SDL_GetModState();
+
+	Vector2i change_2d =
+	   get_mousewheel_change_2D(MousewheelHandlerConfigID::kMapScroll, x, y, modstate);
+	int32_t change_x =
+	   get_mousewheel_change(MousewheelHandlerConfigID::kMapScrollHorizY, x, y, modstate);
+	if (change_2d != Vector2i::zero() || change_x != 0) {
+		change_2d.x += change_x;
+		const uint16_t scroll_distance_y = g_gr->get_yres() / 20;
+		const uint16_t scroll_distance_x = g_gr->get_xres() / 20;
+		pan_by(Vector2i(change_2d.x * scroll_distance_x, change_2d.y * scroll_distance_y),
+		       Transition::Jump);
 		return true;
 	}
+
+	int32_t zoom_step = get_mousewheel_change(MousewheelHandlerConfigID::kZoom, x, y, modstate);
+	if (zoom_step) {
+		constexpr float kPercentPerMouseWheelTick = 0.02f;
+		float zoom =
+		   view_.zoom * static_cast<float>(std::pow(1.f - kPercentPerMouseWheelTick, zoom_step));
+		zoom_around(zoom, last_mouse_pos_.cast<float>(), Transition::Jump);
+		return true;
+	}
+
 	return false;
 }
 
