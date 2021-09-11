@@ -281,10 +281,10 @@ void MiniMap::check_boundaries() {
 	}
 }
 
-bool MiniMap::handle_mousewheel(uint32_t which, int32_t x, int32_t y) {
+bool MiniMap::handle_mousewheel(int32_t x, int32_t y, uint16_t modstate) {
 	// pass wheel events to parent
-	if (!ibase_.map_view()->handle_mousewheel(which, x, y)) {
-		ibase_.handle_mousewheel(which, x, y);
+	if (!ibase_.map_view()->handle_mousewheel(x, y, modstate)) {
+		ibase_.handle_mousewheel(x, y, modstate);
 	}
 
 	// but don't pass them to other underlying windows

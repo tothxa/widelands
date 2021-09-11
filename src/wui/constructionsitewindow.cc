@@ -249,7 +249,7 @@ void ConstructionSiteWindow::init(bool avoid_fastclick, bool workarea_preview_wa
 						game_->send_player_militarysite_set_soldier_preference(
 						   *construction_site_.get(ibase()->egbase()),
 						   state ? Widelands::SoldierPreference::kRookies :
-						           Widelands::SoldierPreference::kHeroes);
+						      Widelands::SoldierPreference::kHeroes);
 					} else {
 						NEVER_HERE();  // TODO(Nordfriese / Scenario Editor): implement
 					}
@@ -528,16 +528,17 @@ bool ConstructionSoldierCapacityBox::handle_key(bool down, SDL_Keysym code) {
 		case ChangeType::kSetMin:
 			set_current(min);
 			return true;
+		default:
+			break;
 		}
 	}
 	return false;
 }
-bool ConstructionSoldierCapacityBox::handle_mousewheel(uint32_t, int32_t x, int32_t y) {
+bool ConstructionSoldierCapacityBox::handle_mousewheel(int32_t x, int32_t y, uint16_t modstate) {
 	if (!enabled) {
 		return false;
 	}
-	int32_t change =
-	   get_mousewheel_change(MousewheelHandlerConfigID::kChangeValue, x, y, SDL_GetModState());
+	int32_t change = get_mousewheel_change(MousewheelHandlerConfigID::kChangeValue, x, y, modstate);
 	if (change == 0) {
 		return false;
 	}

@@ -54,7 +54,7 @@ public:
 		return current;
 	}
 	bool handle_key(bool down, SDL_Keysym code) override;
-	bool handle_mousewheel(uint32_t, int32_t x, int32_t y) override;
+	bool handle_mousewheel(int32_t x, int32_t y, uint16_t modstate) override;
 
 private:
 	void update();

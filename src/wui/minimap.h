@@ -54,7 +54,7 @@ public:
 	}
 	void check_boundaries();
 
-	bool handle_mousewheel(uint32_t which, int32_t x, int32_t y) override;
+	bool handle_mousewheel(int32_t x, int32_t y, uint16_t modstate) override;
 
 	UI::Panel::SaveType save_type() const override {
 		return UI::Panel::SaveType::kMinimap;

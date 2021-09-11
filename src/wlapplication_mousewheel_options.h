@@ -58,6 +58,7 @@ enum class MousewheelOptionID : uint16_t {
 	kMapScroll,
 	kMapScrollInvert,
 	kMapScrollHorizYMod,
+	kMapScrollHorizY,
 	kMapScrollHorizYInvert,
 	kGameSpeedMod,
 	kGameSpeedX,

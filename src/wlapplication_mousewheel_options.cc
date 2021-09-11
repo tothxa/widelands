@@ -185,7 +185,7 @@ static std::map<MousewheelOptionID, MousewheelOption> mousewheel_options = {
     MousewheelOption(
        "inputqueue_priority_modifier", MousewheelOptionType::kKeymod, KMOD_ALT, KMOD_NONE)},
    {MousewheelOptionID::kWUIInputPriorityX,
-    MousewheelOption("inputqueue_priority_x", MousewheelOptionType::kBool, false, false)},
+    MousewheelOption("inputqueue_priority_x", MousewheelOptionType::kBool, true, false)},
    {MousewheelOptionID::kWUIInputPriorityY,
     MousewheelOption("inputqueue_priority_y", MousewheelOptionType::kBool, true, true)},
 
@@ -210,13 +210,15 @@ static std::map<MousewheelOptionID, MousewheelOption> mousewheel_options = {
    {MousewheelOptionID::kMapScrollHorizYMod,
     MousewheelOption(
        "move_map_horizontal_y_modifier", MousewheelOptionType::kKeymod, KMOD_NONE, KMOD_NONE)},
+   {MousewheelOptionID::kMapScrollHorizY,
+    MousewheelOption("move_map_horizontal_y", MousewheelOptionType::kBool, false, false)},
    {MousewheelOptionID::kMapScrollHorizYInvert,
     MousewheelOption("move_map_horizontal_y_invert", MousewheelOptionType::kBool, false, false)},
 
    {MousewheelOptionID::kGameSpeedMod,
     MousewheelOption("gamespeed_modifier", MousewheelOptionType::kKeymod, KMOD_ALT, KMOD_ALT)},
    {MousewheelOptionID::kGameSpeedX,
-    MousewheelOption("gamespeed_x", MousewheelOptionType::kBool, true, true)},
+    MousewheelOption("gamespeed_x", MousewheelOptionType::kBool, false, false)},
    {MousewheelOptionID::kGameSpeedY,
     MousewheelOption("gamespeed_y", MousewheelOptionType::kBool, true, true)},
    {MousewheelOptionID::kGameSpeedInvertX,
@@ -226,7 +228,7 @@ static std::map<MousewheelOptionID, MousewheelOption> mousewheel_options = {
 
    {MousewheelOptionID::kEditorToolsizeMod,
     MousewheelOption(
-       "editor_toolsize_modifier", MousewheelOptionType::kKeymod, KMOD_NONE, KMOD_CTRL)},
+       "editor_toolsize_modifier", MousewheelOptionType::kKeymod, KMOD_ALT, KMOD_ALT)},
    {MousewheelOptionID::kEditorToolsizeX,
     MousewheelOption("editor_toolsize_x", MousewheelOptionType::kBool, true, true)},
    {MousewheelOptionID::kEditorToolsizeY,
@@ -301,7 +303,7 @@ static std::map<MousewheelHandlerConfigID, MousewheelSettings> mousewheel_handle
     MousewheelSettings(MousewheelOptionID::kMapScrollHorizYMod,
                        MousewheelOptionID::kDisabled,
                        MousewheelOptionID::kDisabled,
-                       MousewheelOptionID::kMapScroll,
+                       MousewheelOptionID::kMapScrollHorizY,
                        MousewheelOptionID::kMapScrollHorizYInvert,
                        DEFAULT_SIGN_SCROLL)},
    {MousewheelHandlerConfigID::kGameSpeed,  //

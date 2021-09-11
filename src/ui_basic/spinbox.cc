@@ -29,6 +29,7 @@
 #include "ui_basic/button.h"
 #include "ui_basic/multilinetextarea.h"
 #include "ui_basic/textarea.h"
+#include "wlapplication_mousewheel_options.h"
 #include "wlapplication_options.h"
 
 namespace UI {
@@ -240,26 +241,27 @@ bool SpinBox::handle_key(bool down, SDL_Keysym code) {
 	return Panel::handle_key(down, code);
 }
 
-bool SpinBox::handle_mousewheel(uint32_t, int32_t x, int32_t y) {
-	int32_t change = y - x;
-	SDL_Keymod modstate = SDL_GetModState();
+bool SpinBox::handle_mousewheel(int32_t x, int32_t y, uint16_t modstate) {
+	int32_t change = get_mousewheel_change(MousewheelHandlerConfigID::kChangeValue, x, y,
+	                                       // Reserve Ctrl for big change
+	                                       modstate & ~KMOD_CTRL);
 
-	if (modstate == KMOD_NONE) {
+	if (change != 0) {
+		if (type_ == SpinBox::Type::kBig && modstate & KMOD_CTRL) {
+			if ((change > 0) && (sbi_->button_ten_plus)) {
+				change_value(change * sbi_->big_step_size);
+			}
+			if ((change < 0) && (sbi_->button_ten_minus)) {
+				change_value(change * sbi_->big_step_size);
+			}
+			return true;
+		}
+
 		if ((change > 0) && (sbi_->button_plus)) {
 			change_value(change * sbi_->step_size);
 		}
 		if ((change < 0) && (sbi_->button_minus)) {
 			change_value(change * sbi_->step_size);
-		}
-		return true;
-	}
-
-	if ((modstate & KMOD_CTRL) && !(modstate & ~KMOD_CTRL)) {
-		if ((change > 0) && (sbi_->button_ten_plus)) {
-			change_value(change * sbi_->big_step_size);
-		}
-		if ((change < 0) && (sbi_->button_ten_minus)) {
-			change_value(change * sbi_->big_step_size);
 		}
 		return true;
 	}

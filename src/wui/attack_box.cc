@@ -368,8 +368,8 @@ bool AttackBox::ListOfSoldiers::handle_mousemove(uint8_t, int32_t x, int32_t y, 
 }
 
 // whole window
-bool AttackBox::handle_mousewheel(uint32_t which, int32_t x, int32_t y) {
-	return soldiers_slider_->handle_mousewheel(which, x, y);
+bool AttackBox::handle_mousewheel(int32_t x, int32_t y, uint16_t modstate) {
+	return soldiers_slider_->handle_mousewheel(x, y, modstate);
 }
 
 Widelands::Extent AttackBox::ListOfSoldiers::size() const {

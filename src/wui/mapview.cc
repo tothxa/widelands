@@ -579,11 +579,10 @@ void MapView::think() {
 	}
 }
 
-bool MapView::handle_mousewheel(uint32_t, int32_t x, int32_t y) {
+bool MapView::handle_mousewheel(int32_t x, int32_t y, uint16_t modstate) {
 	if (is_animating()) {
 		return true;
 	}
-	uint16_t modstate = SDL_GetModState();
 
 	Vector2i change_2d =
 	   get_mousewheel_change_2D(MousewheelHandlerConfigID::kMapScroll, x, y, modstate);
@@ -693,7 +692,7 @@ bool MapView::scroll_map() {
 
 	// numpad keys
 	const bool kNumlockOff = !(SDL_GetModState() & KMOD_NUM);
-#define kNP(x)
+#define kNP(x)                                                                                     \
 	const bool kNP##x = kNumlockOff && get_key_state(SDL_GetScancodeFromKey(SDLK_KP_##x));
 	kNP(1) kNP(2) kNP(3) kNP(4) kNP(6) kNP(7) kNP(8) kNP(9)
 #undef kNP

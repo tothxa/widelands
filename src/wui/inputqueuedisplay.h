@@ -62,7 +62,7 @@ struct PrioritySlider : public HorizontalSlider {
 	}
 
 public:
-	bool handle_mousewheel(uint32_t, int32_t, int32_t) override {
+	bool handle_mousewheel(int32_t, int32_t, uint16_t) override {
 		return false;
 	};
 	void change_value_by(int32_t change) {
@@ -103,7 +103,7 @@ protected:
 	void draw_overlay(RenderTarget&) override;
 	bool handle_mousepress(uint8_t, int32_t, int32_t) override;
 	bool handle_mousemove(uint8_t, int32_t, int32_t, int32_t, int32_t) override;
-	bool handle_mousewheel(uint32_t which, int32_t x, int32_t y) override;
+	bool handle_mousewheel(int32_t x, int32_t y, uint16_t modstate) override;
 
 private:
 	// Common constructor

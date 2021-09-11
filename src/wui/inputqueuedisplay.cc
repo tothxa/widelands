@@ -383,7 +383,7 @@ bool InputQueueDisplay::handle_mousemove(
 	return true;
 }
 
-bool InputQueueDisplay::handle_mousewheel(uint32_t, int32_t x, int32_t y) {
+bool InputQueueDisplay::handle_mousewheel(int32_t x, int32_t y, uint16_t modstate) {
 	if (show_only_ || !can_act_) {
 		return false;
 	}
@@ -396,7 +396,6 @@ bool InputQueueDisplay::handle_mousewheel(uint32_t, int32_t x, int32_t y) {
 	static constexpr MousewheelHandlerConfigID config_id_change_val =
 	   MousewheelHandlerConfigID::kChangeValue;
 	int32_t change;
-	uint16_t modstate = SDL_GetModState();
 
 	if (get_mousewheel_option_bool(config_id_unified)) {
 

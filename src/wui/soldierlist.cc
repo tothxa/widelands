@@ -373,7 +373,7 @@ struct SoldierList : UI::Box {
 	const SoldierControl* soldiers() const;
 
 protected:
-	bool handle_mousewheel(uint32_t which, int32_t x, int32_t y) override;
+	bool handle_mousewheel(int32_t x, int32_t y, uint16_t modstate) override;
 
 private:
 	void mouseover(const Soldier* soldier);
@@ -512,8 +512,8 @@ void SoldierList::set_soldier_preference(int32_t changed_to) {
 	}
 }
 
-bool SoldierList::handle_mousewheel(uint32_t which, int32_t x, int32_t y) {
-	return soldier_capacity_control_->handle_mousewheel(which, x, y);
+bool SoldierList::handle_mousewheel(int32_t x, int32_t y, uint16_t modstate) {
+	return soldier_capacity_control_->handle_mousewheel(x, y, modstate);
 }
 
 UI::Panel*
