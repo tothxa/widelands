@@ -32,23 +32,10 @@
 enum class MousewheelOptionID : uint16_t {
 	k__Begin = 0,
 
-	kUIChangeValueMod = k__Begin,
-	kUIChangeValueX,
-	kUIChangeValueY,
-	kUIChangeValueInvertX,
+	kUIChangeValueInvertX = k__Begin,
 	kUIChangeValueInvertY,
-	kUITabMod,
-	kUITabX,
-	kUITabY,
 	kUITabInvertX,
 	kUITabInvertY,
-	kWUIUnifiedInputQueue,
-	kWUIInputFillMod,
-	kWUIInputFillX,
-	kWUIInputFillY,
-	kWUIInputPriorityMod,
-	kWUIInputPriorityX,
-	kWUIInputPriorityY,
 	kMapZoomMod,
 	kMapZoomX,
 	kMapZoomY,
@@ -57,23 +44,18 @@ enum class MousewheelOptionID : uint16_t {
 	kMapScrollMod,
 	kMapScroll,
 	kMapScrollInvert,
-	kMapScrollHorizYMod,
-	kMapScrollHorizY,
-	kMapScrollHorizYInvert,
 	kGameSpeedMod,
 	kGameSpeedX,
 	kGameSpeedY,
-	kGameSpeedInvertX,
-	kGameSpeedInvertY,
 	kEditorToolsizeMod,
 	kEditorToolsizeX,
 	kEditorToolsizeY,
-	kEditorToolsizeInvertX,
-	kEditorToolsizeInvertY,
 
-	k__End = kEditorToolsizeInvertY,
+	k__End = kEditorToolsizeY,
 
+	kEnabled,
 	kDisabled,
+	kNoMod,
 
 	kUse2Ddefaults
 };
@@ -90,11 +72,8 @@ enum class MousewheelHandlerConfigID : uint16_t {
 
 	kChangeValue = k__Begin,
 	kTabBar,
-	kWUIInputFill,
-	kWUIInputPriority,
 	kZoom,
 	kMapScroll,
-	kMapScrollHorizY,
 	kGameSpeed,
 	kEditorToolsize,
 

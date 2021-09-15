@@ -387,71 +387,27 @@ bool InputQueueDisplay::handle_mousewheel(int32_t x, int32_t y, uint16_t modstat
 	if (show_only_ || !can_act_) {
 		return false;
 	}
-	static constexpr MousewheelOptionID config_id_unified =
-	   MousewheelOptionID::kWUIUnifiedInputQueue;
-	static constexpr MousewheelHandlerConfigID config_id_fill =
-	   MousewheelHandlerConfigID::kWUIInputFill;
-	static constexpr MousewheelHandlerConfigID config_id_priority =
-	   MousewheelHandlerConfigID::kWUIInputPriority;
-	static constexpr MousewheelHandlerConfigID config_id_change_val =
-	   MousewheelHandlerConfigID::kChangeValue;
-	int32_t change;
-
-	if (get_mousewheel_option_bool(config_id_unified)) {
-
-		// Unified handling of desired fill and priority:
-		// Either value can be changed anywhere inside the control,
-		// each having its own modifier and direction settings.
-
-		change = get_mousewheel_change(config_id_fill, x, y,
-		                               // shift has special meaning, prevent it to work
-		                               // as part of modifier
-		                               modstate & ~KMOD_SHIFT);
-		if (change) {
+	int32_t change = get_mousewheel_change(MousewheelHandlerConfigID::kChangeValue, x, y,
+	                               // shift has special meaning, prevent it to work
+	                               // as part of modifier
+	                               modstate & ~KMOD_SHIFT);
+	if (change) {
+		if (get_mouse_position().x < priority_.get_x() - kButtonSize / 4) {
+			// Mouse is over desired fill
 			if (modstate & KMOD_SHIFT) {
 				recurse([change](InputQueueDisplay& i) { i.change_desired_fill(change); });
 			} else {
 				change_desired_fill(change);
 			}
 			return true;
-		}
-		if (has_priority_) {
-			change = get_mousewheel_change(config_id_priority, x, y,
-			                               // shift has special meaning, prevent it to work
-			                               // as part of modifier
-			                               modstate & ~KMOD_SHIFT);
-			// KMOD_SHIFT + changedto is already connected to recurse
-			if (change) {
-				priority_.change_value_by(change);
-				return true;
-			}
-		}
+		} else if (has_priority_) {
+			// Mouse is over priority or collapse button
+			// Can't just use method from Slider, because of the special
+			// meaning of shift to change all input priorities together.
 
-	} else {
-		// Handle desired fill and priority as two separate sliders,
-		// but change all inputs together when shift is held down.
-		change = get_mousewheel_change(config_id_change_val, x, y,
-		                               // shift has special meaning, prevent it to work
-		                               // as part of modifier
-		                               modstate & ~KMOD_SHIFT);
-		if (change) {
-			if (get_mouse_position().x < priority_.get_x() - kButtonSize / 4) {
-				// Separate handling of desired fill
-				if (modstate & KMOD_SHIFT) {
-					recurse([change](InputQueueDisplay& i) { i.change_desired_fill(change); });
-				} else {
-					change_desired_fill(change);
-				}
-				return true;
-			} else if (has_priority_) {
-				// Separate handling of priority
-				// Can't just use method from Slider, because of the special
-				// meaning of shift to change all input priorities together.
-
-				// KMOD_SHIFT + changedto is already connected to recurse.
-				priority_.change_value_by(change);
-				return true;
-			}
+			// KMOD_SHIFT + changedto is already connected to recurse.
+			priority_.change_value_by(change);
+			return true;
 		}
 	}
 	return false;
