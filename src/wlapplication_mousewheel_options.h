@@ -43,7 +43,6 @@ enum class MousewheelOptionID : uint16_t {
 	kMapZoomInvertY,
 	kMapScrollMod,
 	kMapScroll,
-	kMapScrollInvert,
 	kGameSpeedMod,
 	kGameSpeedX,
 	kGameSpeedY,
@@ -53,7 +52,7 @@ enum class MousewheelOptionID : uint16_t {
 
 	k__End = kEditorToolsizeY,
 
-	kEnabled,
+	kAlwaysOn,
 	kDisabled,
 	kNoMod,
 

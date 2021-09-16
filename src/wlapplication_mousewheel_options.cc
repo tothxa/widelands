@@ -87,7 +87,7 @@ struct MousewheelOption {
 	}
 };
 
-struct MousewheelSettings {
+struct MousewheelHandlerOptions {
 	const MousewheelOptionID keymod_id;
 	uint16_t current_keymod = KMOD_NONE;
 	const MousewheelOptionID use_x;
@@ -113,7 +113,7 @@ struct MousewheelSettings {
 		}
 	}
 
-	MousewheelSettings(MousewheelOptionID _keymod_id,
+	MousewheelHandlerOptions(MousewheelOptionID _keymod_id,
 	                   MousewheelOptionID _use_x,
 	                   MousewheelOptionID _invert_x,
 	                   MousewheelOptionID _use_y,
@@ -173,8 +173,6 @@ static std::map<MousewheelOptionID, MousewheelOption> mousewheel_options = {
     MousewheelOption("move_map_modifier", MousewheelOptionType::kKeymod, KMOD_NONE, KMOD_NONE)},
    {MousewheelOptionID::kMapScroll,
     MousewheelOption("move_map", MousewheelOptionType::kBool, false, true)},
-   {MousewheelOptionID::kMapScrollInvert,
-    MousewheelOption("move_map_invert", MousewheelOptionType::kBool, false, false)},
 
    {MousewheelOptionID::kGameSpeedMod,
     MousewheelOption("gamespeed_modifier", MousewheelOptionType::kKeymod, KMOD_ALT, KMOD_ALT)},
@@ -191,7 +189,7 @@ static std::map<MousewheelOptionID, MousewheelOption> mousewheel_options = {
    {MousewheelOptionID::kEditorToolsizeY,
     MousewheelOption("editor_toolsize_y", MousewheelOptionType::kBool, true, true)},
 
-   {MousewheelOptionID::kEnabled, MousewheelOption("", MousewheelOptionType::kBool, true, true)},
+   {MousewheelOptionID::kAlwaysOn, MousewheelOption("", MousewheelOptionType::kBool, true, true)},
    {MousewheelOptionID::kDisabled, MousewheelOption("", MousewheelOptionType::kBool, false, false)},
    {MousewheelOptionID::kNoMod,
     MousewheelOption("", MousewheelOptionType::kKeymod, KMOD_NONE, KMOD_NONE)},
@@ -212,44 +210,44 @@ static std::map<MousewheelOptionID, MousewheelOption> mousewheel_options = {
 #define DEFAULT_SIGN_MOVE kSignNextRight, kSignNextDown
 #define DEFAULT_SIGN_SCROLL kSignScroll, kSignScroll
 
-static std::map<MousewheelHandlerConfigID, MousewheelSettings> mousewheel_handlers = {
+static std::map<MousewheelHandlerConfigID, MousewheelHandlerOptions> mousewheel_handlers = {
    {MousewheelHandlerConfigID::kChangeValue,
-    MousewheelSettings(MousewheelOptionID::kNoMod,
-                       MousewheelOptionID::kEnabled,
+    MousewheelHandlerOptions(MousewheelOptionID::kNoMod,
+                       MousewheelOptionID::kAlwaysOn,
                        MousewheelOptionID::kUIChangeValueInvertX,
-                       MousewheelOptionID::kEnabled,
+                       MousewheelOptionID::kAlwaysOn,
                        MousewheelOptionID::kUIChangeValueInvertY,
                        DEFAULT_SIGN_VALUE)},
    {MousewheelHandlerConfigID::kTabBar,  //
-    MousewheelSettings(MousewheelOptionID::kNoMod,
-                       MousewheelOptionID::kEnabled,
+    MousewheelHandlerOptions(MousewheelOptionID::kNoMod,
+                       MousewheelOptionID::kAlwaysOn,
                        MousewheelOptionID::kUITabInvertX,
-                       MousewheelOptionID::kEnabled,
+                       MousewheelOptionID::kAlwaysOn,
                        MousewheelOptionID::kUITabInvertY,
                        DEFAULT_SIGN_MOVE)},
    {MousewheelHandlerConfigID::kZoom,  //
-    MousewheelSettings(MousewheelOptionID::kMapZoomMod,
+    MousewheelHandlerOptions(MousewheelOptionID::kMapZoomMod,
                        MousewheelOptionID::kMapZoomX,
                        MousewheelOptionID::kMapZoomInvertX,
                        MousewheelOptionID::kMapZoomY,
                        MousewheelOptionID::kMapZoomInvertY,
                        DEFAULT_SIGN_VALUE)},
    {MousewheelHandlerConfigID::kMapScroll,  //
-    MousewheelSettings(MousewheelOptionID::kMapScrollMod,
+    MousewheelHandlerOptions(MousewheelOptionID::kMapScrollMod,
                        MousewheelOptionID::kMapScroll,
-                       MousewheelOptionID::kMapScrollInvert,
+                       MousewheelOptionID::kDisabled,  // always use system scroll direction
                        MousewheelOptionID::kMapScroll,
-                       MousewheelOptionID::kMapScrollInvert,
+                       MousewheelOptionID::kDisabled,  // always use system scroll direction
                        DEFAULT_SIGN_SCROLL)},
    {MousewheelHandlerConfigID::kGameSpeed,  //
-    MousewheelSettings(MousewheelOptionID::kGameSpeedMod,
+    MousewheelHandlerOptions(MousewheelOptionID::kGameSpeedMod,
                        MousewheelOptionID::kGameSpeedX,
                        MousewheelOptionID::kUIChangeValueInvertX,
                        MousewheelOptionID::kGameSpeedY,
                        MousewheelOptionID::kUIChangeValueInvertY,
                        DEFAULT_SIGN_VALUE)},
    {MousewheelHandlerConfigID::kEditorToolsize,
-    MousewheelSettings(MousewheelOptionID::kEditorToolsizeMod,
+    MousewheelHandlerOptions(MousewheelOptionID::kEditorToolsizeMod,
                        MousewheelOptionID::kEditorToolsizeX,
                        MousewheelOptionID::kUIChangeValueInvertX,
                        MousewheelOptionID::kEditorToolsizeY,
