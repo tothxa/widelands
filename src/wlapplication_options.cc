@@ -826,6 +826,38 @@ KeyboardShortcut shortcut_from_string(const std::string& name) {
 	throw wexception("Shortcut '%s' does not exist", name.c_str());
 }
 
+std::string keymod_string_for(const uint16_t modstate, const bool rt_escape) {
+	i18n::Textdomain textdomain("widelands");
+	std::vector<std::string> mods;
+	if (modstate & KMOD_SHIFT) {
+		mods.push_back(pgettext("hotkey", "Shift"));
+	}
+	if (modstate & KMOD_ALT) {
+		mods.push_back(pgettext("hotkey", "Alt"));
+	}
+	if (modstate & KMOD_GUI) {
+#ifdef __APPLE__
+		mods.push_back(pgettext("hotkey", "Cmd"));
+#else
+		mods.push_back(pgettext("hotkey", "GUI"));
+#endif
+	}
+	if (modstate & KMOD_CTRL) {
+		mods.push_back(pgettext("hotkey", "Ctrl"));
+	}
+
+	std::string result;
+
+	// Return value will have a trailing "+" if any modifier is matched,
+	// because all current uses need it anyway, and extra checks can
+	// be avoided both here and in the users this way
+	for (const std::string& m : mods) {
+		result = (boost::format(_("%1$s+%2$s")) % m % result).str();
+	}
+
+	return rt_escape ? richtext_escape(result) : result;
+}
+
 std::string shortcut_string_for(const KeyboardShortcut id, const bool rt_escape) {
 	return shortcut_string_for(get_shortcut(id), rt_escape);
 }
@@ -914,28 +946,9 @@ std::string shortcut_string_for(const SDL_Keysym sym, const bool rt_escape) {
 		return "";
 	}
 	i18n::Textdomain textdomain("widelands");
-	std::vector<std::string> mods;
-	if (sym.mod & KMOD_SHIFT) {
-		mods.push_back(pgettext("hotkey", "Shift"));
-	}
-	if (sym.mod & KMOD_ALT) {
-		mods.push_back(pgettext("hotkey", "Alt"));
-	}
-	if (sym.mod & KMOD_GUI) {
-#ifdef __APPLE__
-		mods.push_back(pgettext("hotkey", "Cmd"));
-#else
-		mods.push_back(pgettext("hotkey", "GUI"));
-#endif
-	}
-	if (sym.mod & KMOD_CTRL) {
-		mods.push_back(pgettext("hotkey", "Ctrl"));
-	}
 
-	std::string result = key_name(sym.sym);
-	for (const std::string& m : mods) {
-		result = (boost::format(_("%1$s+%2$s")) % m % result).str();
-	}
+	std::string result =
+	   (boost::format(_("%1$s%2$s")) % keymod_string_for(sym.mod, false) % key_name(sym.sym)).str();
 
 	return rt_escape ? richtext_escape(result) : result;
 }

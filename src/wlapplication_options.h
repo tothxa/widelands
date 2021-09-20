@@ -228,6 +228,10 @@ std::string matching_fastplace_shortcut(SDL_Keysym);
 void init_shortcuts(bool force_defaults = false);
 std::string to_string(KeyboardShortcut);
 KeyboardShortcut shortcut_from_string(const std::string&);
+
+// Return value will either be an empty string or have a trailing "+"
+std::string keymod_string_for(const uint16_t modstate, const bool rt_escape = true);
+
 std::string shortcut_string_for(SDL_Keysym, bool rt_escape = true);
 std::string shortcut_string_for(KeyboardShortcut, bool rt_escape = true);
 void set_fastplace_shortcut(KeyboardShortcut, const std::string& building);

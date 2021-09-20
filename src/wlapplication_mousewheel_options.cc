@@ -283,17 +283,17 @@ uint16_t get_mousewheel_keymod(const MousewheelOptionID opt_id) {
 	return mousewheel_options.at(opt_id).current;
 }
 
-int32_t get_mousewheel_change(const MousewheelHandlerConfigID handler_id,
-                              const int32_t x,
-                              const int32_t y,
-                              const uint16_t modstate) {
+int32_t get_mousewheel_change(MousewheelHandlerConfigID handler_id,
+                              int32_t x,
+                              int32_t y,
+                              uint16_t modstate) {
 	return mousewheel_handlers.at(handler_id).get_change(x, y, modstate);
 }
 
-Vector2i get_mousewheel_change_2D(const MousewheelHandlerConfigID handler_id,
-                                  const int32_t x,
-                                  const int32_t y,
-                                  const uint16_t modstate) {
+Vector2i get_mousewheel_change_2D(MousewheelHandlerConfigID handler_id,
+                                  int32_t x,
+                                  int32_t y,
+                                  uint16_t modstate) {
 	return mousewheel_handlers.at(handler_id).get_change_2D(x, y, modstate);
 }
 

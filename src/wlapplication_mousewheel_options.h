@@ -59,11 +59,11 @@ enum class MousewheelOptionID : uint16_t {
 	kUse2Ddefaults
 };
 
-void set_mousewheel_option_bool(const MousewheelOptionID, const bool);
-bool get_mousewheel_option_bool(const MousewheelOptionID);
+void set_mousewheel_option_bool(MousewheelOptionID, bool);
+bool get_mousewheel_option_bool(MousewheelOptionID);
 
-void set_mousewheel_keymod(const MousewheelOptionID, const uint16_t);
-uint16_t get_mousewheel_keymod(const MousewheelOptionID);
+void set_mousewheel_keymod(MousewheelOptionID, uint16_t);
+uint16_t get_mousewheel_keymod(MousewheelOptionID);
 
 // Map config options to handlers
 enum class MousewheelHandlerConfigID : uint16_t {
@@ -86,15 +86,15 @@ void init_mousewheel_settings(bool force_defaults = false);
 void update_mousewheel_settings();
 
 // Primary handler function
-int32_t get_mousewheel_change(const MousewheelHandlerConfigID handler_id,
-                              const int32_t x,
-                              const int32_t y,
-                              const uint16_t modstate);
+int32_t get_mousewheel_change(MousewheelHandlerConfigID handler_id,
+                              int32_t x,
+                              int32_t y,
+                              uint16_t modstate);
 
 // Handler function for 2D scrolling
-Vector2i get_mousewheel_change_2D(const MousewheelHandlerConfigID handler_id,
-                                  const int32_t x,
-                                  const int32_t y,
-                                  const uint16_t modstate);
+Vector2i get_mousewheel_change_2D(MousewheelHandlerConfigID handler_id,
+                                  int32_t x,
+                                  int32_t y,
+                                  uint16_t modstate);
 
 #endif  // end of include guard: WL_WLAPPLICATION_MOUSEWHEEL_OPTIONS_H

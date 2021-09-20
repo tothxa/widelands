@@ -32,6 +32,7 @@
 #include "ui_basic/textarea.h"
 #include "ui_basic/window.h"
 #include "ui_fsmenu/main.h"
+#include "ui_fsmenu/mousewheel_options.h"
 #include "wui/sound_options.h"
 
 class Section;
@@ -151,6 +152,7 @@ private:
 	UI::Box box_saving_;
 	UI::Box box_newgame_;
 	UI::Box box_ingame_;
+	UI::Box box_mousewheel_;
 
 	// Interface options
 	UI::Dropdown<std::string> language_dropdown_;
@@ -195,6 +197,9 @@ private:
 	UI::Checkbox numpad_diagonalscrolling_;
 	UI::Checkbox edge_scrolling_;
 	UI::Checkbox invert_movement_;
+
+	// Mousewheel options
+	MousewheelOptionsDialog mousewheel_options_;
 
 #if 0  // TODO(Nordfriese): Re-add training wheels code after v1.0
 	UI::Box training_wheels_box_;
