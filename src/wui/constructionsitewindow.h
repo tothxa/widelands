@@ -36,22 +36,22 @@
 // Soldier capacity for training or military site
 struct ConstructionSoldierCapacityBox : public UI::Box {
 private:
-	uint32_t current, min, max;
-	bool enabled;
+	uint32_t current_, min_, max_;
+	bool enabled_;
 	UI::Button cs_soldier_capacity_decrease_;
 	UI::Button cs_soldier_capacity_increase_;
 	UI::Textarea cs_soldier_capacity_display_;
 
 public:
 	ConstructionSoldierCapacityBox(
-	   Panel* parent, uint32_t curr_, uint32_t min_, uint32_t max_, bool enabled_);
+	   Panel* parent, uint32_t current, uint32_t min, uint32_t max, bool enabled);
 
-	void refresh(uint32_t current_, uint32_t max_, bool enabled_);
-	void set_current(uint32_t new_);
+	void refresh(uint32_t current, uint32_t max, bool enabled);
+	void set_current(uint32_t value);
 	void change_current(int32_t delta);
 	boost::signals2::signal<void()> changed;
 	uint32_t get_current() {
-		return current;
+		return current_;
 	}
 	bool handle_key(bool down, SDL_Keysym code) override;
 	bool handle_mousewheel(int32_t x, int32_t y, uint16_t modstate) override;

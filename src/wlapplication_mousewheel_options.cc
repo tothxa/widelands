@@ -28,45 +28,45 @@
 enum class MousewheelOptionType { kBool, kKeymod };
 
 struct MousewheelOption {
-	const std::string internal_name;
+	const std::string internal_name_;
 	const MousewheelOptionType type_;
 	const uint16_t default_;
-	const uint16_t default_2D;
-	uint16_t current;
+	const uint16_t default_2D_;
+	uint16_t current_;
 
 	MousewheelOption(std::string n, MousewheelOptionType t, uint16_t def, uint16_t def2D)
-	   : internal_name(n), type_(t), default_(def), default_2D(def2D), current(def) {
+	   : internal_name_(n), type_(t), default_(def), default_2D_(def2D), current_(def) {
 	}
 
 	void get_config() {
 		const uint16_t def =
-		   get_mousewheel_option_bool(MousewheelOptionID::kUse2Ddefaults) ? default_2D : default_;
-		if (!(internal_name.empty())) {
+		   get_mousewheel_option_bool(MousewheelOptionID::kUse2Ddefaults) ? default_2D_ : default_;
+		if (!(internal_name_.empty())) {
 			if (type_ == MousewheelOptionType::kBool) {
-				current = static_cast<uint16_t>(
-				   get_config_bool("mousewheel", internal_name, static_cast<bool>(def)));
+				current_ = static_cast<uint16_t>(
+				   get_config_bool("mousewheel", internal_name_, static_cast<bool>(def)));
 			} else {
 				assert(type_ == MousewheelOptionType::kKeymod);
-				current = get_config_int("mousewheel", internal_name, def);
+				current_ = get_config_int("mousewheel", internal_name_, def);
 			}
 		}
 	}
 	void set_bool(bool value) {
 		assert(type_ == MousewheelOptionType::kBool);
-		if (!(internal_name.empty())) {
-			set_config_bool("mousewheel", internal_name, value);
+		if (!(internal_name_.empty())) {
+			set_config_bool("mousewheel", internal_name_, value);
 			get_config();
 		}
 	}
 	void set_keymod(uint16_t value) {
 		assert(type_ == MousewheelOptionType::kKeymod);
-		if (!(internal_name.empty())) {
-			set_config_int("mousewheel", internal_name, value);
+		if (!(internal_name_.empty())) {
+			set_config_int("mousewheel", internal_name_, value);
 			get_config();
 		}
 	}
 	void reset() {
-		if (!(internal_name.empty())) {
+		if (!(internal_name_.empty())) {
 			if (type_ == MousewheelOptionType::kBool) {
 				set_bool(static_cast<bool>(default_));
 			} else {
@@ -76,72 +76,72 @@ struct MousewheelOption {
 		}
 	}
 	void set2D() {
-		if (!(internal_name.empty())) {
+		if (!(internal_name_.empty())) {
 			if (type_ == MousewheelOptionType::kBool) {
-				set_bool(static_cast<bool>(default_2D));
+				set_bool(static_cast<bool>(default_2D_));
 			} else {
 				assert(type_ == MousewheelOptionType::kKeymod);
-				set_keymod(default_2D);
+				set_keymod(default_2D_);
 			}
 		}
 	}
 };
 
 struct MousewheelHandlerOptions {
-	const MousewheelOptionID keymod_id;
-	uint16_t current_keymod = KMOD_NONE;
-	const MousewheelOptionID use_x;
-	const MousewheelOptionID invert_x;
-	const int32_t default_sign_x;
-	int32_t current_sign_x = 0;
-	const MousewheelOptionID use_y;
-	const MousewheelOptionID invert_y;
-	const int32_t default_sign_y;
-	int32_t current_sign_y = 0;
+	const MousewheelOptionID keymod_id_;
+	uint16_t current_keymod_ = KMOD_NONE;
+	const MousewheelOptionID use_x_;
+	const MousewheelOptionID invert_x_;
+	const int32_t default_sign_x_;
+	int32_t current_sign_x_ = 0;
+	const MousewheelOptionID use_y_;
+	const MousewheelOptionID invert_y_;
+	const int32_t default_sign_y_;
+	int32_t current_sign_y_ = 0;
 
 	void update_settings() {
-		current_keymod = get_mousewheel_keymod(keymod_id);
-		if (get_mousewheel_option_bool(use_x)) {
-			current_sign_x = default_sign_x * (get_mousewheel_option_bool(invert_x) ? -1 : 1);
+		current_keymod_ = get_mousewheel_keymod(keymod_id_);
+		if (get_mousewheel_option_bool(use_x_)) {
+			current_sign_x_ = default_sign_x_ * (get_mousewheel_option_bool(invert_x_) ? -1 : 1);
 		} else {
-			current_sign_x = 0;
+			current_sign_x_ = 0;
 		}
-		if (get_mousewheel_option_bool(use_y)) {
-			current_sign_y = default_sign_y * (get_mousewheel_option_bool(invert_y) ? -1 : 1);
+		if (get_mousewheel_option_bool(use_y_)) {
+			current_sign_y_ = default_sign_y_ * (get_mousewheel_option_bool(invert_y_) ? -1 : 1);
 		} else {
-			current_sign_y = 0;
+			current_sign_y_ = 0;
 		}
 	}
 
-	MousewheelHandlerOptions(MousewheelOptionID _keymod_id,
-	                   MousewheelOptionID _use_x,
-	                   MousewheelOptionID _invert_x,
-	                   MousewheelOptionID _use_y,
-	                   MousewheelOptionID _invert_y,
+	MousewheelHandlerOptions(MousewheelOptionID keymod_id,
+	                   MousewheelOptionID use_x,
+	                   MousewheelOptionID invert_x,
+	                   MousewheelOptionID use_y,
+	                   MousewheelOptionID invert_y,
 	                   int32_t def_sign_x,
 	                   int32_t def_sign_y)
-	   : keymod_id(_keymod_id),
-	     use_x(_use_x),
-	     invert_x(_invert_x),
-	     default_sign_x(def_sign_x),
-	     use_y(_use_y),
-	     invert_y(_invert_y),
-	     default_sign_y(def_sign_y) {
+	   : keymod_id_(keymod_id),
+	     use_x_(use_x),
+	     invert_x_(invert_x),
+	     default_sign_x_(def_sign_x),
+	     use_y_(use_y),
+	     invert_y_(invert_y),
+	     default_sign_y_(def_sign_y) {
 	}
 
 	bool can_handle(const int32_t x, const int32_t y, const uint16_t modstate) {
-		return (((y && current_sign_y) || (x && current_sign_x)) &&
-		        matches_keymod(current_keymod, modstate));
+		return (((y && current_sign_y_) || (x && current_sign_x_)) &&
+		        matches_keymod(current_keymod_, modstate));
 	}
 	int32_t get_change(const int32_t x, const int32_t y, const uint16_t modstate) {
 		if (can_handle(x, y, modstate)) {
-			return (x * current_sign_x + y * current_sign_y);
+			return (x * current_sign_x_ + y * current_sign_y_);
 		}
 		return 0;
 	}
 	Vector2i get_change_2D(const int32_t x, const int32_t y, const uint16_t modstate) {
 		if (can_handle(x, y, modstate)) {
-			return Vector2i(x * current_sign_x, y * current_sign_y);
+			return Vector2i(x * current_sign_x_, y * current_sign_y_);
 		}
 		return Vector2i(0, 0);
 	}
@@ -200,15 +200,15 @@ static std::map<MousewheelOptionID, MousewheelOption> mousewheel_options = {
 };
 
 // Default signs
-#define kSignIncreaseRight -1
-#define kSignIncreaseUp 1
-#define kSignNextRight -1
-#define kSignNextDown -1
-#define kSignScroll -1
+#define SIGN_INCREASE_RIGHT -1
+#define SIGN_INCREASE_UP 1
+#define SIGN_NEXT_RIGHT -1
+#define SIGN_NEXT_DOWN -1
+#define SIGN_SCROLL -1
 
-#define DEFAULT_SIGN_VALUE kSignIncreaseRight, kSignIncreaseUp
-#define DEFAULT_SIGN_MOVE kSignNextRight, kSignNextDown
-#define DEFAULT_SIGN_SCROLL kSignScroll, kSignScroll
+#define DEFAULT_SIGN_VALUE SIGN_INCREASE_RIGHT, SIGN_INCREASE_UP
+#define DEFAULT_SIGN_MOVE SIGN_NEXT_RIGHT, SIGN_NEXT_DOWN
+#define DEFAULT_SIGN_SCROLL SIGN_SCROLL, SIGN_SCROLL
 
 static std::map<MousewheelHandlerConfigID, MousewheelHandlerOptions> mousewheel_handlers = {
    {MousewheelHandlerConfigID::kChangeValue,
@@ -259,11 +259,11 @@ static std::map<MousewheelHandlerConfigID, MousewheelHandlerOptions> mousewheel_
 #undef DEFAULT_SIGN_VALUE
 #undef DEFAULT_SIGN_MOVE
 #undef DEFAULT_SIGN_SCROLL
-#undef kSignIncreaseRight
-#undef kSignIncreaseUp
-#undef kSignNextRight
-#undef kSignNextDown
-#undef kSignScroll
+#undef SIGN_INCREASE_RIGHT
+#undef SIGN_INCREASE_UP
+#undef SIGN_NEXT_RIGHT
+#undef SIGN_NEXT_DOWN
+#undef SIGN_SCROLL
 
 void set_mousewheel_option_bool(const MousewheelOptionID opt_id, bool value) {
 	assert(mousewheel_options.at(opt_id).type_ == MousewheelOptionType::kBool);
@@ -271,7 +271,7 @@ void set_mousewheel_option_bool(const MousewheelOptionID opt_id, bool value) {
 }
 bool get_mousewheel_option_bool(const MousewheelOptionID opt_id) {
 	assert(mousewheel_options.at(opt_id).type_ == MousewheelOptionType::kBool);
-	return static_cast<bool>(mousewheel_options.at(opt_id).current);
+	return static_cast<bool>(mousewheel_options.at(opt_id).current_);
 }
 
 void set_mousewheel_keymod(const MousewheelOptionID opt_id, uint16_t keymod) {
@@ -280,7 +280,7 @@ void set_mousewheel_keymod(const MousewheelOptionID opt_id, uint16_t keymod) {
 }
 uint16_t get_mousewheel_keymod(const MousewheelOptionID opt_id) {
 	assert(mousewheel_options.at(opt_id).type_ == MousewheelOptionType::kKeymod);
-	return mousewheel_options.at(opt_id).current;
+	return mousewheel_options.at(opt_id).current_;
 }
 
 int32_t get_mousewheel_change(MousewheelHandlerConfigID handler_id,

@@ -422,12 +422,12 @@ void ConstructionSiteWindow::think() {
 }
 
 ConstructionSoldierCapacityBox::ConstructionSoldierCapacityBox(
-   Panel* parent, uint32_t curr_, uint32_t min_, uint32_t max_, bool enabled_)
+   Panel* parent, uint32_t current, uint32_t min, uint32_t max, bool enabled)
    : Box(parent, UI::PanelStyle::kWui, 0, 0, UI::Box::Horizontal),
-     current(curr_),
-     min(min_),
-     max(max_),
-     enabled(enabled_),
+     current_(current),
+     min_(min),
+     max_(max),
+     enabled_(enabled),
      cs_soldier_capacity_decrease_(
         this,
         "decrease",
@@ -458,14 +458,14 @@ ConstructionSoldierCapacityBox::ConstructionSoldierCapacityBox(
 	cs_soldier_capacity_display_.set_fixed_width(kSoldierCapacityDisplayWidth);
 	cs_soldier_capacity_decrease_.sigclicked.connect([this]() {
 		if (matches_keymod(SDL_GetModState(), KMOD_CTRL)) {
-			set_current(min);
+			set_current(min_);
 		} else {
 			change_current(-1);
 		}
 	});
 	cs_soldier_capacity_increase_.sigclicked.connect([this]() {
 		if (matches_keymod(SDL_GetModState(), KMOD_CTRL)) {
-			set_current(max);
+			set_current(max_);
 		} else {
 			change_current(1);
 		}
@@ -474,45 +474,45 @@ ConstructionSoldierCapacityBox::ConstructionSoldierCapacityBox(
 	layout();
 	update();
 }
-void ConstructionSoldierCapacityBox::refresh(uint32_t current_, uint32_t max_, bool enabled_) {
-	if (current == current_ && max == max_ && enabled == enabled_) {
+void ConstructionSoldierCapacityBox::refresh(uint32_t current, uint32_t max, bool enabled) {
+	if (current_ == current && max_ == max && enabled_ == enabled) {
 		return;
 	}
-	assert(max_ >= current_);
-	current = current_;
-	max = max_;
-	enabled = enabled_;
+	assert(max >= current);
+	current_ = current;
+	max_ = max;
+	enabled_ = enabled;
 	update();
 }
-void ConstructionSoldierCapacityBox::set_current(uint32_t new_) {
-	if (!enabled || new_ == current) {
+void ConstructionSoldierCapacityBox::set_current(uint32_t value) {
+	if (!enabled_ || value == current_) {
 		return;
 	}
-	current = new_;
+	current_ = value;
 	update();
 	changed();
 }
 void ConstructionSoldierCapacityBox::change_current(int32_t delta) {
-	if (!enabled || delta == 0) {
+	if (!enabled_ || delta == 0) {
 		return;
 	}
-	int32_t new_ = current + delta;
-	if (delta < 0 && static_cast<int32_t>(min) >= new_) {
-		set_current(min);
-	} else if (delta > 0 && max <= static_cast<uint32_t>(new_)) {
-		set_current(max);
+	int32_t new_val = current_ + delta;
+	if (delta < 0 && static_cast<int32_t>(min_) >= new_val) {
+		set_current(min_);
+	} else if (delta > 0 && max_ <= static_cast<uint32_t>(new_val)) {
+		set_current(max_);
 	} else {
-		set_current(new_);
+		set_current(new_val);
 	}
 }
 void ConstructionSoldierCapacityBox::update() {
 	cs_soldier_capacity_display_.set_text(
-	   (boost::format(ngettext("%u soldier", "%u soldiers", current)) % current).str());
-	cs_soldier_capacity_decrease_.set_enabled(enabled && current > min);
-	cs_soldier_capacity_increase_.set_enabled(enabled && current < max);
+	   (boost::format(ngettext("%u soldier", "%u soldiers", current_)) % current_).str());
+	cs_soldier_capacity_decrease_.set_enabled(enabled_ && current_ > min_);
+	cs_soldier_capacity_increase_.set_enabled(enabled_ && current_ < max_);
 }
 bool ConstructionSoldierCapacityBox::handle_key(bool down, SDL_Keysym code) {
-	if (enabled && down) {
+	if (enabled_ && down) {
 		switch (get_keyboard_change(code)) {
 		case ChangeType::kNone:
 			break;
@@ -523,10 +523,10 @@ bool ConstructionSoldierCapacityBox::handle_key(bool down, SDL_Keysym code) {
 			change_current(-1);
 			return true;
 		case ChangeType::kSetMax:
-			set_current(max);
+			set_current(max_);
 			return true;
 		case ChangeType::kSetMin:
-			set_current(min);
+			set_current(min_);
 			return true;
 		default:
 			break;
@@ -535,7 +535,7 @@ bool ConstructionSoldierCapacityBox::handle_key(bool down, SDL_Keysym code) {
 	return false;
 }
 bool ConstructionSoldierCapacityBox::handle_mousewheel(int32_t x, int32_t y, uint16_t modstate) {
-	if (!enabled) {
+	if (!enabled_) {
 		return false;
 	}
 	int32_t change = get_mousewheel_change(MousewheelHandlerConfigID::kChangeValue, x, y, modstate);

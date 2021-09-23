@@ -35,10 +35,10 @@
 namespace FsMenu {
 
 struct MousewheelConfigSettings {
-	bool Use2Ddefaults, EnableMapScroll;
-	uint16_t ZoomMod, MapScrollMod, SpeedMod, ToolsizeMod;
-	uint8_t ZoomDir, SpeedDir, ToolsizeDir;
-	uint8_t ValueInvert, TabInvert, ZoomInvert;
+	bool use_2d_defaults_, enable_map_scroll_;
+	uint16_t zoom_mod_, map_scroll_mod_, speed_mod_, toolsize_mod_;
+	uint8_t zoom_dir_, speed_dir_, toolsize_dir_;
+	uint8_t value_invert_, tab_invert_, zoom_invert_;
 
 	void read();
 	void apply();
@@ -77,10 +77,10 @@ struct KeymodAndDirBox : public UI::Box {
 	void set(uint16_t keymod, uint8_t dir);
 
 private:
-	UI::Textarea title_area;
-	KeymodButton keymod_button;
-	DirDropdown dir_dropdown;
-	UI::Textarea end_label;
+	UI::Textarea title_area_;
+	KeymodButton keymod_button_;
+	DirDropdown dir_dropdown_;
+	UI::Textarea end_label_;
 };
 
 /**
@@ -100,10 +100,10 @@ private:
 
 	// Option controls
 	UI::Dropdown<bool> use_2d_defaults_;
-	KeymodAndDirBox zoom_box;
-	KeymodAndDirBox mapscroll_box;
-	KeymodAndDirBox speed_box;
-	KeymodAndDirBox toolsize_box;
+	KeymodAndDirBox zoom_box_;
+	KeymodAndDirBox mapscroll_box_;
+	KeymodAndDirBox speed_box_;
+	KeymodAndDirBox toolsize_box_;
 
 	KeymodAndDirBox zoom_invert_;
 	KeymodAndDirBox tab_invert_;
