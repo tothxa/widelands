@@ -32,14 +32,12 @@
 
 namespace FsMenu {
 
-#define READ_MOD(option) \
-	normalize_keymod(get_mousewheel_keymod(MousewheelOptionID::option ## Mod))
+#define READ_MOD(option) normalize_keymod(get_mousewheel_keymod(MousewheelOptionID::option##Mod))
 
 #define DIR_COMBINE(x, y) static_cast<uint8_t>((2 * x) | y)
-#define READ_DIR(option) \
-	DIR_COMBINE( \
-	   static_cast<uint8_t>(get_mousewheel_option_bool(MousewheelOptionID::option ## X)), \
-	   static_cast<uint8_t>(get_mousewheel_option_bool(MousewheelOptionID::option ## Y)))
+#define READ_DIR(option)                                                                           \
+	DIR_COMBINE(static_cast<uint8_t>(get_mousewheel_option_bool(MousewheelOptionID::option##X)),    \
+	            static_cast<uint8_t>(get_mousewheel_option_bool(MousewheelOptionID::option##Y)))
 
 void MousewheelConfigSettings::read() {
 	use_2d_defaults_ = get_mousewheel_option_bool(MousewheelOptionID::kUse2Ddefaults);
@@ -62,9 +60,9 @@ void MousewheelConfigSettings::read() {
 
 #define DIR_X(dc) static_cast<bool>(dc & 2)
 #define DIR_Y(dc) static_cast<bool>(dc & 1)
-#define APPLY_DIR(option, dc) \
-	set_mousewheel_option_bool(MousewheelOptionID::option ## X, DIR_X(dc)); \
-	set_mousewheel_option_bool(MousewheelOptionID::option ## Y, DIR_Y(dc));
+#define APPLY_DIR(option, dc)                                                                      \
+	set_mousewheel_option_bool(MousewheelOptionID::option##X, DIR_X(dc));                           \
+	set_mousewheel_option_bool(MousewheelOptionID::option##Y, DIR_Y(dc));
 
 void MousewheelConfigSettings::apply() {
 	set_mousewheel_option_bool(MousewheelOptionID::kUse2Ddefaults, use_2d_defaults_);
@@ -90,43 +88,50 @@ void MousewheelConfigSettings::apply() {
 // void MousewheelConfigSettings::save() {}
 
 
-KeymodDropdown::KeymodDropdown(UI::Panel* parent) :
-   UI::Dropdown<uint16_t>(parent, std::string(), 0, 0, 200, 20, 24, std::string(),
-                         UI::DropdownType::kTextual,
-                         UI::PanelStyle::kFsMenu,
-                         UI::ButtonStyle::kFsMenuMenu) {
+KeymodDropdown::KeymodDropdown(UI::Panel* parent)
+   : UI::Dropdown<uint16_t>(parent,
+                            std::string(),
+                            0,
+                            0,
+                            200,
+                            20,
+                            24,
+                            std::string(),
+                            UI::DropdownType::kTextual,
+                            UI::PanelStyle::kFsMenu,
+                            UI::ButtonStyle::kFsMenuMenu) {
 	// Same order as in keymod_string_for(), otherwise the list gets messed up
 	uint16_t mods[] = {KMOD_CTRL, KMOD_GUI, KMOD_ALT, KMOD_SHIFT};
 	uint16_t combo, allfour = KMOD_CTRL | KMOD_GUI | KMOD_ALT | KMOD_SHIFT;
 	add(_("(plain)"), KMOD_NONE);
-	for (int i = 0 ; i < 4 ; ++i) {
+	for (int i = 0; i < 4; ++i) {
 		add(keymod_string_for(mods[i]), mods[i]);
 	}
-	for (int i = 0 ; i < 3 ; ++i) {
-		for (int j = i+1 ; j < 4 ; ++j) {
+	for (int i = 0; i < 3; ++i) {
+		for (int j = i + 1; j < 4; ++j) {
 			combo = mods[i] | mods[j];
 			add(keymod_string_for(combo), combo);
 		}
 	}
-	for (int i = 3 ; i >= 0 ; --i) {
+	for (int i = 3; i >= 0; --i) {
 		combo = allfour & ~mods[i];
 		add(keymod_string_for(combo), combo);
 	}
 	add(keymod_string_for(allfour), allfour);
 }
 
-DirDropdown::DirDropdown(UI::Panel* parent, bool two_d) :
-   UI::Dropdown<uint8_t>(parent,
-                         std::string(),
-                         0,
-                         0,
-                         200,
-                         4,
-                         24,
-                         std::string(),
-                         UI::DropdownType::kTextual,
-                         UI::PanelStyle::kFsMenu,
-                         UI::ButtonStyle::kFsMenuMenu) {
+DirDropdown::DirDropdown(UI::Panel* parent, bool two_d)
+   : UI::Dropdown<uint8_t>(parent,
+                           std::string(),
+                           0,
+                           0,
+                           200,
+                           4,
+                           24,
+                           std::string(),
+                           UI::DropdownType::kTextual,
+                           UI::PanelStyle::kFsMenu,
+                           UI::ButtonStyle::kFsMenuMenu) {
 	add(_("Disabled"), 0);
 	if (two_d) {
 		add(_("Any scroll"), 1);
@@ -137,18 +142,18 @@ DirDropdown::DirDropdown(UI::Panel* parent, bool two_d) :
 	}
 }
 
-InvertDirDropdown::InvertDirDropdown(UI::Panel* parent) :
-   UI::Dropdown<uint8_t>(parent,
-                         std::string(),
-                         0,
-                         0,
-                         180,
-                         4,
-                         24,
-                         std::string(),
-                         UI::DropdownType::kTextual,
-                         UI::PanelStyle::kFsMenu,
-                         UI::ButtonStyle::kFsMenuMenu) {
+InvertDirDropdown::InvertDirDropdown(UI::Panel* parent)
+   : UI::Dropdown<uint8_t>(parent,
+                           std::string(),
+                           0,
+                           0,
+                           180,
+                           4,
+                           24,
+                           std::string(),
+                           UI::DropdownType::kTextual,
+                           UI::PanelStyle::kFsMenu,
+                           UI::ButtonStyle::kFsMenuMenu) {
 	add(_("Neither"), 0);
 	add(_("Vertical"), 1);
 	add(_("Horizontal"), 2);
@@ -192,7 +197,13 @@ DefaultsBox::DefaultsBox(UI::Panel* parent, bool use_2d_defaults)
                          UI::DropdownType::kTextual,
                          UI::PanelStyle::kFsMenu,
                          UI::ButtonStyle::kFsMenuMenu),
-     reset_button_(this, std::string(), 0, 0, 250, 24, UI::ButtonStyle::kFsMenuSecondary,
+     reset_button_(this,
+                   std::string(),
+                   0,
+                   0,
+                   250,
+                   24,
+                   UI::ButtonStyle::kFsMenuSecondary,
                    _("Reset all to defaults")) {
 	use_2d_defaults_dd_.add(_("Desktop mouse"), false);
 	use_2d_defaults_dd_.add(_("Touchpad"), true);
@@ -203,18 +214,20 @@ DefaultsBox::DefaultsBox(UI::Panel* parent, bool use_2d_defaults)
 	add(&reset_button_, Resizing::kAlign, UI::Align::kRight);
 }
 
-
 MousewheelOptionsDialog::MousewheelOptionsDialog(UI::Panel* parent)
    : UI::Box(parent, UI::PanelStyle::kFsMenu, 0, 0, UI::Box::Vertical, 0, 0, kPadding),
      settings_(),
      defaults_box_(this, settings_.use_2d_defaults_),
      zoom_box_(this, _("Zoom Map:"), settings_.zoom_mod_, settings_.zoom_dir_),
-     mapscroll_box_(this, _("Scroll Map:"), settings_.map_scroll_mod_, settings_.enable_map_scroll_, true),
+     mapscroll_box_(
+        this, _("Scroll Map:"), settings_.map_scroll_mod_, settings_.enable_map_scroll_, true),
      speed_box_(this, _("Change Game Speed:"), settings_.speed_mod_, settings_.speed_dir_),
-     toolsize_box_(this, _("Change Editor Toolsize:"), settings_.toolsize_mod_, settings_.toolsize_dir_),
+     toolsize_box_(
+        this, _("Change Editor Toolsize:"), settings_.toolsize_mod_, settings_.toolsize_dir_),
      zoom_invert_box_(this, _("Invert scroll direction for map zooming:"), settings_.zoom_invert_),
      tab_invert_box_(this, _("Invert scroll direction for tab switching:"), settings_.tab_invert_),
-     value_invert_box_(this, _("Invert scroll direction for increase/decrease:"), settings_.value_invert_) {
+     value_invert_box_(
+        this, _("Invert scroll direction for increase/decrease:"), settings_.value_invert_) {
 	add(&defaults_box_);
 	add_space(8);
 	add(&zoom_box_);
@@ -232,6 +245,7 @@ MousewheelOptionsDialog::MousewheelOptionsDialog(UI::Panel* parent)
 void MousewheelOptionsDialog::clicked_apply() {
 
 }
+
 // Restores old options when canceled
 void MousewheelOptionsDialog::clicked_cancel() {
 

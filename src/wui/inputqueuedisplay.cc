@@ -387,9 +387,9 @@ bool InputQueueDisplay::handle_mousewheel(int32_t x, int32_t y, uint16_t modstat
 		return false;
 	}
 	int32_t change = get_mousewheel_change(MousewheelHandlerConfigID::kChangeValue, x, y,
-	                               // shift has special meaning, prevent it to work
-	                               // as part of modifier
-	                               modstate & ~KMOD_SHIFT);
+	                                       // shift has special meaning, prevent it to work
+	                                       // as part of modifier
+	                                       modstate & ~KMOD_SHIFT);
 	if (change) {
 		if (get_mouse_position().x < priority_.get_x() - kButtonSize / 4) {
 			// Mouse is over desired fill

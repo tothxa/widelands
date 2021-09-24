@@ -77,12 +77,11 @@ struct InvertDirDropdown : public UI::Dropdown<uint8_t> {
 
 // Box for options of a single handler
 struct KeymodAndDirBox : public UI::Box {
-	KeymodAndDirBox(
-	   UI::Panel* parent,
-	   const std::string& title,
-	   uint16_t keymod,
-	   uint8_t dir,
-	   bool two_d = false);
+	KeymodAndDirBox(UI::Panel* parent,
+	                const std::string& title,
+	                uint16_t keymod,
+	                uint8_t dir,
+	                bool two_d = false);
 
 	uint16_t get_keymod();
 	uint8_t get_dir();
@@ -96,10 +95,7 @@ private:
 
 // Box for invert options
 struct InvertDirBox : public UI::Box {
-	InvertDirBox(
-	   UI::Panel* parent,
-	   const std::string& title,
-	   uint8_t dir);
+	InvertDirBox(UI::Panel* parent, const std::string& title, uint8_t dir);
 
 	uint8_t get_dir();
 	void set(uint8_t dir);

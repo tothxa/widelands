@@ -114,12 +114,12 @@ struct MousewheelHandlerOptions {
 	}
 
 	MousewheelHandlerOptions(MousewheelOptionID keymod_id,
-	                   MousewheelOptionID use_x,
-	                   MousewheelOptionID invert_x,
-	                   MousewheelOptionID use_y,
-	                   MousewheelOptionID invert_y,
-	                   int32_t def_sign_x,
-	                   int32_t def_sign_y)
+	                         MousewheelOptionID use_x,
+	                         MousewheelOptionID invert_x,
+	                         MousewheelOptionID use_y,
+	                         MousewheelOptionID invert_y,
+	                         int32_t def_sign_x,
+	                         int32_t def_sign_y)
 	   : keymod_id_(keymod_id),
 	     use_x_(use_x),
 	     invert_x_(invert_x),
@@ -213,46 +213,46 @@ static std::map<MousewheelOptionID, MousewheelOption> mousewheel_options = {
 static std::map<MousewheelHandlerConfigID, MousewheelHandlerOptions> mousewheel_handlers = {
    {MousewheelHandlerConfigID::kChangeValue,
     MousewheelHandlerOptions(MousewheelOptionID::kNoMod,
-                       MousewheelOptionID::kAlwaysOn,
-                       MousewheelOptionID::kUIChangeValueInvertX,
-                       MousewheelOptionID::kAlwaysOn,
-                       MousewheelOptionID::kUIChangeValueInvertY,
-                       DEFAULT_SIGN_VALUE)},
+                             MousewheelOptionID::kAlwaysOn,
+                             MousewheelOptionID::kUIChangeValueInvertX,
+                             MousewheelOptionID::kAlwaysOn,
+                             MousewheelOptionID::kUIChangeValueInvertY,
+                             DEFAULT_SIGN_VALUE)},
    {MousewheelHandlerConfigID::kTabBar,  //
     MousewheelHandlerOptions(MousewheelOptionID::kNoMod,
-                       MousewheelOptionID::kAlwaysOn,
-                       MousewheelOptionID::kUITabInvertX,
-                       MousewheelOptionID::kAlwaysOn,
-                       MousewheelOptionID::kUITabInvertY,
-                       DEFAULT_SIGN_MOVE)},
+                             MousewheelOptionID::kAlwaysOn,
+                             MousewheelOptionID::kUITabInvertX,
+                             MousewheelOptionID::kAlwaysOn,
+                             MousewheelOptionID::kUITabInvertY,
+                             DEFAULT_SIGN_MOVE)},
    {MousewheelHandlerConfigID::kZoom,  //
     MousewheelHandlerOptions(MousewheelOptionID::kMapZoomMod,
-                       MousewheelOptionID::kMapZoomX,
-                       MousewheelOptionID::kMapZoomInvertX,
-                       MousewheelOptionID::kMapZoomY,
-                       MousewheelOptionID::kMapZoomInvertY,
-                       DEFAULT_SIGN_VALUE)},
+                             MousewheelOptionID::kMapZoomX,
+                             MousewheelOptionID::kMapZoomInvertX,
+                             MousewheelOptionID::kMapZoomY,
+                             MousewheelOptionID::kMapZoomInvertY,
+                             DEFAULT_SIGN_VALUE)},
    {MousewheelHandlerConfigID::kMapScroll,  //
     MousewheelHandlerOptions(MousewheelOptionID::kMapScrollMod,
-                       MousewheelOptionID::kMapScroll,
-                       MousewheelOptionID::kDisabled,  // always use system scroll direction
-                       MousewheelOptionID::kMapScroll,
-                       MousewheelOptionID::kDisabled,  // always use system scroll direction
-                       DEFAULT_SIGN_SCROLL)},
+                             MousewheelOptionID::kMapScroll,
+                             MousewheelOptionID::kDisabled,  // always use system scroll direction
+                             MousewheelOptionID::kMapScroll,
+                             MousewheelOptionID::kDisabled,  // always use system scroll direction
+                             DEFAULT_SIGN_SCROLL)},
    {MousewheelHandlerConfigID::kGameSpeed,  //
     MousewheelHandlerOptions(MousewheelOptionID::kGameSpeedMod,
-                       MousewheelOptionID::kGameSpeedX,
-                       MousewheelOptionID::kUIChangeValueInvertX,
-                       MousewheelOptionID::kGameSpeedY,
-                       MousewheelOptionID::kUIChangeValueInvertY,
-                       DEFAULT_SIGN_VALUE)},
+                             MousewheelOptionID::kGameSpeedX,
+                             MousewheelOptionID::kUIChangeValueInvertX,
+                             MousewheelOptionID::kGameSpeedY,
+                             MousewheelOptionID::kUIChangeValueInvertY,
+                             DEFAULT_SIGN_VALUE)},
    {MousewheelHandlerConfigID::kEditorToolsize,
     MousewheelHandlerOptions(MousewheelOptionID::kEditorToolsizeMod,
-                       MousewheelOptionID::kEditorToolsizeX,
-                       MousewheelOptionID::kUIChangeValueInvertX,
-                       MousewheelOptionID::kEditorToolsizeY,
-                       MousewheelOptionID::kUIChangeValueInvertY,
-                       DEFAULT_SIGN_VALUE)}
+                             MousewheelOptionID::kEditorToolsizeX,
+                             MousewheelOptionID::kUIChangeValueInvertX,
+                             MousewheelOptionID::kEditorToolsizeY,
+                             MousewheelOptionID::kUIChangeValueInvertY,
+                             DEFAULT_SIGN_VALUE)}
 
 };
 
