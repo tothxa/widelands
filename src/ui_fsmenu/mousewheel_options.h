@@ -33,8 +33,26 @@ namespace FsMenu {
 
 struct MousewheelConfigSettings {
 	bool use_2d_defaults_, enable_map_scroll_;
+
+	// Handling of mousewheel events works on the focus follows mouse
+	// basis, see: ui_basic/panel.cc, so there's not much room for
+	// changing its behaviour for UI widgets. They can't even be passed
+	// on to the main window easily, because all mousewheel events are
+	// claimed in ui_basic/window.cc to avoid unexpected propagation
+	// to underlying windows.
+	// Therefore configuration is only needed for the actions in the
+	// main game and editor windows.
 	uint16_t zoom_mod_, map_scroll_mod_, speed_mod_, toolsize_mod_;
 	uint8_t zoom_dir_, speed_dir_, toolsize_dir_;
+
+	// We suppose that the user set the system configuration for
+	// scrolling direction to their preference, so scrollbar and
+	// map scrolling always uses that. However "natural" scrolling
+	// inverts the direction of all scroll events, including those
+	// where it should be absolute, and SDL does not always report
+	// its setting correctly. Furthermore, user preferences may be
+	// different for zoom direction, and for converting scroll
+	// direction to movement in the orthogonal direction.
 	uint8_t value_invert_, tab_invert_, zoom_invert_;
 
 	void read();
