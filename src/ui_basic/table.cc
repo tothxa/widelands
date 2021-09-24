@@ -31,7 +31,6 @@
 #include "graphic/text_layout.h"
 #include "graphic/texture.h"
 #include "ui_basic/mouse_constants.h"
-#include "wlapplication_mousewheel_options.h"
 #include "wlapplication_options.h"
 
 namespace UI {

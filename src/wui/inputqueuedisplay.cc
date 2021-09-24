@@ -24,7 +24,6 @@
 #include "graphic/text_layout.h"
 #include "logic/player.h"
 #include "wlapplication_mousewheel_options.h"
-#include "wlapplication_options.h"
 #include "wui/interactive_base.h"
 
 constexpr int8_t kButtonSize = 25;

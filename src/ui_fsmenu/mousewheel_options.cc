@@ -17,18 +17,20 @@
  *
  */
 
-#include "base/i18n.h"
 #include "ui_fsmenu/mousewheel_options.h"
+
+#include "base/i18n.h"
+#include "ui_fsmenu/menu.h"
 #include "wlapplication_mousewheel_options.h"
 #include "wlapplication_options.h"
 
 namespace FsMenu {
 
-#define DIR_COMBINE(x, y) static_cast<uint8_t>((2 * x) & y)
+#define DIR_COMBINE(x, y) static_cast<uint8_t>((2 * x) | y)
 #define READ_DIR(option) \
 	DIR_COMBINE( \
-	   get_mousewheel_option_bool(MousewheelOptionID::option ## X), \
-	   get_mousewheel_option_bool(MousewheelOptionID::option ## Y))
+	   static_cast<uint8_t>(get_mousewheel_option_bool(MousewheelOptionID::option ## X)), \
+	   static_cast<uint8_t>(get_mousewheel_option_bool(MousewheelOptionID::option ## Y)))
 
 void MousewheelConfigSettings::read() {
 	use_2d_defaults_ = get_mousewheel_option_bool(MousewheelOptionID::kUse2Ddefaults);
@@ -79,7 +81,7 @@ void MousewheelConfigSettings::apply() {
 
 
 KeymodButton::KeymodButton(UI::Panel* parent, uint16_t keymod) :
-   UI::Button(parent, std::string(), 0, 0, 150, 24, UI::ButtonStyle::kFsMenuSecondary, std::string()) {
+   UI::Button(parent, std::string(), 0, 0, 200, 24, UI::ButtonStyle::kFsMenuSecondary, std::string()) {
 	update_text(keymod);
 }
 
@@ -93,7 +95,7 @@ DirDropdown::DirDropdown(Panel* parent, bool invert, bool two_d) :
                          std::string(),
                          0,
                          0,
-                         150,
+                         200,
                          4,
                          24,
                          std::string(),
@@ -102,68 +104,76 @@ DirDropdown::DirDropdown(Panel* parent, bool invert, bool two_d) :
                          UI::ButtonStyle::kFsMenuMenu) {
 	add(_("Disabled"), 0);
 	if (two_d) {
-		add(_("Any"), 1);
+		add(_("Any scroll"), 1);
 	} else {
-		add(_("Vertical"), 1);
-		add(_("Horizontal"), 2);
-		add(invert ? _("Both") : _("Any"), 1 & 2);
+		add(_("Vertical scroll"), 1);
+		add(_("Horizontal scroll"), 2);
+		add(invert ? _("Both directions") : _("Any scroll"), 1 | 2);
 	}
 }
 
 KeymodAndDirBox::KeymodAndDirBox(
-	UI::Panel* parent, const std::string& title, uint8_t dir, bool has_keymod, uint16_t keymod, bool two_d) :
-   UI::Box(parent, UI::PanelStyle::kFsMenu, 0, 0, UI::Box::Horizontal, 500, 36, kPadding),
+	UI::Panel* parent, const std::string& title, uint16_t keymod, uint8_t dir, bool two_d) :
+   UI::Box(parent, UI::PanelStyle::kFsMenu, 0, 0, UI::Box::Horizontal, 700, 36, kPadding),
    title_area_(this, UI::PanelStyle::kFsMenu, UI::FontStyle::kFsMenuLabel, title),
    keymod_button_(this, keymod),
-   dir_dropdown_(this, !has_keymod, two_d),
-   end_label_(this, UI::PanelStyle::kFsMenu, UI::FontStyle::kFsMenuLabel, has_keymod ? _("scroll") : "") {
+   dir_dropdown_(this, false, two_d) {
+	title_area_.set_fixed_width(300);
 	add(&title_area_);
-	if (has_keymod) {
-		add(&keymod_button_);
-	}
-	dir_dropdown_.select(dir);
+	add(&keymod_button_);
 	add(&dir_dropdown_);
-	if (has_keymod) {
-		add(&end_label_);
-	}
+	dir_dropdown_.select(dir);
 }
 
+InvertDirBox::InvertDirBox(
+	UI::Panel* parent, const std::string& title, uint8_t dir) :
+   UI::Box(parent, UI::PanelStyle::kFsMenu, 0, 0, UI::Box::Horizontal, 700, 36, kPadding),
+   title_area_(this, UI::PanelStyle::kFsMenu, UI::FontStyle::kFsMenuLabel, title),
+   dir_dropdown_(this, true) {
+	add_space(24);
+	title_area_.set_fixed_width(300);
+	add(&title_area_);
+	add(&dir_dropdown_);
+	dir_dropdown_.select(dir);
+}
 
 MousewheelOptionsDialog::MousewheelOptionsDialog(
    UI::Panel* parent) :
 	UI::Box(parent, UI::PanelStyle::kFsMenu, 0, 0, UI::Box::Vertical, 0, 0, kPadding),
 	settings_(),
-	use_2d_defaults_(this,
+	use_2d_defaults_dd_(this,
                          std::string(),
                          0,
                          0,
-                         250,
-                         4,
+                         400,
+                         2,
                          24,
-                         std::string(),
+                         _("Pointing Device"),
                          UI::DropdownType::kTextual,
                          UI::PanelStyle::kFsMenu,
                          UI::ButtonStyle::kFsMenuMenu),
-	zoom_box_(this, _("Zoom Map:"), settings_.zoom_dir_, true, settings_.zoom_mod_),
-	mapscroll_box_(this, _("Scroll Map:"), settings_.enable_map_scroll_, true, settings_.map_scroll_mod_, true),
-	speed_box_(this, _("Change Game Speed:"), settings_.speed_dir_, true, settings_.speed_mod_),
-	toolsize_box_(this, _("Change Editor Toolsize:"), settings_.toolsize_dir_, true, settings_.toolsize_mod_),
-	zoom_invert_(this, _("Zoom Map:"), 0, settings_.zoom_invert_, false),
-	tab_invert_(this, _("Switch Tab:"), 0, settings_.tab_invert_, false),
-	value_invert_(this, _("Increase/Decrease:"), 0, settings_.value_invert_, false) {
-	use_2d_defaults_.add(_("Desktop mouse"), false);
-	use_2d_defaults_.add(_("Touchpad"), true);
-	add(&use_2d_defaults_);
+	zoom_box_(this, _("Zoom Map:"), settings_.zoom_mod_, settings_.zoom_dir_),
+	mapscroll_box_(this, _("Scroll Map:"), settings_.map_scroll_mod_, settings_.enable_map_scroll_, true),
+	speed_box_(this, _("Change Game Speed:"), settings_.speed_mod_, settings_.speed_dir_),
+	toolsize_box_(this, _("Change Editor Toolsize:"), settings_.toolsize_mod_, settings_.toolsize_dir_),
+	header_invert_(this, UI::PanelStyle::kFsMenu, UI::FontStyle::kFsMenuLabel, _("Invert scroll direction for:")),
+	zoom_invert_box_(this, _("Map zooming:"), settings_.zoom_invert_),
+	tab_invert_box_(this, _("Switching tabs:"), settings_.tab_invert_),
+	value_invert_box_(this, _("Increase/Decrease:"), settings_.value_invert_) {
+	use_2d_defaults_dd_.add(_("Desktop mouse"), false);
+	use_2d_defaults_dd_.add(_("Touchpad"), true);
+	use_2d_defaults_dd_.select(settings_.use_2d_defaults_);
+	add(&use_2d_defaults_dd_);
 	add_space(8);
 	add(&zoom_box_);
 	add(&mapscroll_box_);
 	add(&speed_box_);
 	add(&toolsize_box_);
 	add_space(8);
-	// add textarea "Invert scroll direction for:"
-	add(&zoom_invert_);
-	add(&tab_invert_);
-	add(&value_invert_);
+	add(&header_invert_);
+	add(&zoom_invert_box_);
+	add(&tab_invert_box_);
+	add(&value_invert_box_);
 }
 
 

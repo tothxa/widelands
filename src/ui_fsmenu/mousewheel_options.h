@@ -25,12 +25,9 @@
 
 #include "ui_basic/box.h"
 #include "ui_basic/button.h"
-#include "ui_basic/checkbox.h"
 #include "ui_basic/dropdown.h"
-#include "ui_basic/multilinetextarea.h"
 #include "ui_basic/textarea.h"
 #include "ui_basic/window.h"
-#include "ui_fsmenu/main.h"
 
 namespace FsMenu {
 
@@ -67,10 +64,9 @@ struct KeymodAndDirBox : public UI::Box {
 	KeymodAndDirBox(
 	   UI::Panel* parent,
 	   const std::string& title,
+	   uint16_t keymod,
 	   uint8_t dir,
-	   bool has_keymod = false,
-	   uint16_t keymod = 0,
-	   bool two_d = false );
+	   bool two_d = false);
 
 	uint16_t get_keymod();
 	uint8_t get_dir();
@@ -80,12 +76,26 @@ private:
 	UI::Textarea title_area_;
 	KeymodButton keymod_button_;
 	DirDropdown dir_dropdown_;
-	UI::Textarea end_label_;
 };
 
-/**
+// Box for invert options
+struct InvertDirBox : public UI::Box {
+	InvertDirBox(
+	   UI::Panel* parent,
+	   const std::string& title,
+	   uint8_t dir);
+
+	uint8_t get_dir();
+	void set(uint8_t dir);
+
+private:
+	UI::Textarea title_area_;
+	DirDropdown dir_dropdown_;
+};
+
+/*****
  * Box for setting mousewheel options
- */
+ *****/
 class MousewheelOptionsDialog : public UI::Box {
 public:
 	MousewheelOptionsDialog(UI::Panel* parent);
@@ -99,15 +109,15 @@ private:
 	MousewheelConfigSettings settings_;
 
 	// Option controls
-	UI::Dropdown<bool> use_2d_defaults_;
+	UI::Dropdown<bool> use_2d_defaults_dd_;
 	KeymodAndDirBox zoom_box_;
 	KeymodAndDirBox mapscroll_box_;
 	KeymodAndDirBox speed_box_;
 	KeymodAndDirBox toolsize_box_;
-
-	KeymodAndDirBox zoom_invert_;
-	KeymodAndDirBox tab_invert_;
-	KeymodAndDirBox value_invert_;
+	UI::Textarea header_invert_;
+	InvertDirBox zoom_invert_box_;
+	InvertDirBox tab_invert_box_;
+	InvertDirBox value_invert_box_;
 };
 
 }  // namespace FsMenu
