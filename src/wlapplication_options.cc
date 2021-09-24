@@ -730,21 +730,15 @@ void normalize_numpad(SDL_Keysym& keysym) {
 	keysym.sym = search->second;
 }
 
+uint16_t normalize_keymod(uint16_t keymod) {
+	return ((keymod & KMOD_SHIFT) ? KMOD_SHIFT : KMOD_NONE) |
+	       ((keymod & KMOD_CTRL) ? KMOD_CTRL : KMOD_NONE) |
+	       ((keymod & KMOD_ALT) ? KMOD_ALT : KMOD_NONE) |
+	       ((keymod & KMOD_GUI) ? KMOD_GUI : KMOD_NONE);
+}
+
 bool matches_keymod(const uint16_t mod1, const uint16_t mod2) {
-	const bool ctrl1 = mod1 & KMOD_CTRL;
-	const bool shift1 = mod1 & KMOD_SHIFT;
-	const bool alt1 = mod1 & KMOD_ALT;
-	const bool gui1 = mod1 & KMOD_GUI;
-	const bool ctrl2 = mod2 & KMOD_CTRL;
-	const bool shift2 = mod2 & KMOD_SHIFT;
-	const bool alt2 = mod2 & KMOD_ALT;
-	const bool gui2 = mod2 & KMOD_GUI;
-
-	if (ctrl1 != ctrl2 || shift1 != shift2 || alt1 != alt2 || gui1 != gui2) {
-		return false;
-	}
-
-	return true;
+	return normalize_keymod(mod1) == normalize_keymod(mod2);
 }
 
 bool matches_shortcut(const KeyboardShortcut id, const SDL_Keysym code) {

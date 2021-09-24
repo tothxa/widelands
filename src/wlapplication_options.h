@@ -221,6 +221,7 @@ bool set_shortcut(KeyboardShortcut, SDL_Keysym, KeyboardShortcut* conflict);
 SDL_Keysym get_shortcut(KeyboardShortcut);
 SDL_Keysym get_default_shortcut(KeyboardShortcut);
 void normalize_numpad(SDL_Keysym&);
+uint16_t normalize_keymod(uint16_t keymod);
 bool matches_keymod(uint16_t, uint16_t);
 bool matches_shortcut(KeyboardShortcut, SDL_Keysym);
 bool matches_shortcut(KeyboardShortcut, SDL_Keycode, int modifiers);

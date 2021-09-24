@@ -19,12 +19,17 @@
 
 #include "ui_fsmenu/mousewheel_options.h"
 
+#include <SDL_keycode.h>
+
 #include "base/i18n.h"
 #include "ui_fsmenu/menu.h"
 #include "wlapplication_mousewheel_options.h"
 #include "wlapplication_options.h"
 
 namespace FsMenu {
+
+#define READ_MOD(option) \
+	normalize_keymod(get_mousewheel_keymod(MousewheelOptionID::option ## Mod))
 
 #define DIR_COMBINE(x, y) static_cast<uint8_t>((2 * x) | y)
 #define READ_DIR(option) \
@@ -35,10 +40,10 @@ namespace FsMenu {
 void MousewheelConfigSettings::read() {
 	use_2d_defaults_ = get_mousewheel_option_bool(MousewheelOptionID::kUse2Ddefaults);
 	enable_map_scroll_ = get_mousewheel_option_bool(MousewheelOptionID::kMapScroll);
-	zoom_mod_ = get_mousewheel_keymod(MousewheelOptionID::kMapZoomMod);
-	map_scroll_mod_ = get_mousewheel_keymod(MousewheelOptionID::kMapScrollMod);
-	speed_mod_ = get_mousewheel_keymod(MousewheelOptionID::kGameSpeedMod);
-	toolsize_mod_ = get_mousewheel_keymod(MousewheelOptionID::kEditorToolsizeMod);
+	zoom_mod_ = READ_MOD(kMapZoom);
+	map_scroll_mod_ = READ_MOD(kMapScroll);
+	speed_mod_ = READ_MOD(kGameSpeed);
+	toolsize_mod_ = READ_MOD(kEditorToolsize);
 	zoom_dir_ = READ_DIR(kMapZoom);
 	speed_dir_ = READ_DIR(kGameSpeed);
 	toolsize_dir_ = READ_DIR(kEditorToolsize);
@@ -47,6 +52,7 @@ void MousewheelConfigSettings::read() {
 	zoom_invert_ = READ_DIR(kMapZoomInvert);
 }
 
+#undef READ_MOD
 #undef READ_DIR
 #undef DIR_COMBINE
 
@@ -80,14 +86,29 @@ void MousewheelConfigSettings::apply() {
 // void MousewheelConfigSettings::save() {}
 
 
-KeymodButton::KeymodButton(UI::Panel* parent, uint16_t keymod) :
-   UI::Button(parent, std::string(), 0, 0, 200, 24, UI::ButtonStyle::kFsMenuSecondary, std::string()) {
-	update_text(keymod);
-}
-
-void KeymodButton::update_text(uint16_t keymod) {
-	std::string t = keymod_string_for(keymod);
-	set_title(t.empty() ? _("(plain)") : t);
+KeymodDropdown::KeymodDropdown(UI::Panel* parent) :
+   UI::Dropdown<uint16_t>(parent, std::string(), 0, 0, 200, 20, 24, std::string(),
+                         UI::DropdownType::kTextual,
+                         UI::PanelStyle::kFsMenu,
+                         UI::ButtonStyle::kFsMenuMenu) {
+	// Same order as in keymod_string_for(), otherwise the list gets messed up
+	uint16_t mods[] = {KMOD_CTRL, KMOD_GUI, KMOD_ALT, KMOD_SHIFT};
+	uint16_t combo, allfour = KMOD_CTRL | KMOD_GUI | KMOD_ALT | KMOD_SHIFT;
+	add(_("(plain)"), KMOD_NONE);
+	for (int i = 0 ; i < 4 ; ++i) {
+		add(keymod_string_for(mods[i]), mods[i]);
+	}
+	for (int i = 0 ; i < 3 ; ++i) {
+		for (int j = i+1 ; j < 4 ; ++j) {
+			combo = mods[i] | mods[j];
+			add(keymod_string_for(combo), combo);
+		}
+	}
+	for (int i = 3 ; i >= 0 ; --i) {
+		combo = allfour & ~mods[i];
+		add(keymod_string_for(combo), combo);
+	}
+	add(keymod_string_for(allfour), allfour);
 }
 
 DirDropdown::DirDropdown(Panel* parent, bool invert, bool two_d) :
@@ -116,12 +137,13 @@ KeymodAndDirBox::KeymodAndDirBox(
 	UI::Panel* parent, const std::string& title, uint16_t keymod, uint8_t dir, bool two_d) :
    UI::Box(parent, UI::PanelStyle::kFsMenu, 0, 0, UI::Box::Horizontal, 700, 36, kPadding),
    title_area_(this, UI::PanelStyle::kFsMenu, UI::FontStyle::kFsMenuLabel, title),
-   keymod_button_(this, keymod),
+   keymod_dropdown_(this),
    dir_dropdown_(this, false, two_d) {
 	title_area_.set_fixed_width(300);
 	add(&title_area_);
-	add(&keymod_button_);
+	add(&keymod_dropdown_);
 	add(&dir_dropdown_);
+	keymod_dropdown_.select(keymod);
 	dir_dropdown_.select(dir);
 }
 

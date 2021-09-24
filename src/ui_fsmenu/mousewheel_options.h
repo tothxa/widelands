@@ -24,10 +24,8 @@
 #include <memory>
 
 #include "ui_basic/box.h"
-#include "ui_basic/button.h"
 #include "ui_basic/dropdown.h"
 #include "ui_basic/textarea.h"
-#include "ui_basic/window.h"
 
 namespace FsMenu {
 
@@ -64,13 +62,8 @@ struct MousewheelConfigSettings {
 	};
 };
 
-struct KeymodButton : public UI::Button {
-	KeymodButton(UI::Panel* parent, uint16_t keymod);
-	void update_text(uint16_t keymod);
-};
-
-struct KeymodChooser : public UI::Window {
-	KeymodChooser(UI::Panel* parent, const std::string& title);
+struct KeymodDropdown : public UI::Dropdown<uint16_t> {
+	KeymodDropdown(UI::Panel* parent);
 };
 
 struct DirDropdown : public UI::Dropdown<uint8_t> {
@@ -92,7 +85,7 @@ struct KeymodAndDirBox : public UI::Box {
 
 private:
 	UI::Textarea title_area_;
-	KeymodButton keymod_button_;
+	KeymodDropdown keymod_dropdown_;
 	DirDropdown dir_dropdown_;
 };
 
