@@ -22,6 +22,10 @@
 #include <SDL_keycode.h>
 
 #include "base/i18n.h"
+#include "ui_basic/box.h"
+#include "ui_basic/button.h"
+#include "ui_basic/dropdown.h"
+#include "ui_basic/textarea.h"
 #include "ui_fsmenu/menu.h"
 #include "wlapplication_mousewheel_options.h"
 #include "wlapplication_options.h"
@@ -111,7 +115,7 @@ KeymodDropdown::KeymodDropdown(UI::Panel* parent) :
 	add(keymod_string_for(allfour), allfour);
 }
 
-DirDropdown::DirDropdown(Panel* parent, bool invert, bool two_d) :
+DirDropdown::DirDropdown(UI::Panel* parent, bool two_d) :
    UI::Dropdown<uint8_t>(parent,
                          std::string(),
                          0,
@@ -129,17 +133,35 @@ DirDropdown::DirDropdown(Panel* parent, bool invert, bool two_d) :
 	} else {
 		add(_("Vertical scroll"), 1);
 		add(_("Horizontal scroll"), 2);
-		add(invert ? _("Both directions") : _("Any scroll"), 1 | 2);
+		add(_("Any scroll"), 1 | 2);
 	}
 }
 
+InvertDirDropdown::InvertDirDropdown(UI::Panel* parent) :
+   UI::Dropdown<uint8_t>(parent,
+                         std::string(),
+                         0,
+                         0,
+                         180,
+                         4,
+                         24,
+                         std::string(),
+                         UI::DropdownType::kTextual,
+                         UI::PanelStyle::kFsMenu,
+                         UI::ButtonStyle::kFsMenuMenu) {
+	add(_("Neither"), 0);
+	add(_("Vertical"), 1);
+	add(_("Horizontal"), 2);
+	add(_("Both"), 1 | 2);
+}
+
 KeymodAndDirBox::KeymodAndDirBox(
-	UI::Panel* parent, const std::string& title, uint16_t keymod, uint8_t dir, bool two_d) :
-   UI::Box(parent, UI::PanelStyle::kFsMenu, 0, 0, UI::Box::Horizontal, 700, 36, kPadding),
-   title_area_(this, UI::PanelStyle::kFsMenu, UI::FontStyle::kFsMenuLabel, title),
-   keymod_dropdown_(this),
-   dir_dropdown_(this, false, two_d) {
-	title_area_.set_fixed_width(300);
+   UI::Panel* parent, const std::string& title, uint16_t keymod, uint8_t dir, bool two_d)
+   : UI::Box(parent, UI::PanelStyle::kFsMenu, 0, 0, UI::Box::Horizontal, 700, 24, kPadding),
+     title_area_(this, UI::PanelStyle::kFsMenu, UI::FontStyle::kFsMenuLabel, title),
+     keymod_dropdown_(this),
+     dir_dropdown_(this, two_d) {
+	title_area_.set_fixed_width(280);
 	add(&title_area_);
 	add(&keymod_dropdown_);
 	add(&dir_dropdown_);
@@ -147,23 +169,19 @@ KeymodAndDirBox::KeymodAndDirBox(
 	dir_dropdown_.select(dir);
 }
 
-InvertDirBox::InvertDirBox(
-	UI::Panel* parent, const std::string& title, uint8_t dir) :
-   UI::Box(parent, UI::PanelStyle::kFsMenu, 0, 0, UI::Box::Horizontal, 700, 36, kPadding),
-   title_area_(this, UI::PanelStyle::kFsMenu, UI::FontStyle::kFsMenuLabel, title),
-   dir_dropdown_(this, true) {
-	add_space(24);
-	title_area_.set_fixed_width(300);
+InvertDirBox::InvertDirBox(UI::Panel* parent, const std::string& title, uint8_t dir)
+   : UI::Box(parent, UI::PanelStyle::kFsMenu, 0, 0, UI::Box::Horizontal, 700, 24, kPadding),
+     title_area_(this, UI::PanelStyle::kFsMenu, UI::FontStyle::kFsMenuLabel, title),
+     dir_dropdown_(this) {
+	title_area_.set_fixed_width(450);
 	add(&title_area_);
 	add(&dir_dropdown_);
 	dir_dropdown_.select(dir);
 }
 
-MousewheelOptionsDialog::MousewheelOptionsDialog(
-   UI::Panel* parent) :
-	UI::Box(parent, UI::PanelStyle::kFsMenu, 0, 0, UI::Box::Vertical, 0, 0, kPadding),
-	settings_(),
-	use_2d_defaults_dd_(this,
+DefaultsBox::DefaultsBox(UI::Panel* parent, bool use_2d_defaults)
+   : UI::Box(parent, UI::PanelStyle::kFsMenu, 0, 0, UI::Box::Horizontal, 700, 24, kPadding),
+     use_2d_defaults_dd_(this,
                          std::string(),
                          0,
                          0,
@@ -174,25 +192,36 @@ MousewheelOptionsDialog::MousewheelOptionsDialog(
                          UI::DropdownType::kTextual,
                          UI::PanelStyle::kFsMenu,
                          UI::ButtonStyle::kFsMenuMenu),
-	zoom_box_(this, _("Zoom Map:"), settings_.zoom_mod_, settings_.zoom_dir_),
-	mapscroll_box_(this, _("Scroll Map:"), settings_.map_scroll_mod_, settings_.enable_map_scroll_, true),
-	speed_box_(this, _("Change Game Speed:"), settings_.speed_mod_, settings_.speed_dir_),
-	toolsize_box_(this, _("Change Editor Toolsize:"), settings_.toolsize_mod_, settings_.toolsize_dir_),
-	header_invert_(this, UI::PanelStyle::kFsMenu, UI::FontStyle::kFsMenuLabel, _("Invert scroll direction for:")),
-	zoom_invert_box_(this, _("Map zooming:"), settings_.zoom_invert_),
-	tab_invert_box_(this, _("Switching tabs:"), settings_.tab_invert_),
-	value_invert_box_(this, _("Increase/Decrease:"), settings_.value_invert_) {
+     reset_button_(this, std::string(), 0, 0, 250, 24, UI::ButtonStyle::kFsMenuSecondary,
+                   _("Reset all to defaults")) {
 	use_2d_defaults_dd_.add(_("Desktop mouse"), false);
 	use_2d_defaults_dd_.add(_("Touchpad"), true);
-	use_2d_defaults_dd_.select(settings_.use_2d_defaults_);
+	use_2d_defaults_dd_.select(use_2d_defaults);
+
 	add(&use_2d_defaults_dd_);
+	add_inf_space();
+	add(&reset_button_, Resizing::kAlign, UI::Align::kRight);
+}
+
+
+MousewheelOptionsDialog::MousewheelOptionsDialog(UI::Panel* parent)
+   : UI::Box(parent, UI::PanelStyle::kFsMenu, 0, 0, UI::Box::Vertical, 0, 0, kPadding),
+     settings_(),
+     defaults_box_(this, settings_.use_2d_defaults_),
+     zoom_box_(this, _("Zoom Map:"), settings_.zoom_mod_, settings_.zoom_dir_),
+     mapscroll_box_(this, _("Scroll Map:"), settings_.map_scroll_mod_, settings_.enable_map_scroll_, true),
+     speed_box_(this, _("Change Game Speed:"), settings_.speed_mod_, settings_.speed_dir_),
+     toolsize_box_(this, _("Change Editor Toolsize:"), settings_.toolsize_mod_, settings_.toolsize_dir_),
+     zoom_invert_box_(this, _("Invert scroll direction for map zooming:"), settings_.zoom_invert_),
+     tab_invert_box_(this, _("Invert scroll direction for tab switching:"), settings_.tab_invert_),
+     value_invert_box_(this, _("Invert scroll direction for increase/decrease:"), settings_.value_invert_) {
+	add(&defaults_box_);
 	add_space(8);
 	add(&zoom_box_);
 	add(&mapscroll_box_);
 	add(&speed_box_);
 	add(&toolsize_box_);
 	add_space(8);
-	add(&header_invert_);
 	add(&zoom_invert_box_);
 	add(&tab_invert_box_);
 	add(&value_invert_box_);

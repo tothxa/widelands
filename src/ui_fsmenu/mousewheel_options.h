@@ -24,6 +24,7 @@
 #include <memory>
 
 #include "ui_basic/box.h"
+#include "ui_basic/button.h"
 #include "ui_basic/dropdown.h"
 #include "ui_basic/textarea.h"
 
@@ -67,7 +68,11 @@ struct KeymodDropdown : public UI::Dropdown<uint16_t> {
 };
 
 struct DirDropdown : public UI::Dropdown<uint8_t> {
-	DirDropdown(Panel* parent, bool invert = false, bool two_d = false);
+	DirDropdown(Panel* parent, bool two_d = false);
+};
+
+struct InvertDirDropdown : public UI::Dropdown<uint8_t> {
+	InvertDirDropdown(Panel* parent);
 };
 
 // Box for options of a single handler
@@ -101,7 +106,15 @@ struct InvertDirBox : public UI::Box {
 
 private:
 	UI::Textarea title_area_;
-	DirDropdown dir_dropdown_;
+	InvertDirDropdown dir_dropdown_;
+};
+
+struct DefaultsBox : public UI::Box {
+	DefaultsBox(UI::Panel* parent, bool use_2d_defaults);
+
+private:
+	UI::Dropdown<bool> use_2d_defaults_dd_;
+	UI::Button reset_button_;
 };
 
 /*****
@@ -120,12 +133,11 @@ private:
 	MousewheelConfigSettings settings_;
 
 	// Option controls
-	UI::Dropdown<bool> use_2d_defaults_dd_;
+	DefaultsBox defaults_box_;
 	KeymodAndDirBox zoom_box_;
 	KeymodAndDirBox mapscroll_box_;
 	KeymodAndDirBox speed_box_;
 	KeymodAndDirBox toolsize_box_;
-	UI::Textarea header_invert_;
 	InvertDirBox zoom_invert_box_;
 	InvertDirBox tab_invert_box_;
 	InvertDirBox value_invert_box_;
