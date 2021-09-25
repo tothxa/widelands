@@ -1128,7 +1128,7 @@ bool WLApplication::init_settings() {
 	init_shortcuts();
 
 	// Mousewheel options
-	init_mousewheel_settings();
+	update_mousewheel_settings();
 
 	int64_t last_start = get_config_int("last_start", 0);
 	int64_t now = time(nullptr);

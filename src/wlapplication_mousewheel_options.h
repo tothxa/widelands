@@ -60,10 +60,12 @@ enum class MousewheelOptionID : uint16_t {
 };
 
 void set_mousewheel_option_bool(MousewheelOptionID, bool);
-bool get_mousewheel_option_bool(MousewheelOptionID);
+bool get_mousewheel_option_bool(MousewheelOptionID);  // for normal use
+bool get_mousewheel_option_bool(MousewheelOptionID, bool use_2d_default);  // for options dialog
 
 void set_mousewheel_keymod(MousewheelOptionID, uint16_t);
-uint16_t get_mousewheel_keymod(MousewheelOptionID);
+uint16_t get_mousewheel_keymod(MousewheelOptionID);  // for normal use
+uint16_t get_mousewheel_keymod(MousewheelOptionID, bool use_2d_default);  // for options dialog
 
 // Map config options to handlers
 enum class MousewheelHandlerConfigID : uint16_t {
@@ -79,11 +81,11 @@ enum class MousewheelHandlerConfigID : uint16_t {
 	k__End = kEditorToolsize
 };
 
-// Read settings from config file or write all default values to config file
-void init_mousewheel_settings(bool force_defaults = false);
-
-// Apply settings to handlers
+// Read settings and apply them to handlers
 void update_mousewheel_settings();
+
+// Write all default values to config file
+void reset_mousewheel_settings(bool use_2d_defaults = false);
 
 // Primary handler function
 int32_t get_mousewheel_change(MousewheelHandlerConfigID handler_id,
