@@ -59,6 +59,7 @@ void MousewheelConfigSettings::def2d_update() {
 
 void MousewheelConfigSettings::read() {
 	use_2d_defaults_ = get_mousewheel_option_bool(MousewheelOptionID::kUse2Ddefaults);
+	def2d_update();
 }
 
 #undef READ_MOD
