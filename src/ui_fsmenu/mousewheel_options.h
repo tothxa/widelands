@@ -31,7 +31,7 @@
 namespace FsMenu {
 
 struct MousewheelConfigSettings {
-	bool use_2d_defaults_, enable_map_scroll_;
+	bool use_2d_defaults_;
 
 	// Handling of mousewheel events works on the focus follows mouse
 	// basis, see: ui_basic/panel.cc, so there's not much room for
@@ -44,6 +44,9 @@ struct MousewheelConfigSettings {
 	uint16_t zoom_mod_, map_scroll_mod_, speed_mod_, toolsize_mod_;
 	uint8_t zoom_dir_, speed_dir_, toolsize_dir_;
 
+	// Will be static_casted from/to bool to allow common handler
+	uint8_t enable_map_scroll_;
+
 	// We suppose that the user set the system configuration for
 	// scrolling direction to their preference, so scrollbar and
 	// map scrolling always uses that. However "natural" scrolling
@@ -54,6 +57,7 @@ struct MousewheelConfigSettings {
 	// direction to movement in the orthogonal direction.
 	uint8_t value_invert_, tab_invert_, zoom_invert_;
 
+	void def2d_update();
 	void read();
 	void apply();
 //	void save();
@@ -62,6 +66,8 @@ struct MousewheelConfigSettings {
 		read();
 	};
 };
+
+class MousewheelOptionsDialog;
 
 struct KeymodDropdown : public UI::Dropdown<uint16_t> {
 	KeymodDropdown(UI::Panel* parent);
@@ -79,34 +85,34 @@ struct InvertDirDropdown : public UI::Dropdown<uint8_t> {
 struct KeymodAndDirBox : public UI::Box {
 	KeymodAndDirBox(UI::Panel* parent,
 	                const std::string& title,
-	                uint16_t keymod,
-	                uint8_t dir,
+	                uint16_t* keymod,
+	                uint8_t* dir,
 	                bool two_d = false);
 
-	uint16_t get_keymod();
-	uint8_t get_dir();
-	void set(uint16_t keymod, uint8_t dir);
+	void update_sel();
 
 private:
 	UI::Textarea title_area_;
 	KeymodDropdown keymod_dropdown_;
 	DirDropdown dir_dropdown_;
+	uint16_t* keymod_;
+	uint8_t* dir_;
 };
 
 // Box for invert options
 struct InvertDirBox : public UI::Box {
-	InvertDirBox(UI::Panel* parent, const std::string& title, uint8_t dir);
+	InvertDirBox(UI::Panel* parent, const std::string& title, uint8_t* dir);
 
-	uint8_t get_dir();
-	void set(uint8_t dir);
+	void update_sel();
 
 private:
 	UI::Textarea title_area_;
 	InvertDirDropdown dir_dropdown_;
+	uint8_t* dir_;
 };
 
 struct DefaultsBox : public UI::Box {
-	DefaultsBox(UI::Panel* parent, bool use_2d_defaults);
+	DefaultsBox(MousewheelOptionsDialog* parent, bool* use_2d_defaults);
 
 private:
 	UI::Dropdown<bool> use_2d_defaults_dd_;
@@ -119,6 +125,8 @@ private:
 class MousewheelOptionsDialog : public UI::Box {
 public:
 	MousewheelOptionsDialog(UI::Panel* parent);
+
+	void update_settings();
 
 	// Saves the options and reloads the active tab
 	void clicked_apply();

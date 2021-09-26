@@ -32,16 +32,19 @@
 
 namespace FsMenu {
 
-#define READ_MOD(option) normalize_keymod(get_mousewheel_keymod(MousewheelOptionID::option##Mod))
+#define READ_MOD(option)                                                                           \
+	normalize_keymod(get_mousewheel_keymod(MousewheelOptionID::option##Mod, use_2d_defaults_))
 
 #define DIR_COMBINE(x, y) static_cast<uint8_t>((2 * x) | y)
 #define READ_DIR(option)                                                                           \
-	DIR_COMBINE(static_cast<uint8_t>(get_mousewheel_option_bool(MousewheelOptionID::option##X)),    \
-	            static_cast<uint8_t>(get_mousewheel_option_bool(MousewheelOptionID::option##Y)))
+	DIR_COMBINE(static_cast<uint8_t>(                                                               \
+	               get_mousewheel_option_bool(MousewheelOptionID::option##X, use_2d_defaults_)),    \
+	            static_cast<uint8_t>(                                                               \
+	               get_mousewheel_option_bool(MousewheelOptionID::option##Y, use_2d_defaults_)))
 
-void MousewheelConfigSettings::read() {
-	use_2d_defaults_ = get_mousewheel_option_bool(MousewheelOptionID::kUse2Ddefaults);
-	enable_map_scroll_ = get_mousewheel_option_bool(MousewheelOptionID::kMapScroll);
+void MousewheelConfigSettings::def2d_update() {
+	enable_map_scroll_ = static_cast<uint8_t>(
+	   get_mousewheel_option_bool(MousewheelOptionID::kMapScroll, use_2d_defaults_));
 	zoom_mod_ = READ_MOD(kMapZoom);
 	map_scroll_mod_ = READ_MOD(kMapScroll);
 	speed_mod_ = READ_MOD(kGameSpeed);
@@ -52,6 +55,10 @@ void MousewheelConfigSettings::read() {
 	value_invert_ = READ_DIR(kUIChangeValueInvert);
 	tab_invert_ = READ_DIR(kUITabInvert);
 	zoom_invert_ = READ_DIR(kMapZoomInvert);
+}
+
+void MousewheelConfigSettings::read() {
+	use_2d_defaults_ = get_mousewheel_option_bool(MousewheelOptionID::kUse2Ddefaults);
 }
 
 #undef READ_MOD
@@ -66,7 +73,8 @@ void MousewheelConfigSettings::read() {
 
 void MousewheelConfigSettings::apply() {
 	set_mousewheel_option_bool(MousewheelOptionID::kUse2Ddefaults, use_2d_defaults_);
-	set_mousewheel_option_bool(MousewheelOptionID::kMapScroll, enable_map_scroll_);
+	set_mousewheel_option_bool(
+	   MousewheelOptionID::kMapScroll, static_cast<bool>(enable_map_scroll_));
 	set_mousewheel_keymod(MousewheelOptionID::kMapZoomMod, zoom_mod_);
 	set_mousewheel_keymod(MousewheelOptionID::kMapScrollMod, map_scroll_mod_);
 	set_mousewheel_keymod(MousewheelOptionID::kGameSpeedMod, speed_mod_);
@@ -86,7 +94,6 @@ void MousewheelConfigSettings::apply() {
 #undef DIR_Y
 
 // void MousewheelConfigSettings::save() {}
-
 
 KeymodDropdown::KeymodDropdown(UI::Panel* parent)
    : UI::Dropdown<uint16_t>(parent,
@@ -161,30 +168,39 @@ InvertDirDropdown::InvertDirDropdown(UI::Panel* parent)
 }
 
 KeymodAndDirBox::KeymodAndDirBox(
-   UI::Panel* parent, const std::string& title, uint16_t keymod, uint8_t dir, bool two_d)
+   UI::Panel* parent, const std::string& title, uint16_t* keymod, uint8_t* dir, bool two_d)
    : UI::Box(parent, UI::PanelStyle::kFsMenu, 0, 0, UI::Box::Horizontal, 700, 24, kPadding),
      title_area_(this, UI::PanelStyle::kFsMenu, UI::FontStyle::kFsMenuLabel, title),
      keymod_dropdown_(this),
-     dir_dropdown_(this, two_d) {
+     dir_dropdown_(this, two_d),
+     keymod_(keymod),
+     dir_(dir) {
 	title_area_.set_fixed_width(280);
 	add(&title_area_);
 	add(&keymod_dropdown_);
 	add(&dir_dropdown_);
-	keymod_dropdown_.select(keymod);
-	dir_dropdown_.select(dir);
+	update_sel();
+}
+void KeymodAndDirBox::update_sel() {
+	keymod_dropdown_.select(*keymod_);
+	dir_dropdown_.select(*dir_);
 }
 
-InvertDirBox::InvertDirBox(UI::Panel* parent, const std::string& title, uint8_t dir)
+InvertDirBox::InvertDirBox(UI::Panel* parent, const std::string& title, uint8_t* dir)
    : UI::Box(parent, UI::PanelStyle::kFsMenu, 0, 0, UI::Box::Horizontal, 700, 24, kPadding),
      title_area_(this, UI::PanelStyle::kFsMenu, UI::FontStyle::kFsMenuLabel, title),
-     dir_dropdown_(this) {
+     dir_dropdown_(this),
+     dir_(dir) {
 	title_area_.set_fixed_width(450);
 	add(&title_area_);
 	add(&dir_dropdown_);
-	dir_dropdown_.select(dir);
+	update_sel();
+}
+void InvertDirBox::update_sel() {
+	dir_dropdown_.select(*dir_);
 }
 
-DefaultsBox::DefaultsBox(UI::Panel* parent, bool use_2d_defaults)
+DefaultsBox::DefaultsBox(MousewheelOptionsDialog* parent, bool* use_2d_defaults)
    : UI::Box(parent, UI::PanelStyle::kFsMenu, 0, 0, UI::Box::Horizontal, 700, 24, kPadding),
      use_2d_defaults_dd_(this,
                          std::string(),
@@ -207,27 +223,39 @@ DefaultsBox::DefaultsBox(UI::Panel* parent, bool use_2d_defaults)
                    _("Reset all to defaults")) {
 	use_2d_defaults_dd_.add(_("Desktop mouse"), false);
 	use_2d_defaults_dd_.add(_("Touchpad"), true);
-	use_2d_defaults_dd_.select(use_2d_defaults);
+	use_2d_defaults_dd_.select(*use_2d_defaults);
 
 	add(&use_2d_defaults_dd_);
 	add_inf_space();
 	add(&reset_button_, Resizing::kAlign, UI::Align::kRight);
+
+	use_2d_defaults_dd_.selected.connect([this, use_2d_defaults, parent]() {
+		*use_2d_defaults = use_2d_defaults_dd_.get_selected();
+		parent->update_settings();
+	});
+
+/*	reset_button_.sigclicked.connect([this]() {
+
+	});
+*/
 }
 
 MousewheelOptionsDialog::MousewheelOptionsDialog(UI::Panel* parent)
    : UI::Box(parent, UI::PanelStyle::kFsMenu, 0, 0, UI::Box::Vertical, 0, 0, kPadding),
      settings_(),
-     defaults_box_(this, settings_.use_2d_defaults_),
-     zoom_box_(this, _("Zoom Map:"), settings_.zoom_mod_, settings_.zoom_dir_),
+     defaults_box_(this, &(settings_.use_2d_defaults_)),
+     zoom_box_(this, _("Zoom Map:"), &(settings_.zoom_mod_), &(settings_.zoom_dir_)),
      mapscroll_box_(
-        this, _("Scroll Map:"), settings_.map_scroll_mod_, settings_.enable_map_scroll_, true),
-     speed_box_(this, _("Change Game Speed:"), settings_.speed_mod_, settings_.speed_dir_),
+        this, _("Scroll Map:"), &(settings_.map_scroll_mod_), &(settings_.enable_map_scroll_), true),
+     speed_box_(this, _("Change Game Speed:"), &(settings_.speed_mod_), &(settings_.speed_dir_)),
      toolsize_box_(
-        this, _("Change Editor Toolsize:"), settings_.toolsize_mod_, settings_.toolsize_dir_),
-     zoom_invert_box_(this, _("Invert scroll direction for map zooming:"), settings_.zoom_invert_),
-     tab_invert_box_(this, _("Invert scroll direction for tab switching:"), settings_.tab_invert_),
+        this, _("Change Editor Toolsize:"), &(settings_.toolsize_mod_), &(settings_.toolsize_dir_)),
+     zoom_invert_box_(
+        this, _("Invert scroll direction for map zooming:"), &(settings_.zoom_invert_)),
+     tab_invert_box_(
+        this, _("Invert scroll direction for tab switching:"), &(settings_.tab_invert_)),
      value_invert_box_(
-        this, _("Invert scroll direction for increase/decrease:"), settings_.value_invert_) {
+        this, _("Invert scroll direction for increase/decrease:"), &(settings_.value_invert_)) {
 	add(&defaults_box_);
 	add_space(8);
 	add(&zoom_box_);
@@ -240,6 +268,16 @@ MousewheelOptionsDialog::MousewheelOptionsDialog(UI::Panel* parent)
 	add(&value_invert_box_);
 }
 
+void MousewheelOptionsDialog::update_settings() {
+	settings_.def2d_update();
+	zoom_box_.update_sel();
+	mapscroll_box_.update_sel();
+	speed_box_.update_sel();
+	toolsize_box_.update_sel();
+	zoom_invert_box_.update_sel();
+	tab_invert_box_.update_sel();
+	value_invert_box_.update_sel();
+}
 
 // Saves the options and reloads the active tab
 void MousewheelOptionsDialog::clicked_apply() {
