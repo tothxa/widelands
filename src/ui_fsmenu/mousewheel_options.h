@@ -60,7 +60,6 @@ struct MousewheelConfigSettings {
 	void def2d_update();
 	void read();
 	void apply();
-//	void save();
 
 	MousewheelConfigSettings() {
 		read();
@@ -127,11 +126,8 @@ public:
 	MousewheelOptionsDialog(UI::Panel* parent);
 
 	void update_settings();
-
-	// Saves the options and reloads the active tab
-	void clicked_apply();
-	// Restores old options when canceled
-	void clicked_cancel();
+	void reread_settings();
+	void apply_settings();
 
 private:
 	MousewheelConfigSettings settings_;

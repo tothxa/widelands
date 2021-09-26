@@ -94,8 +94,6 @@ void MousewheelConfigSettings::apply() {
 #undef DIR_X
 #undef DIR_Y
 
-// void MousewheelConfigSettings::save() {}
-
 KeymodDropdown::KeymodDropdown(UI::Panel* parent)
    : UI::Dropdown<uint16_t>(parent,
                             std::string(),
@@ -181,6 +179,9 @@ KeymodAndDirBox::KeymodAndDirBox(
 	add(&keymod_dropdown_);
 	add(&dir_dropdown_);
 	update_sel();
+	keymod_dropdown_.selected.connect(
+	   [this, keymod]() { *keymod = keymod_dropdown_.get_selected(); });
+	dir_dropdown_.selected.connect([this, dir]() { *dir = dir_dropdown_.get_selected(); });
 }
 void KeymodAndDirBox::update_sel() {
 	keymod_dropdown_.select(*keymod_);
@@ -196,6 +197,7 @@ InvertDirBox::InvertDirBox(UI::Panel* parent, const std::string& title, uint8_t*
 	add(&title_area_);
 	add(&dir_dropdown_);
 	update_sel();
+	dir_dropdown_.selected.connect([this, dir]() { *dir = dir_dropdown_.get_selected(); });
 }
 void InvertDirBox::update_sel() {
 	dir_dropdown_.select(*dir_);
@@ -235,10 +237,10 @@ DefaultsBox::DefaultsBox(MousewheelOptionsDialog* parent, bool* use_2d_defaults)
 		parent->update_settings();
 	});
 
-/*	reset_button_.sigclicked.connect([this]() {
-
+	reset_button_.sigclicked.connect([use_2d_defaults, parent]() {
+		reset_mousewheel_settings(*use_2d_defaults);
+		parent->reread_settings();
 	});
-*/
 }
 
 MousewheelOptionsDialog::MousewheelOptionsDialog(UI::Panel* parent)
@@ -246,8 +248,11 @@ MousewheelOptionsDialog::MousewheelOptionsDialog(UI::Panel* parent)
      settings_(),
      defaults_box_(this, &(settings_.use_2d_defaults_)),
      zoom_box_(this, _("Zoom Map:"), &(settings_.zoom_mod_), &(settings_.zoom_dir_)),
-     mapscroll_box_(
-        this, _("Scroll Map:"), &(settings_.map_scroll_mod_), &(settings_.enable_map_scroll_), true),
+     mapscroll_box_(this,
+                    _("Scroll Map:"),
+                    &(settings_.map_scroll_mod_),
+                    &(settings_.enable_map_scroll_),
+                    true),
      speed_box_(this, _("Change Game Speed:"), &(settings_.speed_mod_), &(settings_.speed_dir_)),
      toolsize_box_(
         this, _("Change Editor Toolsize:"), &(settings_.toolsize_mod_), &(settings_.toolsize_dir_)),
@@ -268,7 +273,6 @@ MousewheelOptionsDialog::MousewheelOptionsDialog(UI::Panel* parent)
 	add(&tab_invert_box_);
 	add(&value_invert_box_);
 }
-
 void MousewheelOptionsDialog::update_settings() {
 	settings_.def2d_update();
 	zoom_box_.update_sel();
@@ -279,15 +283,11 @@ void MousewheelOptionsDialog::update_settings() {
 	tab_invert_box_.update_sel();
 	value_invert_box_.update_sel();
 }
-
-// Saves the options and reloads the active tab
-void MousewheelOptionsDialog::clicked_apply() {
-
+void MousewheelOptionsDialog::reread_settings() {
+	settings_.read();
+	update_settings();
 }
-
-// Restores old options when canceled
-void MousewheelOptionsDialog::clicked_cancel() {
-
+void MousewheelOptionsDialog::apply_settings() {
+	settings_.apply();
 }
-
 }  // namespace FsMenu
