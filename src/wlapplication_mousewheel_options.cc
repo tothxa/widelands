@@ -304,7 +304,8 @@ Vector2i get_mousewheel_change_2D(MousewheelHandlerConfigID handler_id,
 }
 
 void update_mousewheel_settings() {
-	mousewheel_use_2d_defaults_cache = get_mousewheel_option_bool(MousewheelOptionID::kUse2Ddefaults);
+	mousewheel_use_2d_defaults_cache =
+	   get_mousewheel_option_bool(MousewheelOptionID::kUse2Ddefaults);
 	for (MousewheelHandlerConfigID i = MousewheelHandlerConfigID::k__Begin;
 	     i <= MousewheelHandlerConfigID::k__End;
 	     i = static_cast<MousewheelHandlerConfigID>(static_cast<uint16_t>(i) + 1)) {

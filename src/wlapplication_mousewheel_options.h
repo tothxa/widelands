@@ -60,11 +60,11 @@ enum class MousewheelOptionID : uint16_t {
 };
 
 void set_mousewheel_option_bool(MousewheelOptionID, bool);
-bool get_mousewheel_option_bool(MousewheelOptionID);  // for normal use
+bool get_mousewheel_option_bool(MousewheelOptionID);                       // for normal use
 bool get_mousewheel_option_bool(MousewheelOptionID, bool use_2d_default);  // for options dialog
 
 void set_mousewheel_keymod(MousewheelOptionID, uint16_t);
-uint16_t get_mousewheel_keymod(MousewheelOptionID);  // for normal use
+uint16_t get_mousewheel_keymod(MousewheelOptionID);                       // for normal use
 uint16_t get_mousewheel_keymod(MousewheelOptionID, bool use_2d_default);  // for options dialog
 
 // Map config options to handlers
