@@ -20,6 +20,7 @@
 #ifndef WL_UI_FSMENU_MOUSEWHEEL_OPTIONS_H
 #define WL_UI_FSMENU_MOUSEWHEEL_OPTIONS_H
 
+#include <list>
 #include <map>
 #include <memory>
 
@@ -84,16 +85,31 @@ struct InvertDirDropdown : public UI::Dropdown<uint8_t> {
 struct KeymodAndDirBox : public UI::Box {
 	KeymodAndDirBox(UI::Panel* parent,
 	                const std::string& title,
+	                const std::list<KeymodAndDirBox*> shared_scope_list,
 	                uint16_t* keymod,
 	                uint8_t* dir,
 	                bool two_d = false);
 
 	void update_sel();
 
+	// Disable keymod dropdown when neither direction is used
+	void check_dir();
+
+	// Show info window if conflict is found then return false,
+	// return true if there is no conflict
+	bool check_available(uint16_t keymod, uint8_t dir);
+
+	bool conflicts(uint16_t keymod, uint8_t dir);
+	std::string get_title() {
+		return title_;
+	}
+
 private:
 	UI::Textarea title_area_;
 	KeymodDropdown keymod_dropdown_;
 	DirDropdown dir_dropdown_;
+	const std::string title_;
+	const std::list<KeymodAndDirBox*> shared_scope_list_;
 	uint16_t* keymod_;
 	uint8_t* dir_;
 };

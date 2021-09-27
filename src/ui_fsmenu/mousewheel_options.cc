@@ -20,11 +20,15 @@
 #include "ui_fsmenu/mousewheel_options.h"
 
 #include <SDL_keycode.h>
+#include <boost/format.hpp>
+#include <list>
 
 #include "base/i18n.h"
+#include "graphic/text_layout.h"
 #include "ui_basic/box.h"
 #include "ui_basic/button.h"
 #include "ui_basic/dropdown.h"
+#include "ui_basic/messagebox.h"
 #include "ui_basic/textarea.h"
 #include "ui_fsmenu/menu.h"
 #include "wlapplication_mousewheel_options.h"
@@ -32,19 +36,34 @@
 
 namespace FsMenu {
 
+// Scroll Directions
+enum SD : uint8_t {
+	kDisabled = 0,
+	kNeither = kDisabled,
+	kVertical = 1,
+	kHorizontal = 2,
+	kAny = kVertical | kHorizontal,
+	kBoth = kAny
+};
+
+static const std::string sd_names[] = {gettext_noop("Disabled"), gettext_noop("Vertical scroll"),
+                                       gettext_noop("Horizontal scroll"),
+                                       gettext_noop("Any scroll")};
+
 #define READ_MOD(option)                                                                           \
 	normalize_keymod(get_mousewheel_keymod(MousewheelOptionID::option##Mod, use_2d_defaults_))
 
-#define DIR_COMBINE(x, y) static_cast<uint8_t>((2 * x) | y)
+#define DIR_COMBINE(x, y)                                                                          \
+	((x ? SD::kHorizontal : SD::kDisabled) | (y ? SD::kVertical : SD::kDisabled))
 #define READ_DIR(option)                                                                           \
-	DIR_COMBINE(static_cast<uint8_t>(                                                               \
-	               get_mousewheel_option_bool(MousewheelOptionID::option##X, use_2d_defaults_)),    \
-	            static_cast<uint8_t>(                                                               \
-	               get_mousewheel_option_bool(MousewheelOptionID::option##Y, use_2d_defaults_)))
+	DIR_COMBINE(get_mousewheel_option_bool(MousewheelOptionID::option##X, use_2d_defaults_),        \
+	            get_mousewheel_option_bool(MousewheelOptionID::option##Y, use_2d_defaults_))
 
 void MousewheelConfigSettings::def2d_update() {
-	enable_map_scroll_ = static_cast<uint8_t>(
-	   get_mousewheel_option_bool(MousewheelOptionID::kMapScroll, use_2d_defaults_));
+	enable_map_scroll_ =
+	   (get_mousewheel_option_bool(MousewheelOptionID::kMapScroll, use_2d_defaults_) ?
+	       SD::kAny :
+	       SD::kDisabled);
 	zoom_mod_ = READ_MOD(kMapZoom);
 	map_scroll_mod_ = READ_MOD(kMapScroll);
 	speed_mod_ = READ_MOD(kGameSpeed);
@@ -66,11 +85,11 @@ void MousewheelConfigSettings::read() {
 #undef READ_DIR
 #undef DIR_COMBINE
 
-#define DIR_X(dc) static_cast<bool>(dc & 2)
-#define DIR_Y(dc) static_cast<bool>(dc & 1)
-#define APPLY_DIR(option, dc)                                                                      \
-	set_mousewheel_option_bool(MousewheelOptionID::option##X, DIR_X(dc));                           \
-	set_mousewheel_option_bool(MousewheelOptionID::option##Y, DIR_Y(dc));
+#define DIR_X(dir) static_cast<bool>(dir & SD::kHorizontal)
+#define DIR_Y(dir) static_cast<bool>(dir & SD::kVertical)
+#define APPLY_DIR(option, dir)                                                                     \
+	set_mousewheel_option_bool(MousewheelOptionID::option##X, DIR_X(dir));                          \
+	set_mousewheel_option_bool(MousewheelOptionID::option##Y, DIR_Y(dir));
 
 void MousewheelConfigSettings::apply() {
 	set_mousewheel_option_bool(MousewheelOptionID::kUse2Ddefaults, use_2d_defaults_);
@@ -108,23 +127,27 @@ KeymodDropdown::KeymodDropdown(UI::Panel* parent)
                             UI::ButtonStyle::kFsMenuMenu) {
 	// Same order as in keymod_string_for(), otherwise the list gets messed up
 	uint16_t mods[] = {KMOD_CTRL, KMOD_GUI, KMOD_ALT, KMOD_SHIFT};
-	uint16_t combo, allfour = KMOD_CTRL | KMOD_GUI | KMOD_ALT | KMOD_SHIFT;
+	int nmods = 4;
+	uint16_t combo;
+	uint16_t allfour = KMOD_CTRL | KMOD_GUI | KMOD_ALT | KMOD_SHIFT;
 	add(_("(plain)"), KMOD_NONE);
-	for (int i = 0; i < 4; ++i) {
+	for (int i = 0; i < nmods; ++i) {
 		add(keymod_string_for(mods[i]), mods[i]);
 	}
-	for (int i = 0; i < 3; ++i) {
-		for (int j = i + 1; j < 4; ++j) {
+	for (int i = 0; i < nmods - 1; ++i) {
+		for (int j = i + 1; j < nmods; ++j) {
 			combo = mods[i] | mods[j];
 			add(keymod_string_for(combo), combo);
 		}
 	}
-	for (int i = 3; i >= 0; --i) {
+	for (int i = nmods - 1; i >= 0; --i) {
 		combo = allfour & ~mods[i];
 		add(keymod_string_for(combo), combo);
 	}
 	add(keymod_string_for(allfour), allfour);
 }
+
+#define SDOPT(i) _(sd_names[SD::i]), SD::i
 
 DirDropdown::DirDropdown(UI::Panel* parent, bool two_d)
    : UI::Dropdown<uint8_t>(parent,
@@ -138,15 +161,15 @@ DirDropdown::DirDropdown(UI::Panel* parent, bool two_d)
                            UI::DropdownType::kTextual,
                            UI::PanelStyle::kFsMenu,
                            UI::ButtonStyle::kFsMenuMenu) {
-	add(_("Disabled"), 0);
-	if (two_d) {
-		add(_("Any scroll"), 1);
-	} else {
-		add(_("Vertical scroll"), 1);
-		add(_("Horizontal scroll"), 2);
-		add(_("Any scroll"), 1 | 2);
+	add(SDOPT(kDisabled));
+	if (!two_d) {
+		add(SDOPT(kVertical));
+		add(SDOPT(kHorizontal));
 	}
+	add(SDOPT(kAny));
 }
+
+#undef SDOPT
 
 InvertDirDropdown::InvertDirDropdown(UI::Panel* parent)
    : UI::Dropdown<uint8_t>(parent,
@@ -160,18 +183,27 @@ InvertDirDropdown::InvertDirDropdown(UI::Panel* parent)
                            UI::DropdownType::kTextual,
                            UI::PanelStyle::kFsMenu,
                            UI::ButtonStyle::kFsMenuMenu) {
-	add(_("Neither"), 0);
-	add(_("Vertical"), 1);
-	add(_("Horizontal"), 2);
-	add(_("Both"), 1 | 2);
+	add(_("Neither"), SD::kNeither);
+	add(_("Vertical"), SD::kVertical);
+	add(_("Horizontal"), SD::kHorizontal);
+	add(_("Both"), SD::kBoth);
 }
 
-KeymodAndDirBox::KeymodAndDirBox(
-   UI::Panel* parent, const std::string& title, uint16_t* keymod, uint8_t* dir, bool two_d)
+KeymodAndDirBox::KeymodAndDirBox(UI::Panel* parent,
+                                 const std::string& title,
+                                 const std::list<KeymodAndDirBox*> shared_scope_list,
+                                 uint16_t* keymod,
+                                 uint8_t* dir,
+                                 bool two_d)
    : UI::Box(parent, UI::PanelStyle::kFsMenu, 0, 0, UI::Box::Horizontal, 700, 24, kPadding),
-     title_area_(this, UI::PanelStyle::kFsMenu, UI::FontStyle::kFsMenuLabel, title),
+     title_area_(this,
+                 UI::PanelStyle::kFsMenu,
+                 UI::FontStyle::kFsMenuLabel,
+                 (boost::format(_("%1%:")) % title).str()),
      keymod_dropdown_(this),
      dir_dropdown_(this, two_d),
+     title_(title),
+     shared_scope_list_(shared_scope_list),
      keymod_(keymod),
      dir_(dir) {
 	title_area_.set_fixed_width(280);
@@ -179,13 +211,59 @@ KeymodAndDirBox::KeymodAndDirBox(
 	add(&keymod_dropdown_);
 	add(&dir_dropdown_);
 	update_sel();
-	keymod_dropdown_.selected.connect(
-	   [this, keymod]() { *keymod = keymod_dropdown_.get_selected(); });
-	dir_dropdown_.selected.connect([this, dir]() { *dir = dir_dropdown_.get_selected(); });
+	keymod_dropdown_.selected.connect([this]() {
+		// Doesn't close before the selected signal. Bug?
+		keymod_dropdown_.set_list_visibility(false);
+		if (check_available(keymod_dropdown_.get_selected(), *dir_)) {
+			*keymod_ = keymod_dropdown_.get_selected();
+		} else {
+			keymod_dropdown_.select(*keymod_);
+		}
+	});
+	dir_dropdown_.selected.connect([this]() {
+		// Doesn't close before the selected signal. Bug?
+		dir_dropdown_.set_list_visibility(false);
+		if (check_available(*keymod_, dir_dropdown_.get_selected())) {
+			*dir_ = dir_dropdown_.get_selected();
+			check_dir();
+		} else {
+			dir_dropdown_.select(*dir_);
+		}
+	});
 }
 void KeymodAndDirBox::update_sel() {
 	keymod_dropdown_.select(*keymod_);
 	dir_dropdown_.select(*dir_);
+	check_dir();
+}
+void KeymodAndDirBox::check_dir() {
+	if (*dir_ == 0) {
+		keymod_dropdown_.set_enabled(false);
+	} else {
+		keymod_dropdown_.set_enabled(true);
+	}
+}
+bool KeymodAndDirBox::conflicts(uint16_t keymod, uint8_t dir) {
+	return (dir & *dir_) && (matches_keymod(keymod, *keymod_));
+}
+bool KeymodAndDirBox::check_available(uint16_t keymod, uint8_t dir) {
+	for (KeymodAndDirBox* other : shared_scope_list_) {
+		if (other->conflicts(keymod, dir)) {
+			UI::WLMessageBox warning(
+			   get_parent(), UI::WindowStyle::kFsMenu, _("Scroll Setting Conflict"),
+			   as_richtext_paragraph(
+			      (boost::format(_("‘%1$s%2$s’ conflicts with ‘%3$s’. "
+			                       "Please select a different combination or "
+			                       "change the conflicting setting first.")) %
+			       keymod_string_for(keymod) % _(sd_names[dir]) % other->get_title())
+			         .str(),
+			      UI::FontStyle::kFsMenuLabel, UI::Align::kCenter),
+			   UI::WLMessageBox::MBoxType::kOk);
+			warning.run<UI::Panel::Returncodes>();
+			return false;
+		}
+	}
+	return true;
 }
 
 InvertDirBox::InvertDirBox(UI::Panel* parent, const std::string& title, uint8_t* dir)
@@ -216,14 +294,8 @@ DefaultsBox::DefaultsBox(MousewheelOptionsDialog* parent, bool* use_2d_defaults)
                          UI::DropdownType::kTextual,
                          UI::PanelStyle::kFsMenu,
                          UI::ButtonStyle::kFsMenuMenu),
-     reset_button_(this,
-                   std::string(),
-                   0,
-                   0,
-                   250,
-                   24,
-                   UI::ButtonStyle::kFsMenuSecondary,
-                   _("Reset all to defaults")) {
+     reset_button_(
+        this, std::string(), 0, 0, 250, 24, UI::ButtonStyle::kFsMenuSecondary, _("Reset all")) {
 	use_2d_defaults_dd_.add(_("Desktop mouse"), false);
 	use_2d_defaults_dd_.add(_("Touchpad"), true);
 	use_2d_defaults_dd_.select(*use_2d_defaults);
@@ -247,15 +319,27 @@ MousewheelOptionsDialog::MousewheelOptionsDialog(UI::Panel* parent)
    : UI::Box(parent, UI::PanelStyle::kFsMenu, 0, 0, UI::Box::Vertical, 0, 0, kPadding),
      settings_(),
      defaults_box_(this, &(settings_.use_2d_defaults_)),
-     zoom_box_(this, _("Zoom Map:"), &(settings_.zoom_mod_), &(settings_.zoom_dir_)),
+     zoom_box_(this,
+               _("Zoom Map"),
+               {&mapscroll_box_, &speed_box_, &toolsize_box_},
+               &(settings_.zoom_mod_),
+               &(settings_.zoom_dir_)),
      mapscroll_box_(this,
-                    _("Scroll Map:"),
+                    _("Scroll Map"),
+                    {&zoom_box_, &speed_box_, &toolsize_box_},
                     &(settings_.map_scroll_mod_),
                     &(settings_.enable_map_scroll_),
                     true),
-     speed_box_(this, _("Change Game Speed:"), &(settings_.speed_mod_), &(settings_.speed_dir_)),
-     toolsize_box_(
-        this, _("Change Editor Toolsize:"), &(settings_.toolsize_mod_), &(settings_.toolsize_dir_)),
+     speed_box_(this,
+                _("Change Game Speed"),
+                {&zoom_box_, &mapscroll_box_},
+                &(settings_.speed_mod_),
+                &(settings_.speed_dir_)),
+     toolsize_box_(this,
+                   _("Change Editor Toolsize"),
+                   {&zoom_box_, &mapscroll_box_},
+                   &(settings_.toolsize_mod_),
+                   &(settings_.toolsize_dir_)),
      zoom_invert_box_(
         this, _("Invert scroll direction for map zooming:"), &(settings_.zoom_invert_)),
      tab_invert_box_(
