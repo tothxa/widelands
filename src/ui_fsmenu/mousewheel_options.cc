@@ -36,6 +36,19 @@
 
 namespace FsMenu {
 
+// clang-format off
+static constexpr int
+	kButtonSize = 24,
+	kDividerSpace = 8,
+	kOptDlgMaxW = 700,
+	kKmDirDdMaxW = 200,
+	kKmDirTitleMaxW = 280,
+	kInvDirDdMaxW = 180,
+	kInvTitleMaxW = 450,
+	kDef2dMaxW = 400,
+	kResetBtnMaxW = 250;
+// clang-format on
+
 // Scroll Directions
 enum SD : uint8_t {
 	kDisabled = 0,
@@ -118,9 +131,9 @@ KeymodDropdown::KeymodDropdown(UI::Panel* parent)
                             std::string(),
                             0,
                             0,
-                            200,
+                            kKmDirDdMaxW,
                             20,
-                            24,
+                            kButtonSize,
                             std::string(),
                             UI::DropdownType::kTextual,
                             UI::PanelStyle::kFsMenu,
@@ -154,9 +167,9 @@ DirDropdown::DirDropdown(UI::Panel* parent, bool two_d)
                            std::string(),
                            0,
                            0,
-                           200,
+                           kKmDirDdMaxW,
                            4,
-                           24,
+                           kButtonSize,
                            std::string(),
                            UI::DropdownType::kTextual,
                            UI::PanelStyle::kFsMenu,
@@ -176,9 +189,9 @@ InvertDirDropdown::InvertDirDropdown(UI::Panel* parent)
                            std::string(),
                            0,
                            0,
-                           180,
+                           kInvDirDdMaxW,
                            4,
-                           24,
+                           kButtonSize,
                            std::string(),
                            UI::DropdownType::kTextual,
                            UI::PanelStyle::kFsMenu,
@@ -195,7 +208,14 @@ KeymodAndDirBox::KeymodAndDirBox(UI::Panel* parent,
                                  uint16_t* keymod,
                                  uint8_t* dir,
                                  bool two_d)
-   : UI::Box(parent, UI::PanelStyle::kFsMenu, 0, 0, UI::Box::Horizontal, 700, 24, kPadding),
+   : UI::Box(parent,
+             UI::PanelStyle::kFsMenu,
+             0,
+             0,
+             UI::Box::Horizontal,
+             kOptDlgMaxW,
+             kButtonSize,
+             kPadding),
      title_area_(this,
                  UI::PanelStyle::kFsMenu,
                  UI::FontStyle::kFsMenuLabel,
@@ -206,7 +226,7 @@ KeymodAndDirBox::KeymodAndDirBox(UI::Panel* parent,
      shared_scope_list_(shared_scope_list),
      keymod_(keymod),
      dir_(dir) {
-	title_area_.set_fixed_width(280);
+	title_area_.set_fixed_width(kKmDirTitleMaxW);
 	add(&title_area_);
 	add(&keymod_dropdown_);
 	add(&dir_dropdown_);
@@ -265,13 +285,34 @@ bool KeymodAndDirBox::check_available(uint16_t keymod, uint8_t dir) {
 	}
 	return true;
 }
+void KeymodAndDirBox::set_width(int w, int w1) {
+	set_max_size(w, kButtonSize);
+	title_area_.set_fixed_width(w1);
+	keymod_dropdown_.set_size(w1, kButtonSize);
+	dir_dropdown_.set_size(w1, kButtonSize);
+	layout();
+}
+void KeymodAndDirBox::reset_width() {
+	set_max_size(kOptDlgMaxW, kButtonSize);
+	title_area_.set_fixed_width(kKmDirTitleMaxW);
+	keymod_dropdown_.set_size(kKmDirDdMaxW, kButtonSize);
+	dir_dropdown_.set_size(kKmDirDdMaxW, kButtonSize);
+	layout();
+}
 
 InvertDirBox::InvertDirBox(UI::Panel* parent, const std::string& title, uint8_t* dir)
-   : UI::Box(parent, UI::PanelStyle::kFsMenu, 0, 0, UI::Box::Horizontal, 700, 24, kPadding),
+   : UI::Box(parent,
+             UI::PanelStyle::kFsMenu,
+             0,
+             0,
+             UI::Box::Horizontal,
+             kOptDlgMaxW,
+             kButtonSize,
+             kPadding),
      title_area_(this, UI::PanelStyle::kFsMenu, UI::FontStyle::kFsMenuLabel, title),
      dir_dropdown_(this),
      dir_(dir) {
-	title_area_.set_fixed_width(450);
+	title_area_.set_fixed_width(kInvTitleMaxW);
 	add(&title_area_);
 	add(&dir_dropdown_);
 	update_sel();
@@ -280,22 +321,47 @@ InvertDirBox::InvertDirBox(UI::Panel* parent, const std::string& title, uint8_t*
 void InvertDirBox::update_sel() {
 	dir_dropdown_.select(*dir_);
 }
+void InvertDirBox::set_width(int w, int w1) {
+	set_max_size(w, kButtonSize);
+	title_area_.set_fixed_width(2 * w1);
+	dir_dropdown_.set_size(w1, kButtonSize);
+	layout();
+}
+void InvertDirBox::reset_width() {
+	set_max_size(kOptDlgMaxW, kButtonSize);
+	title_area_.set_fixed_width(kInvTitleMaxW);
+	dir_dropdown_.set_size(kInvDirDdMaxW, kButtonSize);
+	layout();
+}
 
 DefaultsBox::DefaultsBox(MousewheelOptionsDialog* parent, bool* use_2d_defaults)
-   : UI::Box(parent, UI::PanelStyle::kFsMenu, 0, 0, UI::Box::Horizontal, 700, 24, kPadding),
+   : UI::Box(parent,
+             UI::PanelStyle::kFsMenu,
+             0,
+             0,
+             UI::Box::Horizontal,
+             kOptDlgMaxW,
+             kButtonSize,
+             kPadding),
      use_2d_defaults_dd_(this,
                          std::string(),
                          0,
                          0,
-                         400,
+                         kDef2dMaxW,
                          2,
-                         24,
+                         kButtonSize,
                          _("Pointing Device"),
                          UI::DropdownType::kTextual,
                          UI::PanelStyle::kFsMenu,
                          UI::ButtonStyle::kFsMenuMenu),
-     reset_button_(
-        this, std::string(), 0, 0, 250, 24, UI::ButtonStyle::kFsMenuSecondary, _("Reset all")) {
+     reset_button_(this,
+                   std::string(),
+                   0,
+                   0,
+                   kResetBtnMaxW,
+                   kButtonSize,
+                   UI::ButtonStyle::kFsMenuSecondary,
+                   _("Reset all")) {
 	use_2d_defaults_dd_.add(_("Desktop mouse"), false);
 	use_2d_defaults_dd_.add(_("Touchpad"), true);
 	use_2d_defaults_dd_.select(*use_2d_defaults);
@@ -313,6 +379,18 @@ DefaultsBox::DefaultsBox(MousewheelOptionsDialog* parent, bool* use_2d_defaults)
 		reset_mousewheel_settings(*use_2d_defaults);
 		parent->reread_settings();
 	});
+}
+void DefaultsBox::set_width(int w, int w1) {
+	set_max_size(w, kButtonSize);
+	use_2d_defaults_dd_.set_size(w1, kButtonSize);
+	reset_button_.set_size(w1, kButtonSize);
+	layout();
+}
+void DefaultsBox::reset_width() {
+	set_max_size(kOptDlgMaxW, kButtonSize);
+	use_2d_defaults_dd_.set_size(kDef2dMaxW, kButtonSize);
+	reset_button_.set_size(kResetBtnMaxW, kButtonSize);
+	layout();
 }
 
 MousewheelOptionsDialog::MousewheelOptionsDialog(UI::Panel* parent)
@@ -347,12 +425,12 @@ MousewheelOptionsDialog::MousewheelOptionsDialog(UI::Panel* parent)
      value_invert_box_(
         this, _("Invert scroll direction for increase/decrease:"), &(settings_.value_invert_)) {
 	add(&defaults_box_);
-	add_space(8);
+	add_space(kDividerSpace);
 	add(&zoom_box_);
 	add(&mapscroll_box_);
 	add(&speed_box_);
 	add(&toolsize_box_);
-	add_space(8);
+	add_space(kDividerSpace);
 	add(&zoom_invert_box_);
 	add(&tab_invert_box_);
 	add(&value_invert_box_);
@@ -373,5 +451,28 @@ void MousewheelOptionsDialog::reread_settings() {
 }
 void MousewheelOptionsDialog::apply_settings() {
 	settings_.apply();
+}
+void MousewheelOptionsDialog::set_size(int w, int h) {
+	if (w < kOptDlgMaxW) {
+		defaults_box_.set_width(w, w / 2 - 2 * kPadding);
+		int w1 = w / 3 - 2 * kPadding;
+		zoom_box_.set_width(w, w1);
+		mapscroll_box_.set_width(w, w1);
+		speed_box_.set_width(w, w1);
+		toolsize_box_.set_width(w, w1);
+		zoom_invert_box_.set_width(w, w1);
+		tab_invert_box_.set_width(w, w1);
+		value_invert_box_.set_width(w, w1);
+	} else {
+		defaults_box_.reset_width();
+		zoom_box_.reset_width();
+		mapscroll_box_.reset_width();
+		speed_box_.reset_width();
+		toolsize_box_.reset_width();
+		zoom_invert_box_.reset_width();
+		tab_invert_box_.reset_width();
+		value_invert_box_.reset_width();
+	}
+	UI::Panel::set_size(w, h);
 }
 }  // namespace FsMenu

@@ -531,6 +531,9 @@ void Options::layout() {
 
 		const int tab_panel_width = get_inner_w() - 2 * kPadding;
 		const int unit_w = tab_panel_width / 3;
+		const int tab_panel_height = tabs_.get_inner_h() - UI::kTabPanelButtonHeight - 2 * kPadding;
+
+		mousewheel_options_.set_size(tab_panel_width, tab_panel_height);
 
 		// Interface
 		language_dropdown_.set_height(tabs_.get_h() - language_dropdown_.get_y() - buth -

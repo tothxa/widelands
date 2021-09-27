@@ -104,6 +104,9 @@ struct KeymodAndDirBox : public UI::Box {
 		return title_;
 	}
 
+	void set_width(int w, int w1);
+	void reset_width();
+
 private:
 	UI::Textarea title_area_;
 	KeymodDropdown keymod_dropdown_;
@@ -120,6 +123,9 @@ struct InvertDirBox : public UI::Box {
 
 	void update_sel();
 
+	void set_width(int w, int w1);
+	void reset_width();
+
 private:
 	UI::Textarea title_area_;
 	InvertDirDropdown dir_dropdown_;
@@ -128,6 +134,9 @@ private:
 
 struct DefaultsBox : public UI::Box {
 	DefaultsBox(MousewheelOptionsDialog* parent, bool* use_2d_defaults);
+
+	void set_width(int w, int w1);
+	void reset_width();
 
 private:
 	UI::Dropdown<bool> use_2d_defaults_dd_;
@@ -144,6 +153,8 @@ public:
 	void update_settings();
 	void reread_settings();
 	void apply_settings();
+
+	void set_size(int nw, int nh) override;
 
 private:
 	MousewheelConfigSettings settings_;
