@@ -106,7 +106,7 @@ Options::Options(MainMenu& fsmm, OptionsCtrl::OptionsStruct opt)
      box_saving_(&tabs_, UI::PanelStyle::kFsMenu, 0, 0, UI::Box::Vertical, 0, 0, kPadding),
      box_newgame_(&tabs_, UI::PanelStyle::kFsMenu, 0, 0, UI::Box::Vertical, 0, 0, kPadding),
      box_ingame_(&tabs_, UI::PanelStyle::kFsMenu, 0, 0, UI::Box::Vertical, 0, 0, kPadding),
-     box_mousewheel_(&tabs_, UI::PanelStyle::kFsMenu, 0, 0, UI::Box::Vertical, 0, 0, kPadding),
+     mousewheel_options_(&tabs_),
 
      // Interface options
      language_dropdown_(&box_interface_vbox_,
@@ -288,10 +288,6 @@ Options::Options(MainMenu& fsmm, OptionsCtrl::OptionsStruct opt)
                       UI::PanelStyle::kFsMenu,
                       Vector2i::zero(),
                       _("Invert click-and-drag map movement direction")),
-
-     // Mousewheel options
-     mousewheel_options_(&box_mousewheel_),
-
 #if 0  // TODO(Nordfriese): Re-add training wheels code after v1.0
      training_wheels_box_(&box_ingame_, UI::PanelStyle::kFsMenu, 0, 0, UI::Box::Horizontal),
      training_wheels_(&training_wheels_box_,
@@ -328,7 +324,7 @@ Options::Options(MainMenu& fsmm, OptionsCtrl::OptionsStruct opt)
 	tabs_.add("options_saving", _("Saving"), &box_saving_, "");
 	tabs_.add("options_newgame", _("New Games"), &box_newgame_, "");
 	tabs_.add("options_ingame", _("In-Game"), &box_ingame_, "");
-	tabs_.add("options_scroll", _("Scrolling"), &box_mousewheel_, "");
+	tabs_.add("options_scroll", _("Scrolling"), &mousewheel_options_, "");
 
 	// We want the last active tab when "Apply" was clicked.
 	if (os_.active_tab < tabs_.tabs().size()) {
@@ -380,10 +376,6 @@ Options::Options(MainMenu& fsmm, OptionsCtrl::OptionsStruct opt)
 	box_ingame_.add(&edge_scrolling_, UI::Box::Resizing::kFullSize);
 	box_ingame_.add(&invert_movement_, UI::Box::Resizing::kFullSize);
 	box_ingame_.add_space(kPadding);
-
-	// Mousewheel
-	box_mousewheel_.add(&mousewheel_options_, UI::Box::Resizing::kFullSize);
-
 #if 0  // TODO(Nordfriese): Re-add training wheels code after v1.0
 	box_ingame_.add(&training_wheels_box_, UI::Box::Resizing::kFullSize);
 	training_wheels_box_.add(&training_wheels_, UI::Box::Resizing::kFullSize);
@@ -531,9 +523,6 @@ void Options::layout() {
 
 		const int tab_panel_width = get_inner_w() - 2 * kPadding;
 		const int unit_w = tab_panel_width / 3;
-		const int tab_panel_height = tabs_.get_inner_h() - UI::kTabPanelButtonHeight - 2 * kPadding;
-
-		mousewheel_options_.set_size(tab_panel_width, tab_panel_height);
 
 		// Interface
 		language_dropdown_.set_height(tabs_.get_h() - language_dropdown_.get_y() - buth -
@@ -554,6 +543,9 @@ void Options::layout() {
 		sb_autosave_.set_desired_size(tab_panel_width, sb_autosave_.get_h());
 		sb_rolling_autosave_.set_unit_width(250);
 		sb_rolling_autosave_.set_desired_size(tab_panel_width, sb_rolling_autosave_.get_h());
+
+		// Mousewheel options
+		mousewheel_options_.set_width(tab_panel_width);
 	}
 	UI::Window::layout();
 }

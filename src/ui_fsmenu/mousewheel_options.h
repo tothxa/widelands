@@ -89,7 +89,6 @@ struct KeymodAndDirBox : public UI::Box {
 	                uint16_t* keymod,
 	                uint8_t* dir,
 	                bool two_d = false);
-
 	void update_sel();
 
 	// Disable keymod dropdown when neither direction is used
@@ -104,8 +103,7 @@ struct KeymodAndDirBox : public UI::Box {
 		return title_;
 	}
 
-	void set_width(int w, int w1);
-	void reset_width();
+	void set_width(const int w);
 
 private:
 	UI::Textarea title_area_;
@@ -122,9 +120,7 @@ struct InvertDirBox : public UI::Box {
 	InvertDirBox(UI::Panel* parent, const std::string& title, uint8_t* dir);
 
 	void update_sel();
-
-	void set_width(int w, int w1);
-	void reset_width();
+	void set_width(const int w);
 
 private:
 	UI::Textarea title_area_;
@@ -135,8 +131,7 @@ private:
 struct DefaultsBox : public UI::Box {
 	DefaultsBox(MousewheelOptionsDialog* parent, bool* use_2d_defaults);
 
-	void set_width(int w, int w1);
-	void reset_width();
+	void set_width(const int w);
 
 private:
 	UI::Dropdown<bool> use_2d_defaults_dd_;
@@ -153,8 +148,7 @@ public:
 	void update_settings();
 	void reread_settings();
 	void apply_settings();
-
-	void set_size(int nw, int nh) override;
+	void set_width(int w);
 
 private:
 	MousewheelConfigSettings settings_;

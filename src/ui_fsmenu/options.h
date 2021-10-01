@@ -153,7 +153,7 @@ private:
 	UI::Box box_saving_;
 	UI::Box box_newgame_;
 	UI::Box box_ingame_;
-	UI::Box box_mousewheel_;
+	MousewheelOptionsDialog mousewheel_options_;
 
 	// Interface options
 	UI::Dropdown<std::string> language_dropdown_;
@@ -197,9 +197,6 @@ private:
 	UI::Checkbox numpad_diagonalscrolling_;
 	UI::Checkbox edge_scrolling_;
 	UI::Checkbox invert_movement_;
-
-	// Mousewheel options
-	MousewheelOptionsDialog mousewheel_options_;
 
 #if 0  // TODO(Nordfriese): Re-add training wheels code after v1.0
 	UI::Box training_wheels_box_;
