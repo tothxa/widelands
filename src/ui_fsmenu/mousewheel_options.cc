@@ -19,9 +19,10 @@
 
 #include "ui_fsmenu/mousewheel_options.h"
 
+#include <list>
+
 #include <SDL_keycode.h>
 #include <boost/format.hpp>
-#include <list>
 
 #include "base/i18n.h"
 #include "graphic/text_layout.h"
@@ -431,7 +432,8 @@ void MousewheelOptionsDialog::apply_settings() {
 	settings_.apply();
 }
 void MousewheelOptionsDialog::set_width(int w) {
-	if (w > 0 && w != get_w()) {
+	if ((w > kPadding) && (w != get_w())) {
+		w -= kPadding;
 		defaults_box_.set_width(w);
 		zoom_box_.set_width(w);
 		mapscroll_box_.set_width(w);
