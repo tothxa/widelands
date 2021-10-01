@@ -72,8 +72,8 @@ static const std::string sd_names[] = {gettext_noop("Disabled"), gettext_noop("V
 void MousewheelConfigSettings::def2d_update() {
 	enable_map_scroll_ =
 	   (get_mousewheel_option_bool(MousewheelOptionID::kMapScroll, use_2d_defaults_) ?
-	       SD::kAny :
-	       SD::kDisabled);
+	   SD::kAny :
+	   SD::kDisabled);
 	zoom_mod_ = READ_MOD(kMapZoom);
 	map_scroll_mod_ = READ_MOD(kMapScroll);
 	speed_mod_ = READ_MOD(kGameSpeed);
@@ -205,14 +205,7 @@ KeymodAndDirBox::KeymodAndDirBox(UI::Panel* parent,
                                  uint16_t* keymod,
                                  uint8_t* dir,
                                  bool two_d)
-   : UI::Box(parent,
-             UI::PanelStyle::kFsMenu,
-             0,
-             0,
-             UI::Box::Horizontal,
-             0,
-             kButtonSize,
-             kPadding),
+   : UI::Box(parent, UI::PanelStyle::kFsMenu, 0, 0, UI::Box::Horizontal, 0, kButtonSize, kPadding),
      title_area_(this,
                  UI::PanelStyle::kFsMenu,
                  UI::FontStyle::kFsMenuLabel,
@@ -284,21 +277,14 @@ bool KeymodAndDirBox::check_available(uint16_t keymod, uint8_t dir) {
 void KeymodAndDirBox::set_width(int w) {
 	if (w > 3 * kPadding) {
 		const int butt_w = std::min(kDirDdMaxW, w / 3 - kPadding);
-		keymod_dropdown_.set_desired_size(butt_w , kButtonSize);
-		dir_dropdown_.set_desired_size(butt_w , kButtonSize);
+		keymod_dropdown_.set_desired_size(butt_w, kButtonSize);
+		dir_dropdown_.set_desired_size(butt_w, kButtonSize);
 	}
 	set_desired_size(w, kButtonSize);
 }
 
 InvertDirBox::InvertDirBox(UI::Panel* parent, const std::string& title, uint8_t* dir)
-   : UI::Box(parent,
-             UI::PanelStyle::kFsMenu,
-             0,
-             0,
-             UI::Box::Horizontal,
-             0,
-             kButtonSize,
-             kPadding),
+   : UI::Box(parent, UI::PanelStyle::kFsMenu, 0, 0, UI::Box::Horizontal, 0, kButtonSize, kPadding),
      title_area_(this, UI::PanelStyle::kFsMenu, UI::FontStyle::kFsMenuLabel, title),
      dir_dropdown_(this),
      dir_(dir) {
@@ -313,20 +299,13 @@ void InvertDirBox::update_sel() {
 void InvertDirBox::set_width(int w) {
 	if (w > 3 * kPadding) {
 		const int butt_w = std::min(kDirDdMaxW, w / 3 - kPadding);
-		dir_dropdown_.set_desired_size(butt_w , kButtonSize);
+		dir_dropdown_.set_desired_size(butt_w, kButtonSize);
 	}
 	set_desired_size(w, kButtonSize);
 }
 
 DefaultsBox::DefaultsBox(MousewheelOptionsDialog* parent, bool* use_2d_defaults)
-   : UI::Box(parent,
-             UI::PanelStyle::kFsMenu,
-             0,
-             0,
-             UI::Box::Horizontal,
-             0,
-             kButtonSize,
-             kPadding),
+   : UI::Box(parent, UI::PanelStyle::kFsMenu, 0, 0, UI::Box::Horizontal, 0, kButtonSize, kPadding),
      use_2d_defaults_dd_(this,
                          std::string(),
                          0,
@@ -366,8 +345,10 @@ DefaultsBox::DefaultsBox(MousewheelOptionsDialog* parent, bool* use_2d_defaults)
 }
 void DefaultsBox::set_width(int w) {
 	if (w > 10 * kPadding) {
-		use_2d_defaults_dd_.set_desired_size(std::min(kDef2dMaxW, 3 * w / 5 - 2 * kPadding), kButtonSize);
-		reset_button_.set_desired_size(std::min(kResetBtnMaxW, 2 * w / 5 - 2 * kPadding), kButtonSize);
+		use_2d_defaults_dd_.set_desired_size(
+		   std::min(kDef2dMaxW, 3 * w / 5 - 2 * kPadding), kButtonSize);
+		reset_button_.set_desired_size(
+		   std::min(kResetBtnMaxW, 2 * w / 5 - 2 * kPadding), kButtonSize);
 	}
 	set_desired_size(w, kButtonSize);
 }
