@@ -32,6 +32,10 @@ print_help () {
     echo "the name of a different file to use, or if set to a"
     echo "non-existent name, to use the built-in defaults."
     echo " "
+    echo "The defaults file will first be searched for in the current"
+    echo "working directory, then in the source directory where this"
+    echo "script is located."
+    echo " "
     echo "The following options are available:"
     echo " "
     echo "-h or --help          Print this help."
@@ -107,6 +111,9 @@ print_help () {
     echo "-b <dir> or --builddir <dir>"
     echo "                      Build in specified directory."
     echo "                      Default is '<sourcedir>/build'"
+    echo "                      Relative paths will always be applied to the current"
+    echo "                      working directory, even if they come from a defaults"
+    echo "                      file located elsewhere!"
     echo "-e <filename> or --exename <filename>"
     echo "                      Move newly built executable to '<sourcedir>/<filename>'"
     echo "                      Default is to not move if the build directory is changed,"
@@ -133,7 +140,7 @@ print_help () {
 ###############################################################################
 ### Options to control the build.
 BUILDDIR_DEFAULT="build"
-BUILDDIR=$BUILDDIR_DEFAULT
+BUILDDIR=""
 EXENAME=""
 BUILD_WEBSITE="ON"
 BUILD_TRANSLATIONS="ON"
@@ -146,7 +153,8 @@ USE_TSAN="OFF"
 COMPILER="default"
 USE_XDG="ON"
 EXTRA_OPTS=""
-# Option for this script itself
+
+# Options for this script itself
 QUIET=0
 RUN=""
 
@@ -186,14 +194,37 @@ else
 fi
 
 ###############################################################################
-### Parse options
+### Look for local default options
 
 OLD_CLI_ARGS="$@"
+LOCAL_DEFAULTS=""
+
+STARTDIR=$(pwd -P)
+REL_SOURCEDIR=$(dirname "$0")
+if [ "$REL_SOURCEDIR" = "." ]; then
+  SOURCEDIR="$STARTDIR"
+else
+  cd "$REL_SOURCEDIR"
+  SOURCEDIR=$(pwd -P)
+  cd "$STARTDIR"
+fi
+
+if [ ! -f "$COMPILE_DEFAULTS" ]; then
+  # Also try in source directory if directory isn't specified.
+  if [ "$SOURCEDIR" != "$STARTDIR" -a \
+       "${COMPILE_DEFAULTS}" = $(basename "$COMPILE_DEFAULTS") ]; then
+    COMPILE_DEFAULTS="${SOURCEDIR}/$COMPILE_DEFAULTS"
+  fi
+fi
+
 if [ -f "$COMPILE_DEFAULTS" -a -r "$COMPILE_DEFAULTS" ]; then
   read LOCAL_DEFAULTS <"$COMPILE_DEFAULTS"
   # We want $LOCAL_DEFAULTS to be split, so no "" for it
   set -- $LOCAL_DEFAULTS "$@"
 fi
+
+###############################################################################
+### Parse options
 
 while [ $# -gt 0 ]
 do
@@ -383,17 +414,28 @@ if [ "${USE_ASAN}" = "ON" ] && [ "${USE_TSAN}" = "ON" ]; then
   exit 1
 fi
 
+if [ -n $RUN ]; then
+  echo "export CC=$CC"
+  echo "export CXX=$CXX"
+fi
+
 ###############################################################################
 ### Sort out directories
 
-# Check whether the script is run in a widelands main directory
-if ! [ -f src/wlapplication.cc ] ; then
+if ! [ -f "${SOURCEDIR}/src/wlapplication.cc" ] ; then
   echo "  This script must be located in the main directory of the widelands"
   echo "  source code."
   exit 1
 fi
 
-SOURCEDIR=$(pwd -P)
+BUILDDIR_IN_SOURCEDIR=no
+USING_DEFAULT_BUILDDIR=no
+
+if [ -z "$BUILDDIR" ]; then
+  BUILDDIR="${SOURCEDIR}/$BUILDDIR_DEFAULT"
+  BUILDDIR_IN_SOURCEDIR=yes
+  USING_DEFAULT_BUILDDIR=yes
+fi
 
 if [ ! -d "$BUILDDIR" ]; then
   if ! $RUN mkdir -p "$BUILDDIR" ; then
@@ -402,51 +444,74 @@ if [ ! -d "$BUILDDIR" ]; then
   fi
 fi
 
-if ! $RUN cd "$BUILDDIR" ; then
-  echo "Can't enter build directory: $BUILDDIR"
+if [ -z "$RUN" ]; then
+  if cd "$BUILDDIR" ; then
+    BUILDDIR=$(pwd -P)
+  else
+    echo "Can't enter build directory: $BUILDDIR"
+    exit 1
+  fi
+else
+  # Dry run: Can't create it, shouldn't fail if can't enter it.
+  # Still would be nice to report the same as a real run.
+
+  # Default is already absolute
+  if [ $USING_DEFAULT_BUILDDIR != yes ]; then
+    if hash realpath 2>/dev/null ; then
+      # With GNU coreutils, it's easy.
+      BUILDDIR=$(realpath -P "$BUILDDIR")
+    else
+      if [ -d "$BUILDDIR" ] && cd "$BUILDDIR" ; then
+        BUILDDIR=$(pwd -P)
+      else
+        # One more try...
+        BUILD_BASEDIR=$(dirname "$BUILDDIR")
+        if [ -d "$BUILD_BASEDIR" ] && cd "$BUILD_BASEDIR" ; then
+          BUILDDIR=$(pwd -P)/$(basename "$BUILDDIR")
+        else
+          if [ "${BUILDDIR##/}" = "$BUILDDIR" ]; then
+            # Looks like a relative path.
+            BUILDDIR="${STARTDIR}/$BUILDDIR"
+#         else
+            # Looks like an absolute path, so we can leave it alone.
+            # Symlinks will not be resolved though.
+          fi
+        fi
+      fi
+    fi
+  fi
+fi
+
+if [ "$BUILDDIR" = "$SOURCEDIR" ]; then
+  echo "ERROR: Build directory is the same as source directory:"
+  echo "          $BUILDDIR"
   exit 1
 fi
 
-if [ -z "$RUN" ]; then
-  BUILDDIR=$(pwd -P)
-fi
+BUILD_TO_SOURCEDIR="$SOURCEDIR"
+SOURCE_TO_BUILDDIR="${BUILDDIR#${SOURCEDIR}/}"
 
-BUILD_BASEDIR=$(dirname "$BUILDDIR")
+if [ "$SOURCE_TO_BUILDDIR" != "$BUILDDIR" ] ; then
+  BUILDDIR_IN_SOURCEDIR=yes
 
-if [ "$RUN" = "echo" -a "$BUILD_BASEDIR" = "." ]; then
-  BUILD_BASEDIR="$SOURCEDIR"
-fi
-
-$RUN cd "$SOURCEDIR"
-
-if [ "$BUILD_BASEDIR" = "$SOURCEDIR" ] ; then
-  SOURCEDIR=..
-  BUILD_BASEDIR=..
-  BUILDDIR=$(basename "$BUILDDIR")
-fi
-
-builddir_in_sourcedir () {
-  if [ "$BUILD_BASEDIR" = "$SOURCEDIR" ] ; then
-    return 0
+  # Let's see if we can simplify
+  if [ $(dirname "$BUILDDIR") = "$SOURCEDIR" ] ; then
+    BUILD_TO_SOURCEDIR=..
+    if [ "$SOURCE_TO_BUILDDIR" = "$BUILDDIR_DEFAULT" ] ; then
+      USING_DEFAULT_BUILDDIR=yes
+    fi
   else
-    return 1
+    if [ $(dirname $(dirname "$BUILDDIR")) = "$SOURCEDIR" ] ; then
+      BUILD_TO_SOURCEDIR=../..
+    fi
+    # More '../'-s usually wouldn't be better than the full path.
   fi
-}
 
-using_default_builddir () {
-  if ! builddir_in_sourcedir ; then
-    return 1
-  fi
-  if [ "$BUILDDIR" = "$BUILDDIR_DEFAULT" ] ; then
-    return 0
-  else
-    return 1
-  fi
-}
+fi
 
 ###############################################################################
 ### Get command and options to use in update.sh
-COMMANDLINE="$0"
+COMMANDLINE=$(basename "$0")
 CMD_ADD () {
   COMMANDLINE="$COMMANDLINE $@"
 }
@@ -473,7 +538,11 @@ if [ -n "$LOCAL_DEFAULTS" ]; then
 fi
 
 echo "Using build directory:"
-echo "   '$BUILDDIR'"
+if [ "$SOURCEDIR" = "$STARTDIR" ]; then
+  echo "   '$SOURCE_TO_BUILDDIR'"
+else
+  echo "   '$BUILDDIR'"
+fi
 echo " "
 # Adding build directory to update script is not necessary, because the script
 # will only be created for the default.
@@ -602,7 +671,7 @@ fi
 echo " "
 echo "###########################################################"
 echo " "
-echo "Call 'compile.sh -h' or 'compile.sh --help' for help."
+echo "Call '${0} -h' or '${0} --help' for help."
 echo ""
 echo "For instructions on how to adjust options and build with"
 echo "CMake, please take a look at"
@@ -645,24 +714,29 @@ fi  # End of verbose output section
   prepare_directories_and_links () {
     test -d "$BUILDDIR"/locale || $RUN mkdir -p "$BUILDDIR"/locale
 
+    # Don't link if we don't build it
+    if [ $BUILD_TRANSLATIONS = OFF ]; then
+      return 0
+    fi
+
     # Link only if build directory is under source directory
-    if builddir_in_sourcedir ; then
+    if [ $BUILDDIR_IN_SOURCEDIR = yes ]; then
       if [ -e data/locale ] ; then
         # Prefer link to default builddir
-        if using_default_builddir ; then
+        if [ $USING_DEFAULT_BUILDDIR = yes ]; then
           $RUN rm data/locale
         else
           return 0
         fi
       fi
-      $RUN ln -s ../"$BUILDDIR"/locale data/locale
+      $RUN ln -s ../"$SOURCE_TO_BUILDDIR"/locale data/locale
     fi
     return 0
   }
 
 ### Function to actually compile Widelands
   compile_widelands () {
-    $RUN cmake $GENERATOR  "$SOURCEDIR"  $EXTRA_OPTS           \
+    $RUN cmake $GENERATOR  "$BUILD_TO_SOURCEDIR"  $EXTRA_OPTS  \
                -DCMAKE_BUILD_TYPE=$BUILD_TYPE                  \
                -DOPTION_BUILD_WEBSITE_TOOLS=$BUILD_WEBSITE     \
                -DOPTION_BUILD_TRANSLATIONS=$BUILD_TRANSLATIONS \
@@ -681,7 +755,7 @@ fi  # End of verbose output section
   move_built_files () {
     # Only replace files for the default build, except for main executable,
     # which is also replaced in case of -e or --exename
-    if ! using_default_builddir ; then
+    if [ $USING_DEFAULT_BUILDDIR != yes ]; then
       if [ -n "$EXENAME" ]; then
         # This is called in $BUILDDIR
         $RUN rm -f "${SOURCEDIR}/$EXENAME" || true
@@ -697,17 +771,17 @@ fi  # End of verbose output section
 
     # This is called in $BUILDDIR, but only if it is ${SOURCEDIR}/$BUILDDIR_DEFAULT,
     # so .. is $SOURCEDIR
-    $RUN rm  -f ../VERSION || true
-    $RUN rm  -f ../"$EXENAME" || true
-
-    $RUN rm  -f ../wl_create_spritesheet || true
-    $RUN rm  -f ../wl_map_object_info || true
-    $RUN rm  -f ../wl_map_info || true
+    $RUN rm -f ../VERSION || true
+    $RUN rm -f ../"$EXENAME" || true
 
     $RUN cp VERSION ../VERSION
     $RUN mv src/widelands ../"$EXENAME"
 
     if [ $BUILD_WEBSITE = "ON" ]; then
+      $RUN rm -f ../wl_create_spritesheet || true
+      $RUN rm -f ../wl_map_object_info || true
+      $RUN rm -f ../wl_map_info || true
+
       $RUN mv ../build/src/website/wl_create_spritesheet ../wl_create_spritesheet
       $RUN mv ../build/src/website/wl_map_object_info ../wl_map_object_info
       $RUN mv ../build/src/website/wl_map_info ../wl_map_info
@@ -717,13 +791,14 @@ fi  # End of verbose output section
 
 ### Function to create update script
   create_update_script () {
-    # Only create for default build
-    if ! using_default_builddir ; then
+    # Only create for default build. (Custom build directories are aimed at
+    # developers while the update script is aimed at end users.)
+    if [ $USING_DEFAULT_BUILDDIR != yes ]; then
       return 2
     fi
     # First check if this is a git checkout at all - only in that case,
     # creation of a script makes any sense.
-    if [ -n "$(git status -s)" ]; then
+    if [ -n "$(git status -s 2>&1)" ]; then
       echo "You don't appear to be using Git, or your working tree is not clean."
       echo "An update script will not be created."
       if [ $QUIET -eq 0 ]; then
@@ -733,7 +808,8 @@ fi  # End of verbose output section
     fi
     # This is called in $SOURCEDIR
       $RUN rm -f update.sh || true
-      $RUN cat > update.sh << END_SCRIPT
+      if [ -z "$RUN" ]; then
+        cat > update.sh << END_SCRIPT
 #!/bin/sh
 echo "################################################"
 echo "#            Widelands update script.          #"
@@ -741,6 +817,9 @@ echo "################################################"
 echo " "
 
 set -e
+
+cd \$(dirname "\$0")
+
 if ! [ -f src/wlapplication.cc ] ; then
   echo "  This script must be run from the main directory of the widelands"
   echo "  source code."
@@ -751,7 +830,7 @@ fi
 git checkout
 git pull https://github.com/widelands/widelands.git master
 
-$COMMANDLINE
+./$COMMANDLINE
 
 echo " "
 echo "################################################"
@@ -759,6 +838,10 @@ echo "#      Widelands was updated successfully.     #"
 echo "# You should be able to run it via ./widelands #"
 echo "################################################"
 END_SCRIPT
+
+      else  # dry run
+        echo 'cat > update.sh'
+      fi
 
       $RUN chmod +x ./update.sh
       if [ $QUIET -eq 0 ]; then
@@ -776,6 +859,7 @@ END_SCRIPT
 ###############################################################################
 
 set -e
+$RUN cd "$SOURCEDIR"
 set_buildtool
 prepare_directories_and_links
 
@@ -807,7 +891,7 @@ echo "###########################################################"
 echo "# Congratulations! Widelands has been built successfully  #"
 echo "# with the following settings:                            #"
 echo "#                                                         #"
-if ! using_default_builddir ; then
+if [ $USING_DEFAULT_BUILDDIR != yes ]; then
   echo "# - Build directory:                                      #"
   printf "#   %-53s #\n" "'$BUILDDIR'"
 fi
@@ -839,19 +923,19 @@ else
 fi
 echo "#                                                         #"
 if [ -n "$FILES_MOVED" ] ; then
-  echo "# You should now be able to run Widelands via             #"
-  printf "# %-55s #\n" "typing './$EXENAME' + ENTER in your terminal"
+  echo "# You should now be able to run Widelands via typing      #"
+  printf "#   %-53s #\n" "'${REL_SOURCEDIR}/$EXENAME' + ENTER"
+  echo "# in your terminal.                                       #"
 else
   echo "# The newly built executable was not moved to the source  #"
   echo "# directory because of a non-standard build directory.    #"
   echo "# It can be found at:                                     #"
   printf "#   %-53s #\n" "'${BUILDDIR}/src/widelands'"
-  echo "#                                                         #"
   echo "# Don't forget to move it to the source directory or use  #"
   echo "# the --datadir option. You may also need --localedir and #"
   echo "# --skip_check_datadir_version                            #"
 fi
-if [ $BUILD_WEBSITE = "ON" ] && ! using_default_builddir ; then
+if [ $BUILD_WEBSITE = "ON" ] && [ $USING_DEFAULT_BUILDDIR != yes ]; then
   echo "#                                                         #"
   echo "# The newly built website-related executables can be      #"
   echo "# found in:                                               #"
