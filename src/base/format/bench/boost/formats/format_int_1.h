@@ -1,0 +1,142 @@
+/*
+ * Copyright (C) 2021 by the Widelands Development Team
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *
+ */
+
+#include <boost/format.hpp>
+#include <vector>
+
+static const std::vector<boost::format> formats_int = {
+boost::format("%2d: DNA initialization... \n"),
+boost::format("AI %d: player has no statistics yet\n"),
+boost::format(" AI %d: Players statistics are still empty\n"),
+boost::format("Animation has %d as its representative frame, but the frame indices "),
+boost::format("Archive the selected %d message"),
+boost::format("Archive the selected %d messages"),
+boost::format("Attempt to set road-building overlay for invalid direction %i"),
+boost::format("Attempt to set road going in invalid direction %i"),
+boost::format("Autosave: Rolling savefiles (count): %d\n"),
+boost::format("Building, index: %d, needs no workers!\n"),
+boost::format("[Client]: enqueue playercommand at time %i\n"),
+boost::format("[Client]: Playercommand is not for current player? %i\n"),
+boost::format("[Client]: sending timestamp: %i"),
+boost::format("Creating player %d…"),
+boost::format("%d, "),
+boost::format("%d field"),
+boost::format("%d fields"),
+boost::format("%d file"),
+boost::format("%d files"),
+boost::format("%d game could not be deleted."),
+boost::format("%d games could not be deleted."),
+boost::format("%d minute"),
+boost::format("%d minutes"),
+boost::format("Do you really want to delete these %d games?"),
+boost::format("Do you really want to delete these %d replays?"),
+boost::format("Do you really want to delete this %d game?"),
+boost::format("Do you really want to delete this %d replay?"),
+boost::format("%d piece of gold."),
+boost::format("%d pieces of gold."),
+boost::format("%d pixel"),
+boost::format("%d pixels"),
+boost::format("%d replay could not be deleted."),
+boost::format("%d replays could not be deleted."),
+boost::format("%d second"),
+boost::format("%d seconds"),
+boost::format("Fastplace #%i"),
+boost::format("   filled           %7d"),
+boost::format("FindNodeImmovableSize: bad size = %i"),
+boost::format("Font renderer: Specified image width of %d exceeds the overall "),
+boost::format("Font renderer: Specified width of %d exceeds the overall available "),
+boost::format("Garrisoned soldiers heal %d health point per second."),
+boost::format("Garrisoned soldiers heal %d health points per second."),
+boost::format("glewInit returns %i: Broken OpenGL installation."),
+boost::format("Go To Landmark #%d"),
+boost::format("[Host]: comparing syncreports for time %i"),
+boost::format("[Host]: %i clients hung. Entering wait mode"),
+boost::format("[Host]: Requesting sync reports for time %i"),
+boost::format("%i artifact"),
+boost::format("%i artifacts"),
+boost::format("%i: building waterway aborted, missing end flag\n"),
+boost::format("%i: building waterway aborted, missing start flag\n"),
+boost::format("%i minute"),
+boost::format("%i minutes"),
+boost::format("   index            %7d"),
+boost::format("   index_           %7d"),
+boost::format("InternetGaming: Server time offset is %d second(s)."),
+boost::format("Invalid MenuTarget %d"),
+boost::format("%i point"),
+boost::format("%i points"),
+boost::format("%i tree"),
+boost::format("%i trees"),
+boost::format("Keep it for %i more minutes to win the game."),
+boost::format("Keep it for %i more minute to win the game."),
+boost::format("[LAN] Closing an IPv%d socket."),
+boost::format("[LAN] Error: trying to send to an IPv%d address but socket is not open.\n"),
+boost::format("[LAN] Error when checking whether data is available on IPv%d socket, closing it: "),
+boost::format("lastserial: %i\n"),
+boost::format("%li second"),
+boost::format("%li seconds"),
+boost::format("   max_fill         %7d"),
+boost::format("   max_size         %7d"),
+boost::format("    ... member of team %d\n"),
+boost::format("   missing          %7d"),
+boost::format("[NetHost] Closing a listening IPv%d socket."),
+boost::format("[NetHostProxy] Handshaking error (2): Received command code %i from relay server "),
+boost::format("No fontset defined for FontSets::Selector enum member #%d\n"),
+boost::format("No such building, index: %d\n"),
+boost::format("PlayerCommand::deserialize(): Encountered invalid command id: %d"),
+boost::format("Player End status for player %d already reported"),
+boost::format("Players:       %d\n"),
+boost::format("Queried road going in invalid direction %i"),
+boost::format("Received command code %i from relay server, do not know what to do with it\n"),
+boost::format("Requested unknown animation with id: %i"),
+boost::format("Restore the selected %d message"),
+boost::format("Restore the selected %d messages"),
+boost::format("Server time offset is %d second."),
+boost::format("Server time offset is %d seconds."),
+boost::format("Set Landmark #%d"),
+boost::format("Set Toolsize to %d"),
+boost::format("Ship %d"),
+boost::format("Sorry, cannot find building with id %d"),
+boost::format("SoundHandler: Sound effect %d does not exist!\n"),
+boost::format("SoundHandler: Sound effect %d exists but contains no files!\n"),
+boost::format("Status for Team %d"),
+boost::format("Team %d"),
+boost::format("Team %i"),
+boost::format("Team Total: %i point"),
+boost::format("Team Total: %i points"),
+boost::format("There are %i unloaded objects. This is a bug, please "),
+boost::format("Total: %i point"),
+boost::format("Total: %i points"),
+boost::format("Unknown given_item.program_id: %d"),
+boost::format("Unknown item.program_id: %d"),
+boost::format("Unknown MapObjectType %d."),
+boost::format("We still need to discover %d piece of our shrine."),
+boost::format("We still need to discover %d pieces of our shrine."),
+boost::format("You’ve still got %i minutes to prevent a victory."),
+boost::format("You’ve still got %i minute to prevent a victory."),
+boost::format("%i %%"),
+boost::format("%i%%"),
+boost::format("%i%% built"),
+boost::format("Increased by %d%% for each level."),
+boost::format("Starts at %d%%."),
+boost::format(" %02x"),
+boost::format("Unknown texture %x. Defaulting to water.\n")
+};
+
+static const uint kNFmtInt = formats_int.size();
+

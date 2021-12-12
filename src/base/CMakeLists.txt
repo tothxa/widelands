@@ -1,4 +1,5 @@
 add_subdirectory(test)
+add_subdirectory(format/bench)
 
 wl_library(base
   SRCS

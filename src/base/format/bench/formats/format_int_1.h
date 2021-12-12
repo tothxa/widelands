@@ -1,0 +1,142 @@
+/*
+ * Copyright (C) 2021 by the Widelands Development Team
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *
+ */
+
+#include <string>
+#include <vector>
+
+static const std::vector<std::string> formats_int = {
+"%2d: DNA initialization... \n",
+"AI %d: player has no statistics yet\n",
+" AI %d: Players statistics are still empty\n",
+"Animation has %d as its representative frame, but the frame indices ",
+"Archive the selected %d message",
+"Archive the selected %d messages",
+"Attempt to set road-building overlay for invalid direction %i",
+"Attempt to set road going in invalid direction %i",
+"Autosave: Rolling savefiles (count): %d\n",
+"Building, index: %d, needs no workers!\n",
+"[Client]: enqueue playercommand at time %i\n",
+"[Client]: Playercommand is not for current player? %i\n",
+"[Client]: sending timestamp: %i",
+"Creating player %d…",
+"%d, ",
+"%d field",
+"%d fields",
+"%d file",
+"%d files",
+"%d game could not be deleted.",
+"%d games could not be deleted.",
+"%d minute",
+"%d minutes",
+"Do you really want to delete these %d games?",
+"Do you really want to delete these %d replays?",
+"Do you really want to delete this %d game?",
+"Do you really want to delete this %d replay?",
+"%d piece of gold.",
+"%d pieces of gold.",
+"%d pixel",
+"%d pixels",
+"%d replay could not be deleted.",
+"%d replays could not be deleted.",
+"%d second",
+"%d seconds",
+"Fastplace #%i",
+"   filled           %7d",
+"FindNodeImmovableSize: bad size = %i",
+"Font renderer: Specified image width of %d exceeds the overall ",
+"Font renderer: Specified width of %d exceeds the overall available ",
+"Garrisoned soldiers heal %d health point per second.",
+"Garrisoned soldiers heal %d health points per second.",
+"glewInit returns %i: Broken OpenGL installation.",
+"Go To Landmark #%d",
+"[Host]: comparing syncreports for time %i",
+"[Host]: %i clients hung. Entering wait mode",
+"[Host]: Requesting sync reports for time %i",
+"%i artifact",
+"%i artifacts",
+"%i: building waterway aborted, missing end flag\n",
+"%i: building waterway aborted, missing start flag\n",
+"%i minute",
+"%i minutes",
+"   index            %7d",
+"   index_           %7d",
+"InternetGaming: Server time offset is %d second(s).",
+"Invalid MenuTarget %d",
+"%i point",
+"%i points",
+"%i tree",
+"%i trees",
+"Keep it for %i more minutes to win the game.",
+"Keep it for %i more minute to win the game.",
+"[LAN] Closing an IPv%d socket.",
+"[LAN] Error: trying to send to an IPv%d address but socket is not open.\n",
+"[LAN] Error when checking whether data is available on IPv%d socket, closing it: ",
+"lastserial: %i\n",
+"%li second",
+"%li seconds",
+"   max_fill         %7d",
+"   max_size         %7d",
+"    ... member of team %d\n",
+"   missing          %7d",
+"[NetHost] Closing a listening IPv%d socket.",
+"[NetHostProxy] Handshaking error (2): Received command code %i from relay server ",
+"No fontset defined for FontSets::Selector enum member #%d\n",
+"No such building, index: %d\n",
+"PlayerCommand::deserialize(): Encountered invalid command id: %d",
+"Player End status for player %d already reported",
+"Players:       %d\n",
+"Queried road going in invalid direction %i",
+"Received command code %i from relay server, do not know what to do with it\n",
+"Requested unknown animation with id: %i",
+"Restore the selected %d message",
+"Restore the selected %d messages",
+"Server time offset is %d second.",
+"Server time offset is %d seconds.",
+"Set Landmark #%d",
+"Set Toolsize to %d",
+"Ship %d",
+"Sorry, cannot find building with id %d",
+"SoundHandler: Sound effect %d does not exist!\n",
+"SoundHandler: Sound effect %d exists but contains no files!\n",
+"Status for Team %d",
+"Team %d",
+"Team %i",
+"Team Total: %i point",
+"Team Total: %i points",
+"There are %i unloaded objects. This is a bug, please ",
+"Total: %i point",
+"Total: %i points",
+"Unknown given_item.program_id: %d",
+"Unknown item.program_id: %d",
+"Unknown MapObjectType %d.",
+"We still need to discover %d piece of our shrine.",
+"We still need to discover %d pieces of our shrine.",
+"You’ve still got %i minutes to prevent a victory.",
+"You’ve still got %i minute to prevent a victory.",
+"%i %%",
+"%i%%",
+"%i%% built",
+"Increased by %d%% for each level.",
+"Starts at %d%%.",
+" %02x",
+"Unknown texture %x. Defaulting to water.\n"
+};
+
+static const uint kNFmtInt = formats_int.size();
+

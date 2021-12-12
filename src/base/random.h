@@ -34,6 +34,10 @@ struct RNG {
 		seed(s);
 	}
 
+	void reset() {
+		state0 = 0;
+		state1 = 0;
+	}
 	void seed(uint32_t);
 
 	uint32_t rand();

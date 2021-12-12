@@ -1,0 +1,29 @@
+wl_test(format_benchmark
+  SRCS
+    const_strings.h
+    formats/format_int_1.h
+    formats/format_int_2.h
+    formats/format_int_str.h
+    formats/format_other.h
+    formats/format_str_1.h
+    formats/format_str_2.h
+    formats/format_str_3.h
+    formats/format_uint_1.h
+    formats/format_uint_2.h
+    formats/format_uint_str.h
+    formats/format_wild_1.h
+    formats/format_wild_2.h
+    format_benchmark.h
+    format_functions.h
+    func_format_other.h
+    timer.h
+    mem_usage.h
+    fill_cache.cc
+    seq_all.cc
+    random_all.cc
+    format_benchmark.cc
+  DEPENDS
+    base
+    base_random
+)
+add_subdirectory(boost)
