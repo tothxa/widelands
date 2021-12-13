@@ -36,39 +36,7 @@ struct StringNode : FormatNode {
 		}
 	}
 
-	char* append(char* out, const ArgType t, const Argument arg_u, bool) const override {
-		if (t != ArgType::kString) {
-			throw wexception("Wrong argument type: expected string, found %s", to_string(t).c_str());
-		}
-		const char* arg = arg_u.string_val;
-
-		if (min_width_ == 0 || flags_ & kLeftAlign) {
-			// The easy case: Just start writing.
-			size_t written = 0;
-			for (const char* a = arg; *a && written < precision_; ++a, ++out, ++written) {
-				*out = *a;
-			}
-			if (written < min_width_) {
-				written = min_width_ - written;
-				for (; written; ++out, --written) {
-					*out = ' ';
-				}
-			}
-			return out;
-		}
-
-		// The more complex case: We want a right-aligned string with a given minimum width.
-		const size_t arg_len = std::min<size_t>(precision_, strlen(arg));
-		if (arg_len < min_width_) {
-			for (size_t i = min_width_ - arg_len; i; ++out, --i) {
-				*out = ' ';
-			}
-		}
-		for (size_t l = arg_len; l; --l, ++out, ++arg) {
-			*out = *arg;
-		}
-		return out;
-	}
+	char* append(char* out, const ArgType t, const Argument arg_u, bool) const override;
 
 	static const StringNode node_;
 };

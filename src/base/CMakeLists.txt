@@ -6,8 +6,10 @@ wl_library(base
     format/abstract_node.h
     format/boolean_node.h
     format/common_nodes.h
+    format/float_node.cc
     format/float_node.h
     format/number_node.h
+    format/string_node.cc
     format/string_node.h
     format/tree.cc
     format/tree.h

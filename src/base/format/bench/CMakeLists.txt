@@ -1,4 +1,4 @@
-wl_test(format_benchmark
+wl_test(format_benchmark_notinline
   SRCS
     const_strings.h
     formats/format_int_1.h
