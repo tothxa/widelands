@@ -1,3 +1,4 @@
+add_subdirectory(format/bench)
 add_subdirectory(test)
 
 wl_library(base_macros
