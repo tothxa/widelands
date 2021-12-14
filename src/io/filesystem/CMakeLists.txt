@@ -7,6 +7,7 @@ wl_library(io_filesystem
     filesystem.cc
     filesystem.h
     filesystem_exceptions.h
+    illegal_filename_characters.h
     layered_filesystem.cc
     layered_filesystem.h
     zip_exceptions.h
@@ -16,7 +17,15 @@ wl_library(io_filesystem
     base
     base_exceptions
     base_macros
-    graphic_text_layout
     io_stream
     third_party_minizip
+)
+
+wl_library(io_filesystem_illegal_filename_tooltip
+  SRCS
+    illegal_filename_tooltip.h
+    illegal_filename_tooltip.cc
+  DEPENDS
+    io_filesystem
+    graphic_text_layout
 )
