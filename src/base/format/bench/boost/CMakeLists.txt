@@ -19,6 +19,6 @@ wl_test(boost_format_benchmark
     random_all.cc
     format_benchmark.cc
   DEPENDS
-    base
+    base_macros
     base_random
 )

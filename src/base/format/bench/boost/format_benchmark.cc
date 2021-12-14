@@ -19,12 +19,11 @@
 
 #include "base/format/bench/boost/format_benchmark.h"
 
+#include <boost/format.hpp>
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
 #include <string>
-
-#include "base/string.h"
 
 #include "base/format/bench/boost/format_functions.h"
 #include "base/format/bench/boost/func_format_other.h"
@@ -39,8 +38,8 @@ int main(int, char**) {
 	uint sum = 0;
 	uint32_t check_random;
 
-	std::string time_report_fmt = ("done in: %7d " + timer_unit + "\n").insert(0, 50, ' ');
-	std::string state_report_fmt = "%10d characters written. Random state: %08x\n";
+	boost::format time_report_fmt(("done in: %7d " + timer_unit + "\n").insert(0, 50, ' '));
+	boost::format state_report_fmt("%10d characters written. Random state: %08x\n");
 
 	memory_report();
 	t_total.start();
@@ -54,11 +53,11 @@ int main(int, char**) {
 	}
 	t_unit.stop();
 	check_random = rng.rand();
-	std::cout << bformat(time_report_fmt, t_unit.elapsed());
-	std::cout << bformat(state_report_fmt, sum, check_random);
+	std::cout << (time_report_fmt % t_unit.elapsed()).str();
+	std::cout << (state_report_fmt % sum % check_random).str();
 	memory_report();
 
-	std::cout << bformat("Using each format sequentially %u times...\n", kRounds / 1000);
+	std::cout << (boost::format("Using each format sequentially %u times...\n") % (kRounds / 1000)).str();
 	sum = 0;
 	t_unit.start();
 	for (i = kRounds / 1000; i > 0; --i) {
@@ -66,11 +65,11 @@ int main(int, char**) {
 	}
 	t_unit.stop();
 	check_random = rng.rand();
-	std::cout << bformat(time_report_fmt, t_unit.elapsed());
-	std::cout << bformat(state_report_fmt, sum, check_random);
+	std::cout << (boost::format(time_report_fmt) % t_unit.elapsed()).str();
+	std::cout << (boost::format(state_report_fmt) % sum % check_random).str();
 	memory_report();
 
-	std::cout << bformat("Using '%%c' formats %u times...\n", kRounds);
+	std::cout << (boost::format("Using '%%c' formats %u times...\n") % kRounds).str();
 	sum = 0;
 	t_unit.start();
 	for (i = 0; i < kRounds; ++i) {
@@ -78,11 +77,11 @@ int main(int, char**) {
 	}
 	t_unit.stop();
 	check_random = rng.rand();
-	std::cout << bformat(time_report_fmt, t_unit.elapsed());
-	std::cout << bformat(state_report_fmt, sum, check_random);
+	std::cout << (boost::format(time_report_fmt) % t_unit.elapsed()).str();
+	std::cout << (boost::format(state_report_fmt) % sum % check_random).str();
 	memory_report();
 
-	std::cout << bformat("Using '%%f' formats %u times...\n", kRounds);
+	std::cout << (boost::format("Using '%%f' formats %u times...\n") % kRounds).str();
 	sum = 0;
 	t_unit.start();
 	for (i = 0; i < kRounds; ++i) {
@@ -90,11 +89,11 @@ int main(int, char**) {
 	}
 	t_unit.stop();
 	check_random = rng.rand();
-	std::cout << bformat(time_report_fmt, t_unit.elapsed());
-	std::cout << bformat(state_report_fmt, sum, check_random);
+	std::cout << (boost::format(time_report_fmt) % t_unit.elapsed()).str();
+	std::cout << (boost::format(state_report_fmt) % sum % check_random).str();
 	memory_report();
 
-	std::cout << bformat("Using '%%i' formats %u times...\n", kRounds);
+	std::cout << (boost::format("Using '%%i' formats %u times...\n") % kRounds).str();
 	sum = 0;
 	t_unit.start();
 	for (i = 0; i < kRounds; ++i) {
@@ -102,11 +101,11 @@ int main(int, char**) {
 	}
 	t_unit.stop();
 	check_random = rng.rand();
-	std::cout << bformat(time_report_fmt, t_unit.elapsed());
-	std::cout << bformat(state_report_fmt, sum, check_random);
+	std::cout << (boost::format(time_report_fmt) % t_unit.elapsed()).str();
+	std::cout << (boost::format(state_report_fmt) % sum % check_random).str();
 	memory_report();
 
-	std::cout << bformat("Using '%%p' formats %u times...\n", kRounds);
+	std::cout << (boost::format("Using '%%p' formats %u times...\n") % kRounds).str();
 	sum = 0;
 	t_unit.start();
 	for (i = 0; i < kRounds; ++i) {
@@ -114,11 +113,11 @@ int main(int, char**) {
 	}
 	t_unit.stop();
 	check_random = rng.rand();
-	std::cout << bformat(time_report_fmt, t_unit.elapsed());
-	std::cout << bformat(state_report_fmt, sum, check_random);
+	std::cout << (boost::format(time_report_fmt) % t_unit.elapsed()).str();
+	std::cout << (boost::format(state_report_fmt) % sum % check_random).str();
 	memory_report();
 
-	std::cout << bformat("Using '%%s' formats %u times...\n", kRounds);
+	std::cout << (boost::format("Using '%%s' formats %u times...\n") % kRounds).str();
 	sum = 0;
 	t_unit.start();
 	for (i = 0; i < kRounds; ++i) {
@@ -126,11 +125,11 @@ int main(int, char**) {
 	}
 	t_unit.stop();
 	check_random = rng.rand();
-	std::cout << bformat(time_report_fmt, t_unit.elapsed());
-	std::cout << bformat(state_report_fmt, sum, check_random);
+	std::cout << (boost::format(time_report_fmt) % t_unit.elapsed()).str();
+	std::cout << (boost::format(state_report_fmt) % sum % check_random).str();
 	memory_report();
 
-	std::cout << bformat("Using '%%u' formats %u times...\n", kRounds);
+	std::cout << (boost::format("Using '%%u' formats %u times...\n") % kRounds).str();
 	sum = 0;
 	t_unit.start();
 	for (i = 0; i < kRounds; ++i) {
@@ -138,11 +137,11 @@ int main(int, char**) {
 	}
 	t_unit.stop();
 	check_random = rng.rand();
-	std::cout << bformat(time_report_fmt, t_unit.elapsed());
-	std::cout << bformat(state_report_fmt, sum, check_random);
+	std::cout << (boost::format(time_report_fmt) % t_unit.elapsed()).str();
+	std::cout << (boost::format(state_report_fmt) % sum % check_random).str();
 	memory_report();
 
-	std::cout << bformat("Using '%%1%%' formats %u times...\n", kRounds);
+	std::cout << (boost::format("Using '%%1%%' formats %u times...\n") % kRounds).str();
 	sum = 0;
 	t_unit.start();
 	for (i = 0; i < kRounds; ++i) {
@@ -150,13 +149,13 @@ int main(int, char**) {
 	}
 	t_unit.stop();
 	check_random = rng.rand();
-	std::cout << bformat(time_report_fmt, t_unit.elapsed());
-	std::cout << bformat(state_report_fmt, sum, check_random);
+	std::cout << (boost::format(time_report_fmt) % t_unit.elapsed()).str();
+	std::cout << (boost::format(state_report_fmt) % sum % check_random).str();
 	memory_report();
 
 	t_total.stop();
 	std::cout << "Total:\n";
-	std::cout << bformat(time_report_fmt, t_total.elapsed());
+	std::cout << (boost::format(time_report_fmt) % t_total.elapsed()).str();
 
 	return 0;
 }
