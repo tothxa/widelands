@@ -40,7 +40,7 @@
 
 static constexpr uint kRounds = 100000;
 
-static RNG rng;
+extern RNG rng;
 
 static constexpr uint kRndIntMax = 2047;
 static constexpr uint kRndFloatMax = 99999;
