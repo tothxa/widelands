@@ -31,6 +31,8 @@
 #include "base/format/bench/timer.h"
 #include "base/format/bench/mem_usage.h"
 
+RNG rng;
+
 inline void print_usage() {
 	std::cout << "Use maximum one of [random|seq|init] as argument. Default is 'random'.\n";
 }
