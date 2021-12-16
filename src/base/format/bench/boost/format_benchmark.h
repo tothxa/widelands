@@ -71,10 +71,6 @@ inline std::string rnd_str() {
 	return const_strings.at(rnd_uint(kNStr));
 }
 
-inline boost::format rnd_fmt(std::vector<boost::format>& formats) {
-	return formats.at(rnd_uint(formats.size()));
-}
-
 std::string format_random();
 uint seq_all();
 

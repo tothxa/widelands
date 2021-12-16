@@ -70,10 +70,6 @@ inline std::string rnd_str() {
 	return const_strings.at(rnd_uint(kNStr));
 }
 
-inline std::string rnd_fmt(std::vector<std::string>& formats) {
-	return formats.at(rnd_uint(formats.size()));
-}
-
 std::string format_random();
 void fill_cache();
 uint seq_all();

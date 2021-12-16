@@ -37,4 +37,16 @@ wl_test(format_debug
   DEPENDS
     format_benchmark_lib
 )
+wl_test(compare_full
+  SRCS
+    compare_full.cc
+  DEPENDS
+    format_benchmark_lib
+)
+wl_test(compare_simple
+  SRCS
+    compare_simple.cc
+  DEPENDS
+    format_benchmark_lib
+)
 add_subdirectory(boost)
