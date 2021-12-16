@@ -1,4 +1,4 @@
-wl_test(boost_format_benchmark
+wl_library(boost_format_benchmark_lib
   SRCS
     formats/format_int_1.h
     formats/format_int_2.h
@@ -17,8 +17,19 @@ wl_test(boost_format_benchmark
     func_format_other.h
     seq_all.cc
     random_all.cc
-    format_benchmark.cc
   DEPENDS
     base_macros
     base_random
+)
+wl_test(boost_format_benchmark
+  SRCS
+    format_benchmark.cc
+  DEPENDS
+    boost_format_benchmark_lib
+)
+wl_test(boost_format_debug
+  SRCS
+    format_debug.cc
+  DEPENDS
+    boost_format_benchmark_lib
 )

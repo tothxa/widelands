@@ -1,4 +1,4 @@
-wl_test(format_benchmark
+wl_library(format_benchmark_lib
   SRCS
     const_strings.h
     formats/format_int_1.h
@@ -21,9 +21,20 @@ wl_test(format_benchmark
     fill_cache.cc
     seq_all.cc
     random_all.cc
-    format_benchmark.cc
   DEPENDS
     base
     base_random
+)
+wl_test(format_benchmark
+  SRCS
+    format_benchmark.cc
+  DEPENDS
+    format_benchmark_lib
+)
+wl_test(format_debug
+  SRCS
+    format_debug.cc
+  DEPENDS
+    format_benchmark_lib
 )
 add_subdirectory(boost)
