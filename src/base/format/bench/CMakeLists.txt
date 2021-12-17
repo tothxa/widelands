@@ -49,4 +49,10 @@ wl_test(compare_simple
   DEPENDS
     format_benchmark_lib
 )
+wl_test(compare_char
+  SRCS
+    compare_char.cc
+  DEPENDS
+    format_benchmark_lib
+)
 add_subdirectory(boost)
