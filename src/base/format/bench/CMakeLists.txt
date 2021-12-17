@@ -26,4 +26,3 @@ wl_test(format_benchmark_notinline
     base
     base_random
 )
-add_subdirectory(boost)
