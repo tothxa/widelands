@@ -31,6 +31,8 @@
 #include "base/format/bench/timer.h"
 #include "base/format/bench/mem_usage.h"
 
+RNG rng;
+
 int main(int, char**) {
 	Timer t_total;
 	Timer t_unit;

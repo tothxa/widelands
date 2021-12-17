@@ -40,7 +40,7 @@
 
 static constexpr uint kRounds = 100000;
 
-static RNG rng;
+extern RNG rng;
 
 static constexpr uint kRndIntMax = 2047;
 static constexpr uint kRndFloatMax = 99999;
@@ -68,10 +68,6 @@ inline uint32_t rnd_ptr() {
 
 inline std::string rnd_str() {
 	return const_strings.at(rnd_uint(kNStr));
-}
-
-inline std::string rnd_fmt(std::vector<std::string>& formats) {
-	return formats.at(rnd_uint(formats.size()));
 }
 
 std::string format_random();
