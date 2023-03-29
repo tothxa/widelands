@@ -63,8 +63,7 @@ Widelands::Game& WatchWindow::game() const {
 }
 
 WatchWindow::WatchWindowMapView::WatchWindowMapView(WatchWindow* parent, const Widelands::Map& map)
-   : MapView(parent, map, 0, 0, 200, 166),
-     parent_window_(parent) {
+   : MapView(parent, map, 0, 0, 200, 166), parent_window_(parent) {
 }
 
 WatchWindow::WatchWindow(InteractiveGameBase& parent,
@@ -346,8 +345,7 @@ bool WatchWindow::WatchWindowMapView::handle_mousepress(uint8_t btn, int32_t x, 
 	}
 	return MapView::handle_mousepress(btn, x, y);
 }
-bool WatchWindow::WatchWindowMapView::handle_mouserelease(
-   const uint8_t btn, int32_t x, int32_t y) {
+bool WatchWindow::WatchWindowMapView::handle_mouserelease(const uint8_t btn, int32_t x, int32_t y) {
 	if (btn == SDL_BUTTON_RIGHT && is_dragging()) {
 		if (!view_moved_) {
 			constexpr uint32_t kMaxClickDuration = 1000;
