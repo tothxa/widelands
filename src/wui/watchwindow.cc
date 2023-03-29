@@ -18,8 +18,9 @@
 
 #include "wui/watchwindow.h"
 
-#include <SDL_timer.h>
 #include <set>
+
+#include <SDL_timer.h>
 
 #include "base/i18n.h"
 #include "base/macros.h"
