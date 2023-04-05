@@ -348,7 +348,7 @@ bool WatchWindow::WatchWindowMapView::handle_mousepress(uint8_t btn, int32_t x, 
 bool WatchWindow::WatchWindowMapView::handle_mouserelease(const uint8_t btn, int32_t x, int32_t y) {
 	if (btn == SDL_BUTTON_RIGHT && is_dragging()) {
 		if (!view_moved_) {
-			constexpr uint32_t kMaxClickDuration = 1000;
+			constexpr uint32_t kMaxClickDuration = 500;
 			const uint32_t release_time = SDL_GetTicks();
 			if (release_time > dragging_start_time_ &&
 			    release_time - dragging_start_time_ < kMaxClickDuration &&
