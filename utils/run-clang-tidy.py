@@ -131,8 +131,10 @@ def make_absolute(f, directory):
     return os.path.normpath(os.path.join(directory, f))
 
 
+cache = None
+
 class Cache:
-    """Implements the cache
+    """Implements the cache.
 
     Acknowledgements:
 
@@ -358,9 +360,12 @@ def pp_hash(file, command, dir):
     return hashlib.sha256(output).hexdigest()
 
 
-def get_tidy_common_args(clang_tidy_binary, checks, build_path, header_filter,
+tidy_common_args = []
+
+def set_tidy_common_args(clang_tidy_binary, checks, build_path, header_filter,
                          extra_arg, extra_arg_before, quiet, config):
     """Gets the global arguments for clang-tidy."""
+    global tidy_common_args
     tidy_common_args = [clang_tidy_binary]
     if header_filter is not None:
         tidy_common_args.append('-header-filter=' + header_filter)
@@ -441,9 +446,12 @@ def apply_fixes(args, tmpdir):
     subprocess.call(invocation)
 
 
-def run_tidy(tidy_common_args, cache, tmpdir, build_path, queue, lock,
-             failed_files):
+# List of files with a non-zero return code.
+failed_files = []
+
+def run_tidy(tmpdir, build_path, queue, lock):
     """Takes filenames out of queue and runs clang-tidy on them."""
+    global failed_files
     while True:
         name, command, dir = queue.get()
         hash = None
@@ -505,7 +513,7 @@ def run_tidy(tidy_common_args, cache, tmpdir, build_path, queue, lock,
 
         queue.task_done()
 
-def query_tidy(tidy_common_args, query, quiet):
+def query_tidy(query, quiet):
     invocation = tidy_common_args + [query]
     if not quiet:
         print(invocation)
@@ -589,9 +597,9 @@ def main():
         # Find our database
         build_path = find_compilation_database(db_path)
 
-    tidy_common_args = get_tidy_common_args(args.clang_tidy_binary, args.checks,
-        build_path, args.header_filter, args.extra_arg, args.extra_arg_before,
-        args.quiet, args.config)
+    set_tidy_common_args(args.clang_tidy_binary, args.checks, build_path,
+        args.header_filter, args.extra_arg, args.extra_arg_before, args.quiet,
+        args.config)
 
     tmpdir = None
     if args.fix or (yaml and args.export_fixes):
@@ -601,14 +609,14 @@ def main():
             print('Caching is disabled because of -fix\n', file=sys.stderr)
         args.cache = False
 
-    cache = None
+    global cache
     try:
-        version = query_tidy(tidy_common_args, '-version', args.quiet)
-        checks = query_tidy(tidy_common_args, '-list-checks', args.quiet)
+        version = query_tidy('-version', args.quiet)
+        checks = query_tidy('-list-checks', args.quiet)
 
         if args.cache:
             try:
-                config = query_tidy(tidy_common_args, '-dump-config', True)
+                config = query_tidy('-dump-config', True)
                 cache = Cache(build_path, version, config, checks)
             except Exception as error:
                 print(error, file=sys.stderr)
@@ -634,8 +642,6 @@ def main():
         if file_name_re.search(name) and not 'src/third_party' in name:
             files.append((name, entry['command'], entry['directory']))
 
-    # List of files with a non-zero return code.
-    failed_files = []
     return_code = 0
     lock = threading.Lock()
     task_queue = queue.Queue(max_task)
@@ -644,9 +650,7 @@ def main():
         # Spin up a bunch of tidy-launching threads.
         for _ in range(max_task):
             t = threading.Thread(target=run_tidy,
-                                 args=(tidy_common_args, cache, tmpdir,
-                                       build_path, task_queue, lock,
-                                       failed_files))
+                                 args=(tmpdir, build_path, task_queue, lock))
             t.daemon = True
             t.start()
 
@@ -657,7 +661,7 @@ def main():
         # Wait for all threads to be done.
         task_queue.join()
         if len(failed_files):
-            print('clang-tidy errors: {}\n'.format(len(failed_files)),
+            print('\nclang-tidy errors: {}\n'.format(len(failed_files)),
                   file=sys.stderr)
             return_code = 1
 
