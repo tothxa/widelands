@@ -132,6 +132,18 @@ def make_absolute(f, directory):
 
 
 class Cache:
+    """Implements the cache
+
+    Acknowledgements:
+
+    The basic inspiration and some ideas for hashing the sources came from
+    https://github.com/freedick/cltcache.
+
+    Some more ideas for hashing and ideas for parsing compile_commands.json
+    came from https://github.com/matus-chochlik/ctcache.
+
+    No code is copied directly from either.
+    """
     failed_files_regexp = re.compile(r'^([0-9a-f]{64})\.std(out|err)$')
 
     def __init__(self, dir, tidy_version, config, checks):
@@ -297,10 +309,15 @@ class Cache:
 def get_hash(text_to_hash):
     return hashlib.sha256(text_to_hash.encode('utf-8')).hexdigest()
 
+
+extra_before = []
+extra_after = []
+
 def pp_hash(file, command, dir):
     preprocessor_args = []
+    pp_args_loaded = shlex.split(command, posix = True)
     skip = False
-    for arg in shlex.split(command, posix = True):
+    for arg in pp_args_loaded[0:1] + extra_before + pp_args_loaded[1:] + extra_after:
         if skip:
             skip = False
             continue
@@ -308,17 +325,20 @@ def pp_hash(file, command, dir):
             skip = True
             continue
         if arg == '-c':
-            arg = '-E'
+            preprocessor_args.append('-E')
+            # We need this because of NOLINT comments
+            arg = '-C'
         preprocessor_args.append(arg)
-
-    # We need this because of NOLINT comments
-    preprocessor_args.append('-C')
 
     proc = subprocess.Popen(
        preprocessor_args, cwd=dir, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     output, err = proc.communicate()
     if proc.returncode != 0 or len(err) > 0:
-        raise Exception('preprocessor error')
+        print('Preprocessor exited with error:\n' +
+              ' '.join(preprocessor_args) + '\n' +
+              err.decode('utf-8'), file=sys.stderr)
+        sys.stderr.flush()
+        raise Exception('Preprocessor error')
 
     ### Would be nice (not very important), but we need the NOLINT comments...
     # hash = hashlib.sha256()
@@ -353,8 +373,10 @@ def get_tidy_common_args(clang_tidy_binary, checks, build_path, header_filter,
         tidy_common_args.append('-config=' + config)
     for arg in extra_arg:
         tidy_common_args.append('-extra-arg=%s' % arg)
+        extra_after.append(arg)
     for arg in extra_arg_before:
         tidy_common_args.append('-extra-arg-before=%s' % arg)
+        extra_before.append(arg)
     return tidy_common_args
 
 def get_tidy_file_args(file, tmpdir):
@@ -437,16 +459,15 @@ def run_tidy(tidy_common_args, cache, tmpdir, build_path, queue, lock,
             try:
                 hash = pp_hash(name, command, dir)
             except:
-                print('Preprocessing failed for {}, skipping cache lookup.\n'.format(name),
+                print('Preprocessing failed for {}, skipping cache lookup.'.format(name),
                       file=sys.stderr)
-                traceback.print_exc()
                 hash = None
             if hash:
                 with lock:
                     try:
                         hit, passed, output, err = cache.lookup(hash)
                     except:
-                        print('Cache lookup error for {} with hash {}.\n'.format(name, hash),
+                        print('Cache lookup error for {} with hash {}.'.format(name, hash),
                               file=sys.stderr)
                         traceback.print_exc()
                         hit = False
@@ -477,7 +498,7 @@ def run_tidy(tidy_common_args, cache, tmpdir, build_path, queue, lock,
                     try:
                         cache.add_failed(hash, output, err)
                     except:
-                        print('Error saving output to the cache.\n',
+                        print('Error saving output to the cache.',
                               file=sys.stderr)
                         traceback.print_exc()
                         sys.stderr.flush()
@@ -672,11 +693,12 @@ def main():
             print('\nCache statistics:\n'
                   f'   Total files:  {len(files):5}\n'
                   f'   Cache hits:   {cache.hits:5}\n'
-                  f'   Cache misses: {cache.misses:5}\n',
+                  f'   Cache misses: {cache.misses:5}',
                   file=sys.stderr)
             other = len(files) - cache.hits - cache.misses
             if other != 0:
-                print(f'   Lookup failed: {other:4}\n', file=sys.stderr)
+                print(f'   Lookup failed: {other:4}', file=sys.stderr)
+            print('', file=sys.stderr)
 
     if tmpdir:
         shutil.rmtree(tmpdir)
