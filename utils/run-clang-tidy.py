@@ -148,8 +148,29 @@ class Cache:
     """
     failed_files_regexp = re.compile(r'^([0-9a-f]{64})\.std(out|err)$')
 
-    def __init__(self, dir, tidy_version, config, checks):
+    def __init__(self, dir, tidy_version, config, checks, custom):
         self.dir = os.path.join(dir, 'clang-tidy-cache')
+        if not os.path.isdir(self.dir):
+            os.mkdir(self.dir)
+
+        filtered_config = ''
+        for line in config.splitlines(keepends = True):
+            if not line.startswith(('Checks:', 'User:', 'FormatStyle:')):
+                filtered_config += line
+        version_line = tidy_version.splitlines()[0].strip()
+        self.config_hash = get_hash(version_line + filtered_config + checks)
+
+        # We only put caches of custom runs in separate subdirs, so we can clean
+        # up the main directory on upgrades or when the default config changes.
+        # Custom subdirs have to be cleaned up manually on upgrades.
+        if custom:
+            # TODO(tothxa): Hash and config details in the main dir should be
+            # checked before creating and switching the directory. Maybe the
+            # custom arguments didn't actually result in a different config.
+            self.dir = os.path.join(self.dir, self.config_hash)
+            if not os.path.isdir(self.dir):
+                os.mkdir(self.dir)
+
         self.passed_file = os.path.join(self.dir, 'passed')
         self.failed_dir = os.path.join(self.dir, 'failed')
         if not os.path.isdir(self.dir):
@@ -166,44 +187,55 @@ class Cache:
         # last access time internally
         self.failed = set()
 
-        if self.check_version(tidy_version, config, checks):
+        if self.check_version(version_line, filtered_config, checks, custom):
             self.load_cache()
 
         # Statistics counters
         self.hits = 0
         self.misses = 0
 
-    def check_version(self, tidy_version, config, checks):
+    def check_version(self, tidy_version, config, checks, custom):
         self.version_file = os.path.join(self.dir, 'clang-tidy_version')
         self.config_dump_file = os.path.join(self.dir, 'clang-tidy_config')
         self.checks_file = os.path.join(self.dir, 'enabled_checks')
+        self.config_hash_file = os.path.join(self.dir, 'config_hash')
         old_version = ''
         old_config = ''
         old_checks = ''
-        filtered_config = ''
-        for line in config.splitlines(keepends = True):
-            if not line.startswith(('Checks:', 'User:')):
-                filtered_config += line
         if os.path.isfile(self.version_file):
             with open(self.version_file, 'r', encoding = 'utf-8') as vf:
-                old_version = vf.readline().strip()
+                old_version = vf.read()
         if os.path.isfile(self.config_dump_file):
             with open(self.config_dump_file, 'r', encoding = 'utf-8') as cf:
                 old_config = cf.read()
         if os.path.isfile(self.checks_file):
             with open(self.checks_file, 'r', encoding = 'utf-8') as cf:
                 old_checks = cf.read()
-        if tidy_version.splitlines()[0].strip() == old_version and \
-           filtered_config == old_config and checks == old_checks:
+
+        # For customized runs (when the run-time configuration is changed by
+        # the command line arguments), the directory name already contains the
+        # hash.
+        old_config_hash = self.config_hash
+        if not custom:
+            if os.path.isfile(self.config_hash_file):
+                with open(self.config_hash_file, 'r', encoding = 'utf-8') as hf:
+                    old_config_hash = hf.read()
+            else:
+                old_config_hash = ''
+        if tidy_version == old_version and config == old_config and \
+           checks == old_checks and self.config_hash == old_config_hash:
             return True
         else:
             self.clear()
             with open(self.version_file, 'w', encoding = 'utf-8') as vf:
                  vf.write(tidy_version)
             with open(self.config_dump_file, 'w', encoding = 'utf-8') as cf:
-                 cf.write(filtered_config)
+                 cf.write(config)
             with open(self.checks_file, 'w', encoding = 'utf-8') as cf:
                  cf.write(checks)
+            if not custom:
+                 with open(self.config_hash_file, 'w', encoding = 'utf-8') as hf:
+                     hf.write(self.config_hash)
             return False
 
     def load_cache(self):
@@ -232,6 +264,7 @@ class Cache:
         self.passed = keep
         with open(self.passed_file, 'w', encoding = 'utf-8') as pf:
             json.dump(self.passed, pf, sort_keys = True, indent = 2)
+            pf.write('\n')
         # failed entries are updated on the fly, we only need to delete old ones
         with os.scandir(self.failed_dir) as dir:
             for entry in dir:
@@ -242,8 +275,12 @@ class Cache:
     def clear(self):
         if os.path.isfile(self.version_file):
             os.remove(self.version_file)
+        if os.path.isfile(self.config_dump_file):
+            os.remove(self.config_dump_file)
         if os.path.isfile(self.checks_file):
             os.remove(self.checks_file)
+        if os.path.isfile(self.config_hash_file):
+            os.remove(self.config_hash_file)
         if os.path.isfile(self.passed_file):
             os.remove(self.passed_file)
         with os.scandir(self.failed_dir) as dir:
@@ -342,8 +379,9 @@ def pp_hash(file, command, dir):
         sys.stderr.flush()
         raise Exception('Preprocessor error')
 
+    hash = hashlib.sha256(cache.config_hash.encode('utf-8'))
+
     ### Would be nice (not very important), but we need the NOLINT comments...
-    # hash = hashlib.sha256()
     # # Try to make it more resistant to comment and formatting changes
     # for line in output.decode('utf-8').splitlines():
     #     l = line.strip()
@@ -357,7 +395,8 @@ def pp_hash(file, command, dir):
     # return hash.hexdigest()
     ###
 
-    return hashlib.sha256(output).hexdigest()
+    hash.update(output)
+    return hash.hexdigest()
 
 
 tidy_common_args = []
@@ -449,7 +488,7 @@ def apply_fixes(args, tmpdir):
 # List of files with a non-zero return code.
 failed_files = []
 
-def run_tidy(tmpdir, build_path, queue, lock):
+def run_tidy(tmpdir, build_path, quiet, queue, lock):
     """Takes filenames out of queue and runs clang-tidy on them."""
     global failed_files
     while True:
@@ -495,11 +534,11 @@ def run_tidy(tmpdir, build_path, queue, lock):
             sys.stdout.write('\n' + ' '.join(invocation) +
                              '\n' + output)
             sys.stdout.flush()
-            if len(err) > 0:
+            if (tidy_error or not quiet) and len(err) > 0:
                 sys.stderr.write(err)
                 sys.stderr.flush()
 
-            if cache and not hit and hash:
+            if cache and not hit and hash and not tidy_error:
                 if passed:
                     cache.add_passed(hash)
                 else:
@@ -531,13 +570,15 @@ def query_tidy(query, quiet):
     return output
 
 
+default_tidy_binary = 'clang-tidy'
+
 def main():
     parser = argparse.ArgumentParser(description='Runs clang-tidy over all files '
                                      'in a compilation database. Requires '
                                      'clang-tidy and clang-apply-replacements in '
                                      '$PATH.')
     parser.add_argument('-clang-tidy-binary', metavar='PATH',
-                        default='clang-tidy',
+                        default=default_tidy_binary,
                         help='path to clang-tidy binary')
     parser.add_argument('-clang-apply-replacements-binary', metavar='PATH',
                         default='clang-apply-replacements',
@@ -616,8 +657,14 @@ def main():
 
         if args.cache:
             try:
+                # -quiet only changes stderr, not the actual checks, so we
+                # suppress stderr completely with quiet as long as return code
+                # is 0, so we can use the same cache if the only difference
+                # is -quiet.
+                custom = args.checks or args.config or args.header_filter or \
+                         args.clang_tidy_binary != default_tidy_binary
                 config = query_tidy('-dump-config', True)
-                cache = Cache(build_path, version, config, checks)
+                cache = Cache(build_path, version, config, checks, custom)
             except Exception as error:
                 print(error, file=sys.stderr)
                 traceback.print_exc()
@@ -650,7 +697,8 @@ def main():
         # Spin up a bunch of tidy-launching threads.
         for _ in range(max_task):
             t = threading.Thread(target=run_tidy,
-                                 args=(tmpdir, build_path, task_queue, lock))
+                                 args=(tmpdir, build_path, args.quiet,
+                                       task_queue, lock))
             t.daemon = True
             t.start()
 
