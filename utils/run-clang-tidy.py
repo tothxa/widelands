@@ -153,20 +153,12 @@ class Cache:
         if not os.path.isdir(self.dir):
             os.mkdir(self.dir)
 
-        filtered_config = ''
-        for line in config.splitlines(keepends = True):
-            if not line.startswith(('Checks:', 'User:', 'FormatStyle:')):
-                filtered_config += line
-        version_line = tidy_version.splitlines()[0].strip()
-        self.config_hash = get_hash(version_line + filtered_config + checks)
+        self.config_hash = get_hash(tidy_version + config + checks)
 
         # We only put caches of custom runs in separate subdirs, so we can clean
         # up the main directory on upgrades or when the default config changes.
         # Custom subdirs have to be cleaned up manually on upgrades.
         if custom:
-            # TODO(tothxa): Hash and config details in the main dir should be
-            # checked before creating and switching the directory. Maybe the
-            # custom arguments didn't actually result in a different config.
             self.dir = os.path.join(self.dir, self.config_hash)
             if not os.path.isdir(self.dir):
                 os.mkdir(self.dir)
@@ -187,7 +179,7 @@ class Cache:
         # last access time internally
         self.failed = set()
 
-        if self.check_version(version_line, filtered_config, checks, custom):
+        if self.check_version(tidy_version, config, checks, custom):
             self.load_cache()
 
         # Statistics counters
@@ -569,6 +561,16 @@ def query_tidy(query, quiet):
         raise Exception('Unable to run clang-tidy.')
     return output
 
+def filter_config(config):
+    filtered_config = ''
+    for line in config.splitlines(keepends = True):
+        if not line.startswith(('Checks:', 'User:', 'FormatStyle:')):
+            filtered_config += line
+    return filtered_config
+
+def filter_version(tidy_version):
+    return tidy_version.splitlines()[0].strip()
+
 
 default_tidy_binary = 'clang-tidy'
 
@@ -638,10 +640,6 @@ def main():
         # Find our database
         build_path = find_compilation_database(db_path)
 
-    set_tidy_common_args(args.clang_tidy_binary, args.checks, build_path,
-        args.header_filter, args.extra_arg, args.extra_arg_before, args.quiet,
-        args.config)
-
     tmpdir = None
     if args.fix or (yaml and args.export_fixes):
         check_clang_apply_replacements_binary(args)
@@ -650,21 +648,50 @@ def main():
             print('Caching is disabled because of -fix\n', file=sys.stderr)
         args.cache = False
 
+    custom = False
+    default_version = ''
+    default_config = ''
+    default_checks = ''
+
+    if args.cache:
+        # -quiet only changes stderr, not the actual checks, so we
+        # suppress stderr completely with quiet as long as return code
+        # is 0, so we can use the same cache if the only difference
+        # is -quiet.
+        custom = args.checks or args.config or args.header_filter or \
+                 args.clang_tidy_binary != default_tidy_binary
+
+        # Maybe the command-line arguments don't actually change the config
+        # and the enabled checks. To find out, we need to get them for the
+        # default setup.
+        if custom:
+            set_tidy_common_args(default_tidy_binary, None, build_path,
+                None, [], [], False, None)
+            try:
+                default_version = filter_version(query_tidy('-version', True))
+                default_config = filter_config(query_tidy('-dump-config', True))
+                default_checks = query_tidy('-list-checks', True)
+            except:
+                # Ignore errors. Maybe the args are there to make it work.
+                pass
+
+    set_tidy_common_args(args.clang_tidy_binary, args.checks, build_path,
+        args.header_filter, args.extra_arg, args.extra_arg_before, args.quiet,
+        args.config)
+
     global cache
+
     try:
         version = query_tidy('-version', args.quiet)
         checks = query_tidy('-list-checks', args.quiet)
 
         if args.cache:
             try:
-                # -quiet only changes stderr, not the actual checks, so we
-                # suppress stderr completely with quiet as long as return code
-                # is 0, so we can use the same cache if the only difference
-                # is -quiet.
-                custom = args.checks or args.config or args.header_filter or \
-                         args.clang_tidy_binary != default_tidy_binary
-                config = query_tidy('-dump-config', True)
-                cache = Cache(build_path, version, config, checks, custom)
+                version_f = filter_version(version)
+                config = filter_config(query_tidy('-dump-config', True))
+                custom = custom and (version_f != default_version or
+                         config != default_config or checks != default_checks)
+                cache = Cache(build_path, version_f, config, checks, custom)
             except Exception as error:
                 print(error, file=sys.stderr)
                 traceback.print_exc()
