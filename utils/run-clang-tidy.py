@@ -159,7 +159,7 @@ class Cache:
         # up the main directory on upgrades or when the default config changes.
         # Custom subdirs have to be cleaned up manually on upgrades.
         if custom:
-            self.dir = os.path.join(self.dir, self.config_hash)
+            self.dir = os.path.join(self.dir, '__custom_args', self.config_hash)
             if not os.path.isdir(self.dir):
                 os.mkdir(self.dir)
 
