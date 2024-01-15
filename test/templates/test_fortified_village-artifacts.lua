@@ -15,8 +15,12 @@ run(function()
                field.immovable.fields[1] == field then
             n_artifacts = n_artifacts + 1
             sleep(2000)
-            print(string.bformat("Conquering artifact at %d,%d for the winner.", field.x, field.y))
-            game.players[winner]:conquer(field)
+            local for_player = game.players[winner]
+            if n_artifacts > 2 then
+               for_player = game.players[n_artifacts - 2]
+            end
+            print(string.bformat("Conquering artifact at %d,%d for %s.", field.x, field.y, tostring(for_player)))
+            for_player:conquer(field)
          end
       end
    end
@@ -25,7 +29,8 @@ run(function()
       sleep(2000)
       assert(false, "No artifacts on the map. The win condition artifacts will not end.")
    else
-      print("All artifacts are conquered for the winner, win condition should be triggered soon.")
+      print(string.format(
+         "All %d artifacts are conquered, win condition should be triggered soon.", n_artifacts))
    end
 end)
 
