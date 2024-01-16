@@ -1,8 +1,8 @@
 include "scripting/coroutine.lua"
 include "test/scripting/lunit.lua"
 
-game = wl.Game()
-mapview = wl.ui.MapView()
+game = wl.Game() -- global is used by tests
+local mapview = wl.ui.MapView()
 
 local function result_table(winners)
   local r = {}
@@ -31,17 +31,16 @@ local function formatted_time()
 end
 
 -- 2 minutes grace period
-timeout = (game.win_condition_duration + 2) * 60 * 1000
-check_interval = 2000
-pause_timeout = 2 * 60  -- 2 minutes
+local timeout = (game.win_condition_duration + 2) * 60 * 1000
+local check_interval = 2000
+local pause_timeout = 2 * 60  -- 2 minutes
 
-game_ended = false
-last_gametime = 0
-pause_counter = 0
+local last_gametime = 0
+local pause_counter = 0
 
-expected = nil
+local expected = nil
 
-function check_game_ended()
+function check_game_ended() -- global, to be callable from callback in add_plugin_timer()
   if (game.time > last_gametime) then
     last_gametime = game.time
     pause_counter = 0
@@ -49,7 +48,7 @@ function check_game_ended()
     pause_counter = pause_counter + check_interval / 1000
     print(string.bformat("No progress since last check. (%d seconds)", pause_counter))
   end
-  game_ended = mapview.windows.game_summary ~= nil
+  local game_ended = mapview.windows.game_summary ~= nil
   print("Checking end of game at " .. formatted_time())
   if game_ended or game.time > timeout or pause_counter >= pause_timeout then
 
@@ -74,7 +73,7 @@ function check_game_ended()
   end
 end
 
-function check_win_condition(winners)
+function check_win_condition(winners) -- global, to use for tests
   run(function()
     sleep(1000)
 
