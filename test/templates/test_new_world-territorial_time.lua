@@ -16,3 +16,10 @@ run(function()
 end)
 
 check_win_condition(2)
+
+local tc = lunit.TestCase("New World")
+function tc.test_ships() -- is run at end
+   for _i, plr in pairs(game.players) do
+      assert_equal(7, #plr:get_ships(), "ships for "..tostring(plr))
+   end
+end
