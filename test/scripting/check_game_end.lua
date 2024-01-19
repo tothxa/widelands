@@ -80,6 +80,28 @@ function check_result()
     assert_true(#failed == 0, "Wrong result for: "..table.concat(failed, ", "))
 end
 
+local tc_init = lunit.TestCase("Check init")
+function tc_init.test_all_tribes() -- runs at end
+   local ALL_TRIBES = 5
+   local tribes = {}
+   for _i, plr in pairs(game.players) do
+      tribes[plr.tribe_name] = 1
+   end
+   local n_tribes = 0
+   for _name in pairs(tribes) do
+      n_tribes = n_tribes + 1
+   end
+   if ALL_TRIBES == n_tribes then
+      assert_true(true) -- is checked
+   else
+      local msg = ""
+      for name in pairs(tribes) do
+         msg = msg..name.." "
+      end
+      assert_equal(5, n_tribes, "Tribes in game: "..msg)
+   end
+end
+
 function check_win_condition(winners) -- global, to use for tests
   run(function()
     sleep(1000)
