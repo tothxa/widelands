@@ -51,26 +51,33 @@ function check_game_ended() -- global, to be callable from callback in add_plugi
   local game_ended = mapview.windows.game_summary ~= nil
   print("Checking end of game at " .. formatted_time())
   if game_ended or game.time > timeout or pause_counter >= pause_timeout then
+      local test_case = lunit.TestCase("End result")
+      -- Check timeout
+      function test_case.test_in_time()
+         assert_true(game_ended, "Game did not end in time")
+      end
+      if game_ended then
+         test_case.test_result = check_result
+      end
+      lunit.run()
 
-    -- Check timeout
-    assert_true(game_ended, "## Game did not end in time. ##")
+      mapview:close()
+   end
+end
+
+function check_result()
+-- TODO local, move above
 
     -- Check that the expected player(s) won
-    local good = true
+    local failed = {}
     if expected ~= nil then
       for i = 1, #game.players do
         if(expected[i] ~= game.players[i].end_result) then
-          print("Wrong result for " .. game.players[i].name)
-          good = false
+          table.insert(failed,game.players[i].name)
         end
       end
     end
-    assert_true(good, "## Game ended with wrong results. ##")
-
-    print("# All Tests passed.")
-
-    mapview:close()
-  end
+    assert_true(#failed == 0, "Wrong result for: "..table.concat(failed, ", "))
 end
 
 function check_win_condition(winners) -- global, to use for tests
