@@ -14,3 +14,8 @@ run(function()
 end)
 
 check_win_condition(winner)
+
+local tc = lunit.TestCase("Trading outpost")
+function tc.test_no_of_buildings()
+   check_min_no_of_buildings(4)
+end

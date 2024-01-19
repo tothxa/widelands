@@ -120,3 +120,14 @@ function check_win_condition(winners) -- global, to use for tests
     game.desired_speed = 100000
   end)
 end
+
+function check_min_no_of_buildings(min_no) -- gobal for use by tests
+   for _i, plr in pairs(game.players) do
+      local count_all = 0
+      local houses = plr:get_buildings("all")
+      for _bld_name, blds in pairs(houses) do
+         count_all = count_all + #blds
+      end
+      assert_true(count_all >= min_no, count_all.." buildings for "..plr.tribe_name)
+   end
+end

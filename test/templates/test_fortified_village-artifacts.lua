@@ -22,3 +22,8 @@ run(function()
 end)
 
 check_win_condition(winner)
+
+local tc = lunit.TestCase("Fortiefied village")
+function tc.test_no_of_buildings()
+   check_min_no_of_buildings(6)
+end
