@@ -119,21 +119,19 @@ for tribe in start_conditions:
     if len(unused) > 0:
         unused_sc[tribe] = unused
 
+failures = 0
+
 
 def report_if(check_result, msg):
+    nonlocal failures
     if len(check_result) > 0:
         print()
         print(msg)
         print(check_result)
+        failures += 1
 
 
 # Report
-if len(unknown_wc) == 0 and len(unknown_tribe) == 0 and len(unknown_sc) == 0 and \
-   len(unused_wc) == 0 and len(unused_sc) == 0 and len(no_script) == 0:
-    print()
-    print('Done, all starting and win conditions are covered by tests.')
-    sys.exit(0)
-
 report_if(unknown_tribe, 'ERROR: Unknown tribes found in the tests:')
 report_if(unknown_sc, 'ERROR: Unknown start conditions found in the tests:')
 report_if(unknown_wc, 'ERROR: Unknown win conditions found in the tests:')
@@ -143,4 +141,7 @@ report_if(unused_wc, 'ERROR: Win conditions not covered by tests:')
 
 report_if(no_script, 'ERROR: No scripts provided for tests:')
 
-sys.exit(1)
+if failures > 0:
+    sys.exit(1)
+else:
+    print('Done, all starting and win conditions are covered by tests.')
