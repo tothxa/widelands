@@ -52,5 +52,6 @@ closed="true"
 
 [player_8]
 tribe=
+init="poor_hamlet.lua"
 ai="random"
 closed="false"
