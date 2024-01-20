@@ -119,6 +119,14 @@ for tribe in start_conditions:
     if len(unused) > 0:
         unused_sc[tribe] = unused
 
+
+def report_if(check_result, msg):
+    if len(check_result) > 0:
+        print()
+        print(msg)
+        print(check_result)
+
+
 # Report
 if len(unknown_wc) == 0 and len(unknown_tribe) == 0 and len(unknown_sc) == 0 and \
    len(unused_wc) == 0 and len(unused_sc) == 0 and len(no_script) == 0:
@@ -126,31 +134,13 @@ if len(unknown_wc) == 0 and len(unknown_tribe) == 0 and len(unknown_sc) == 0 and
     print('Done, all starting and win conditions are covered by tests.')
     sys.exit(0)
 
-if len(unknown_tribe) > 0:
-    print()
-    print('ERROR: Unknown tribes found in the tests:')
-    print(unknown_tribe)
-if len(unknown_sc) > 0:
-    print()
-    print('ERROR: Unknown start conditions found in the tests:')
-    print(unknown_sc)
-if len(unknown_wc) > 0:
-    print()
-    print('ERROR: Unknown win conditions found in the tests:')
-    print(unknown_wc)
+report_if(unknown_tribe, 'ERROR: Unknown tribes found in the tests:')
+report_if(unknown_sc, 'ERROR: Unknown start conditions found in the tests:')
+report_if(unknown_wc, 'ERROR: Unknown win conditions found in the tests:')
 
-if len(unused_sc) > 0:
-    print()
-    print('ERROR: Start conditions not covered by tests:')
-    print(unused_sc)
-if len(unused_wc) > 0:
-    print()
-    print('ERROR: Win conditions not covered by tests:')
-    print(unused_wc)
+report_if(unused_sc, 'ERROR: Start conditions not covered by tests:')
+report_if(unused_wc, 'ERROR: Win conditions not covered by tests:')
 
-if len(no_script) > 0:
-    print()
-    print('ERROR: No scripts provided for tests:')
-    print(no_script)
+report_if(no_script, 'ERROR: No scripts provided for tests:')
 
 sys.exit(1)
