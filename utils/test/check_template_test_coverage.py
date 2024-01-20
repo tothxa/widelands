@@ -20,49 +20,55 @@ if not os.path.isdir(datadir):
     sys.exit(1)
 
 # Collect win conditions
-wcdir = os.path.join(datadir, 'scripting', 'win_conditions')
-wc_init = os.path.join(wcdir, 'init.lua')
-if not os.path.isfile(wc_init):
-    print('ERROR: Win conditions config file not found at ' + wc_init)
-    sys.exit(1)
+def collect_win_conditions():
+    wcdir = os.path.join(datadir, 'scripting', 'win_conditions')
+    wc_init = os.path.join(wcdir, 'init.lua')
+    if not os.path.isfile(wc_init):
+        print('ERROR: Win conditions config file not found at ' + wc_init)
+        sys.exit(1)
 
-with open(wc_init, 'r', encoding = 'utf-8') as fh:
-    wc_regexp = re.compile('("[a-z_]+\\.lua")')
-    win_conditions = {match.group(1): False
-                      for match in [wc_regexp.search(line)
-                      for line in fh.read().splitlines()] if match}
-if len(win_conditions) < 1:
-    print('ERROR: No win conditions found.')
-    sys.exit(1)
+    with open(wc_init, 'r', encoding='utf-8') as fh:
+        wc_regexp = re.compile('("[a-z_]+\\.lua")')
+        win_conditions = {match.group(1): False
+                          for match in [wc_regexp.search(line)
+                          for line in fh.read().splitlines()] if match}
+    if len(win_conditions) < 1:
+        print('ERROR: No win conditions found.')
+        sys.exit(1)
 
-print()
-print('Win conditions:')
-for wc in win_conditions:
-    print('   ' + wc)
+    print()
+    print('Win conditions:')
+    for wc in win_conditions:
+        print('   ' + wc)
+    return win_conditions
+win_conditions = collect_win_conditions()
 
 # Collect start conditions for all tribes
-tribesdir = os.path.join(datadir, 'tribes', 'initialization')
-tribes = sorted([td for td in glob(os.path.join(tribesdir, '*'))
-                if os.path.isdir(os.path.join(td, 'starting_conditions'))])
-if len(tribes) < 1:
-    print('ERROR: No tribe directories found.')
-    sys.exit(1)
+def collect_start_conditions():
+    tribesdir = os.path.join(datadir, 'tribes', 'initialization')
+    tribes = sorted([td for td in glob(os.path.join(tribesdir, '*'))
+                    if os.path.isdir(os.path.join(td, 'starting_conditions'))])
+    if len(tribes) < 1:
+        print('ERROR: No tribe directories found.')
+        sys.exit(1)
 
-start_conditions = {'"' + os.path.basename(td) + '"':
-                    {'"' + os.path.basename(sc) + '"': False
-                     for sc in sorted(glob(os.path.join(td, 'starting_conditions', '*')))}
-                    for td in tribes}
+    start_conditions = {'"' + os.path.basename(td) + '"':
+                        {'"' + os.path.basename(sc) + '"': False
+                         for sc in sorted(glob(os.path.join(td, 'starting_conditions', '*')))}
+                        for td in tribes}
 
-if len(start_conditions) < 1:
-    print('ERROR: No start conditions found.')
-    sys.exit(1)
+    if len(start_conditions) < 1:
+        print('ERROR: No start conditions found.')
+        sys.exit(1)
 
-print()
-print('Start conditions:')
-for tr in start_conditions:
-    print('   ' + tr + ':')
-    for sc in start_conditions[tr]:
-        print('      ' + sc)
+    print()
+    print('Start conditions:')
+    for tr in start_conditions:
+        print('   ' + tr + ':')
+        for sc in start_conditions[tr]:
+            print('      ' + sc)
+    return start_conditions
+start_conditions = collect_start_conditions()
 
 # Collect tests
 testdir = os.path.join(basedir, 'test', 'templates')
@@ -113,19 +119,27 @@ for test in tests:
 
 # Check unused
 unused_wc = [wc for wc in win_conditions if not win_conditions[wc]]
-unused_sc = dict()
-for tribe in start_conditions:
-    unused = [sc for sc in start_conditions[tribe] if not start_conditions[tribe][sc]]
-    if len(unused) > 0:
-        unused_sc[tribe] = unused
+
+def check_unused_sc():
+    unused_sc = dict()
+    for tribe in start_conditions:
+        unused = [sc for sc in start_conditions[tribe] if not start_conditions[tribe][sc]]
+        if len(unused) > 0:
+            unused_sc[tribe] = unused
+    return unused_sc
+unused_sc = check_unused_sc()
 
 # Check all tribes in all_tribes.wmf/
-missing_in_alltribes = []
-for tribe in start_conditions:
-    tribe = tribe.strip('"')
-    path = f'test/maps/all_tribes.wmf/scripting/test_{ tribe }.lua'
-    if not os.path.isfile(path):
-        missing_in_alltribes.append(tribe)
+def check_missing_in_alltribes():
+    missing_in_alltribes = []
+    for tribe in start_conditions:
+        tribe = tribe.strip('"')
+        path = f'test/maps/all_tribes.wmf/scripting/test_{ tribe }.lua'
+        if not os.path.isfile(path):
+            missing_in_alltribes.append(tribe)
+    return missing_in_alltribes
+missing_in_alltribes = check_missing_in_alltribes()
+
 
 
 failures = 0
