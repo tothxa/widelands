@@ -82,7 +82,7 @@ unknown_tribe = []
 unknown_sc = dict()
 no_script = []
 
-# Collect uses
+    # Collect uses
 for test in tests:
     if not os.path.isfile(test[:-3] + 'lua'):
         no_script.append(test)
@@ -97,14 +97,14 @@ for test in tests:
     for s in cfg.sections():
         section = cfg[s]
 
-        # Test's win condition
+            # Test's win condition
         if s == 'global':
             if not section['win_condition'] in win_conditions:
                 unknown_wc.append(section['win_condition'])
             else:
                 win_conditions[section['win_condition']] = True
 
-        # Each player's start condition
+            # Each player's start condition
         if s.startswith('player_') and section['closed'] != '"true"' and \
            section['tribe'] != '':
             if not section['tribe'] in start_conditions:
@@ -154,7 +154,7 @@ def report_if(check_result, msg):
         failures += 1
 
 
-# Report
+    # Report
 report_if(unknown_tribe, 'ERROR: Unknown tribes found in the tests:')
 report_if(unknown_sc, 'ERROR: Unknown start conditions found in the tests:')
 report_if(unknown_wc, 'ERROR: Unknown win conditions found in the tests:')
@@ -164,7 +164,8 @@ report_if(unused_wc, 'ERROR: Win conditions not covered by tests:')
 
 report_if(no_script, 'ERROR: No scripts provided for tests:')
 
-report_if(missing_in_alltribes, 'ERROR: Test for tribes missing in test/maps/all_tribes.wmf/scripting/:')
+report_if(missing_in_alltribes,
+              'ERROR: Test for tribes missing in test/maps/all_tribes.wmf/scripting/:')
 
 if failures > 0:
     sys.exit(1)
