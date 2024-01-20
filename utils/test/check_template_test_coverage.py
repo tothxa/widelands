@@ -119,6 +119,15 @@ for tribe in start_conditions:
     if len(unused) > 0:
         unused_sc[tribe] = unused
 
+# Check all tribes in all_tribes.wmf/
+missing_in_alltribes = []
+for tribe in start_conditions:
+    tribe = tribe.strip('"')
+    path = f'test/maps/all_tribes.wmf/scripting/test_{ tribe }.lua'
+    if not os.path.isfile(path):
+        missing_in_alltribes.append(tribe)
+
+
 failures = 0
 
 
@@ -140,6 +149,8 @@ report_if(unused_sc, 'ERROR: Start conditions not covered by tests:')
 report_if(unused_wc, 'ERROR: Win conditions not covered by tests:')
 
 report_if(no_script, 'ERROR: No scripts provided for tests:')
+
+report_if(missing_in_alltribes, 'ERROR: Test for tribes missing in test/maps/all_tribes.wmf/scripting/:')
 
 if failures > 0:
     sys.exit(1)
