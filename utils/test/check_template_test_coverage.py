@@ -71,51 +71,59 @@ def collect_start_conditions():
 start_conditions = collect_start_conditions()
 
 # Collect tests
-testdir = os.path.join(basedir, 'test', 'templates')
-tests = sorted(glob(os.path.join(testdir, '*.wgt')))
-if len(tests) < 1:
-    print('ERROR: No tests found in directory ' + testdir)
-    sys.exit(1)
+def collect_tests():
+    testdir = os.path.join(basedir, 'test', 'templates')
+    tests = sorted(glob(os.path.join(testdir, '*.wgt')))
+    if len(tests) < 1:
+        print('ERROR: No tests found in directory ' + testdir)
+        sys.exit(1)
 
-unknown_wc = []
-unknown_tribe = []
-unknown_sc = dict()
-no_script = []
+    unknown_wc = []
+    unknown_tribe = []
+    unknown_sc = dict()
+    no_script = []
 
     # Collect uses
-for test in tests:
-    if not os.path.isfile(test[:-3] + 'lua'):
-        no_script.append(test)
-    cfg = configparser.ConfigParser()
-    cfg.read(test)
+    for test in tests:
+        if not os.path.isfile(test[:-3] + 'lua'):
+            no_script.append(test)
+        cfg = configparser.ConfigParser()
+        cfg.read(test)
 
-    # This one is a bare minimum template, leaves all to defaults, including tribes, and start and
-    # win conditions.
-    if test == os.path.join(testdir, 'test_alldefaults.wgt'):
-        continue
+        # This one is a bare minimum template, leaves all to defaults, including tribes, and start and
+        # win conditions.
+        if test == os.path.join(testdir, 'test_alldefaults.wgt'):
+            continue
 
-    for s in cfg.sections():
-        section = cfg[s]
+        for s in cfg.sections():
+            section = cfg[s]
 
             # Test's win condition
-        if s == 'global':
-            if not section['win_condition'] in win_conditions:
-                unknown_wc.append(section['win_condition'])
-            else:
-                win_conditions[section['win_condition']] = True
+            if s == 'global':
+                if not section['win_condition'] in win_conditions:
+                    unknown_wc.append(section['win_condition'])
+                else:
+                    win_conditions[section['win_condition']] = True
 
             # Each player's start condition
-        if s.startswith('player_') and section['closed'] != '"true"' and \
-           section['tribe'] != '':
-            if not section['tribe'] in start_conditions:
-                unknown_tribe.append(section['tribe'])
-            else:
-                if not section['init'] in start_conditions[section['tribe']]:
-                    if not section['tribe'] in unknown_sc:
-                        unknown_sc[section['tribe']] = []
-                    unknown_sc[section['tribe']].append(section['init'])
+            if s.startswith('player_') and section['closed'] != '"true"' and \
+               section['tribe'] != '':
+                if not section['tribe'] in start_conditions:
+                    unknown_tribe.append(section['tribe'])
                 else:
-                    start_conditions[section['tribe']][section['init']] = True
+                    if not section['init'] in start_conditions[section['tribe']]:
+                        if not section['tribe'] in unknown_sc:
+                            unknown_sc[section['tribe']] = []
+                        unknown_sc[section['tribe']].append(section['init'])
+                    else:
+                        start_conditions[section['tribe']][section['init']] = True
+    return (
+        unknown_wc,
+        unknown_tribe,
+        unknown_sc,
+        no_script,
+    )
+unknown_wc, unknown_tribe, unknown_sc, no_script = collect_tests()
 
 # Check unused
 unused_wc = [wc for wc in win_conditions if not win_conditions[wc]]
@@ -142,32 +150,35 @@ missing_in_alltribes = check_missing_in_alltribes()
 
 
 
-failures = 0
+def run_checks():
+    failures = 0
 
-
-def report_if(check_result, msg):
-    nonlocal failures
-    if len(check_result) > 0:
-        print()
-        print(msg)
-        print(check_result)
-        failures += 1
-
+    def report_if(check_result, msg):
+        nonlocal failures
+        if len(check_result) > 0:
+            print()
+            print(msg)
+            print(check_result)
+            failures += 1
 
     # Report
-report_if(unknown_tribe, 'ERROR: Unknown tribes found in the tests:')
-report_if(unknown_sc, 'ERROR: Unknown start conditions found in the tests:')
-report_if(unknown_wc, 'ERROR: Unknown win conditions found in the tests:')
+    report_if(unknown_tribe, 'ERROR: Unknown tribes found in the tests:')
+    report_if(unknown_sc, 'ERROR: Unknown start conditions found in the tests:')
+    report_if(unknown_wc, 'ERROR: Unknown win conditions found in the tests:')
 
-report_if(unused_sc, 'ERROR: Start conditions not covered by tests:')
-report_if(unused_wc, 'ERROR: Win conditions not covered by tests:')
+    report_if(unused_sc, 'ERROR: Start conditions not covered by tests:')
+    report_if(unused_wc, 'ERROR: Win conditions not covered by tests:')
 
-report_if(no_script, 'ERROR: No scripts provided for tests:')
+    report_if(no_script, 'ERROR: No scripts provided for tests:')
 
-report_if(missing_in_alltribes,
+    report_if(missing_in_alltribes,
               'ERROR: Test for tribes missing in test/maps/all_tribes.wmf/scripting/:')
 
-if failures > 0:
+    if failures == 0:
+        print('Done, all starting and win conditions are covered by tests.')
+
+    return failures
+
+
+if run_checks() > 0:
     sys.exit(1)
-else:
-    print('Done, all starting and win conditions are covered by tests.')
