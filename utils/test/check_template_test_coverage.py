@@ -90,17 +90,14 @@ def collect_tests():
         cfg = configparser.ConfigParser()
         cfg.read(test)
 
-        # This one is a bare minimum template, leaves all to defaults, including tribes, and start and
-        # win conditions.
-        if test == os.path.join(testdir, 'test_alldefaults.wgt'):
-            continue
-
         for s in cfg.sections():
             section = cfg[s]
 
             # Test's win condition
             if s == 'global':
-                if not section['win_condition'] in win_conditions:
+                if not section.get('win_condition'):
+                    pass  # uses default win condition, skip
+                elif not section['win_condition'] in win_conditions:
                     unknown_wc.append(section['win_condition'])
                 else:
                     win_conditions[section['win_condition']] = True
