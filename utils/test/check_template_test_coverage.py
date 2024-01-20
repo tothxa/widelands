@@ -117,16 +117,16 @@ def collect_tests():
                         unknown_sc[section['tribe']].append(section['init'])
                     else:
                         start_conditions[section['tribe']][section['init']] = True
-    return (
-        unknown_wc,
-        unknown_tribe,
-        unknown_sc,
-        no_script,
-    )
-unknown_wc, unknown_tribe, unknown_sc, no_script = collect_tests()
+    return {
+        'wc': unknown_wc,
+        'tribe': unknown_tribe,
+        'sc': unknown_sc,
+        'no_script': no_script,
+    }
 
 # Check unused
-unused_wc = [wc for wc in win_conditions if not win_conditions[wc]]
+def check_unused_wc():
+    return [wc for wc in win_conditions if not win_conditions[wc]]
 
 def check_unused_sc():
     unused_sc = dict()
@@ -135,7 +135,6 @@ def check_unused_sc():
         if len(unused) > 0:
             unused_sc[tribe] = unused
     return unused_sc
-unused_sc = check_unused_sc()
 
 # Check all tribes in all_tribes.wmf/
 def check_missing_in_alltribes():
@@ -146,8 +145,6 @@ def check_missing_in_alltribes():
         if not os.path.isfile(path):
             missing_in_alltribes.append(tribe)
     return missing_in_alltribes
-missing_in_alltribes = check_missing_in_alltribes()
-
 
 
 def run_checks():
@@ -161,17 +158,19 @@ def run_checks():
             print(check_result)
             failures += 1
 
+    unknown = collect_tests()
+
     # Report
-    report_if(unknown_tribe, 'ERROR: Unknown tribes found in the tests:')
-    report_if(unknown_sc, 'ERROR: Unknown start conditions found in the tests:')
-    report_if(unknown_wc, 'ERROR: Unknown win conditions found in the tests:')
+    report_if(unknown['tribe'], 'ERROR: Unknown tribes found in the tests:')
+    report_if(unknown['sc'], 'ERROR: Unknown start conditions found in the tests:')
+    report_if(unknown['wc'], 'ERROR: Unknown win conditions found in the tests:')
 
-    report_if(unused_sc, 'ERROR: Start conditions not covered by tests:')
-    report_if(unused_wc, 'ERROR: Win conditions not covered by tests:')
+    report_if(check_unused_sc(), 'ERROR: Start conditions not covered by tests:')
+    report_if(check_unused_wc(), 'ERROR: Win conditions not covered by tests:')
 
-    report_if(no_script, 'ERROR: No scripts provided for tests:')
+    report_if(unknown['no_script'], 'ERROR: No scripts provided for tests:')
 
-    report_if(missing_in_alltribes,
+    report_if(check_missing_in_alltribes(),
               'ERROR: Test for tribes missing in test/maps/all_tribes.wmf/scripting/:')
 
     if failures == 0:
@@ -179,6 +178,6 @@ def run_checks():
 
     return failures
 
-
-if run_checks() > 0:
-    sys.exit(1)
+if __name__ == '__main__':
+    if run_checks() > 0:
+        sys.exit(1)
