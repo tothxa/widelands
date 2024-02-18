@@ -1191,7 +1191,7 @@ Worker::~Worker() {
 	assert(!transfer_);
 
 	// From Bob::~Bob()
-	if (position_.field != nullptr) {
+	if (get_position().field != nullptr) {
 		molog(owner().egbase().get_gametime(), "Bob::~Bob: pos_.field != 0, cleanup() not called!\n");
 		abort();
 	}
