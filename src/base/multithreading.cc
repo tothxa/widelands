@@ -265,19 +265,19 @@ MutexLock::MutexLock(const ID i) : id_(i) {
 	// The Logic Frame mutex's extended sleep time is higher because it's locked much longer.
 	const bool has_priority = (record.waiting_threads.empty() || is_initializer_thread());
 
-	if (id_ == ID::kLog && record.waiting_threads.count(self) > 0) {
-		// Above only checked borrowing situations. Here we check for recursie calls, most likely
-		// by some other logging call below.
-		std::cout << thread_name(self) << " is already waiting for mutex kLog, skip locking" <<
-		   std::endl;
-		s_mutex_.unlock();
-		id_ = ID::kNone;
-		return;
-	}
-
 	if (record.waiting_threads.count(self) != 0) {
-		std::cout << thread_name(self) << " is already waiting for mutex " << to_string(id_) <<
-		   std::endl;
+		if (id_ == ID::kLog) {
+			// Above only checked borrowing situations. Here we check for recursie calls, most likely
+			// by some other logging call below.
+			std::cout << thread_name(self) << " is already waiting for mutex kLog, skip locking" <<
+			   std::endl;
+			s_mutex_.unlock();
+			id_ = ID::kNone;
+			return;
+		} else {
+			std::cout << thread_name(self) << " is already waiting for mutex " << to_string(id_) <<
+			   std::endl;
+		}
 	}
 
 	assert(record.waiting_threads.count(self) == 0);
