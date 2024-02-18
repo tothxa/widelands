@@ -1189,6 +1189,7 @@ Worker::Worker(const WorkerDescr& worker_descr) : Bob(worker_descr) {
 Worker::~Worker() {
 	assert(!location_.is_set());
 	assert(!transfer_);
+	Bob::~Bob();
 }
 
 /// Log basic information.
