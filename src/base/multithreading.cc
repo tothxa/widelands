@@ -274,10 +274,10 @@ MutexLock::MutexLock(const ID i) : id_(i) {
 			s_mutex_.unlock();
 			id_ = ID::kNone;
 			return;
-		} else {
-			std::cout << thread_name(self) << " is already waiting for mutex " << to_string(id_) <<
-			   std::endl;
 		}
+
+		std::cout << thread_name(self) << " is already waiting for mutex " << to_string(id_) <<
+		   std::endl;
 	}
 
 	assert(record.waiting_threads.count(self) == 0);
