@@ -259,7 +259,6 @@ MutexLock::MutexLock(const ID i) : id_(i) {
 			}
 		}
 	}
-	// TODO(tothxa): From here on we should be safe to use *log_*(), shouldn't we?
 
 	// When several threads are waiting to grab the same mutex, the first one is advantaged
 	// by giving it a lower sleep time between attempts. This keeps overall waiting times low.
@@ -281,7 +280,7 @@ MutexLock::MutexLock(const ID i) : id_(i) {
 	uint32_t last_log_time = 0;
 	while (!record.mutex.try_lock()) {
 		const uint32_t now = SDL_GetTicks();
-		if (now - start_time > 1000 && now - last_log_time > 1000 && id_ != ID::kLog) {
+		if (now - start_time > 1000 && now - last_log_time > 1000) {
 			last_log_time = now;
 			verb_log_dbg("WARNING: %s locking mutex %s, already waiting for %d ms",
 			             thread_name(self).c_str(), to_string(id_).c_str(), now - start_time);
@@ -292,7 +291,7 @@ MutexLock::MutexLock(const ID i) : id_(i) {
 				MutexLock guard(MutexLock::ID::kMutexInternal);
 				if (!stay_responsive_.empty()) {
 					stay_responsive_.back()();
-				} else if (id_ != ID::kLog) {
+				} else {
 					verb_log_dbg("WARNING: Mutex locking: No responsiveness function set");
 				}
 			}
@@ -334,9 +333,7 @@ MutexLock::MutexLock(const ID i) : id_(i) {
 					}
 
 					s_mutex_.unlock();
-					if (id_ != ID::kLog) {
-						log_err("%s", info.c_str());
-					}
+					log_err("%s", info.c_str());
 					throw wexception("%s", info.c_str());
 				}
 			}
@@ -361,10 +358,8 @@ MutexLock::MutexLock(const ID i) : id_(i) {
 	record.ownership_count++;
 
 #ifdef MUTEX_LOCK_DEBUG
-	if (id_ != ID::kLog) {
-		log_dbg("Locking mutex %s took %ums (%u function calls)", to_string(id_).c_str(),
-		        SDL_GetTicks() - start_time, counter);
-	}
+	log_dbg("Locking mutex %s took %ums (%u function calls)", to_string(id_).c_str(),
+	        SDL_GetTicks() - start_time, counter);
 #endif
 }
 MutexLock::~MutexLock() {
@@ -375,6 +370,8 @@ MutexLock::~MutexLock() {
 #ifdef MUTEX_LOCK_DEBUG
 	if (id_ != ID::kLog) {
 		log_dbg("Unlocking mutex %s", to_string(id_).c_str());
+	} else {
+		std::cout << "Unlocking mutex Log..." << std::endl;
 	}
 #endif
 
