@@ -175,6 +175,8 @@ static std::string to_string(const MutexLock::ID i) {
 	switch (i) {
 	case MutexLock::ID::kNone:
 		return "None";
+	case MutexLock::ID::kMutexInternal:
+		return "MutexInternal";
 	case MutexLock::ID::kLogicFrame:
 		return "LogicFrame";
 	case MutexLock::ID::kObjects:
