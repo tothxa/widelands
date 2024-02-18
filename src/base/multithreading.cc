@@ -268,10 +268,16 @@ MutexLock::MutexLock(const ID i) : id_(i) {
 	if (id_ == ID::kLog && record.waiting_threads.count(self) > 0) {
 		// Above only checked borrowing situations. Here we check for recursie calls, most likely
 		// by some other logging call below.
-		std::cout << thread_name(self) << " already owns mutex kLog, skip re-locking" << std::endl;
+		std::cout << thread_name(self) << " is already waiting for mutex kLog, skip locking" <<
+		   std::endl;
 		s_mutex_.unlock();
 		id_ = ID::kNone;
 		return;
+	}
+
+	if (record.waiting_threads.count(self) != 0) {
+		std::cout << thread_name(self) << " is already waiting for mutex " << to_string(id_) <<
+		   std::endl;
 	}
 
 	assert(record.waiting_threads.count(self) == 0);
