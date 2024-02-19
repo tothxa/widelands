@@ -122,7 +122,7 @@ function change_inputs()
    end
 end
 
-test_duration = 600000  -- gametime
+test_duration = 200000  -- gametime
 
 -- ### End of helper functions, now the fun starts ### --
 
@@ -130,7 +130,8 @@ test_duration = 600000  -- gametime
 
 run(function()
    while true do
-      sleep(math.random(400, 1600))
+--      sleep(math.random(400, 1600))
+      sleep(math.random(1000))
       open_window()
    end
 end)
@@ -139,7 +140,8 @@ run(function()
    -- mv:add_plugin_timer("close_window()", 1003)
 
    while true do
-      sleep(math.random(600, 1500))
+--      sleep(math.random(600, 1500))
+      sleep(math.random(600, 900))
       close_window()
    end
 end)
@@ -148,7 +150,8 @@ run(function()
    -- mv:add_plugin_timer("replace_building()", 1319)
 
    while true do
-      sleep(math.random(1000, 3000))
+--      sleep(math.random(1000, 3000))
+      sleep(math.random(700, 1500))
       replace_building()
    end
 end)
@@ -158,7 +161,8 @@ run(function()
    -- mv:add_plugin_timer("start_stop_building()", 257)
 
    while true do
-      sleep(math.random(200, 1000))
+--      sleep(math.random(200, 1000))
+      sleep(math.random(600))
       start_stop_building()
    end
 end)
@@ -168,7 +172,8 @@ run(function()
    -- mv:add_plugin_timer("change_inputs()", 263)
 
    while true do
-      sleep(math.random(200, 1000))
+--      sleep(math.random(200, 1000))
+      sleep(math.random(300))
       change_inputs()
    end
 end)
