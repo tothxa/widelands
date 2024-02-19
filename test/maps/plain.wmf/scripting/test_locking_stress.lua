@@ -122,7 +122,7 @@ function change_inputs()
    end
 end
 
-test_duration = 200000  -- gametime
+test_duration = 300000  -- gametime
 
 -- ### End of helper functions, now the fun starts ### --
 
@@ -141,7 +141,7 @@ run(function()
 
    while true do
 --      sleep(math.random(600, 1500))
-      sleep(math.random(600, 900))
+      sleep(math.random(600, 1200))
       close_window()
    end
 end)
