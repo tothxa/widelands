@@ -62,9 +62,17 @@ jobs:
           widelands-exe-${{ matrix.compiler }}-${{ matrix.config }}-
     - name: Installing dependencies
       run: sh ./.github/scripts/install_deps.sh
+    - name: Check cache restore
+      # cache-hit is only true on exact match...
+      run: |
+        if [ -x widelands ] then
+          echo "cache_restored=true" >> "$GITHUB_ENV"
+        else
+          echo "cache_restored=false" >> "$GITHUB_ENV"
+        fi
     - name: Compile
-      if: ${{ steps.cache.outputs.cache-hit != 'true' }}
       id: compile
+      if: ${{ env.cache_restored != "true" }}
       run: |
         if [ "${CXX:0:1}" == "c" ]
         then
