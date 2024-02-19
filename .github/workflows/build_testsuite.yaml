@@ -52,11 +52,13 @@ jobs:
       uses: actions/checkout@v4
       with:
         fetch-depth: 1
-    - name: Cache built binary
-      uses: actions/cache@v4
+    - name: Restore executable from cache
+      uses: actions/cache/restore@v4
       with:
         path: widelands
         key: widelands-exe-${{ matrix.compiler }}-${{ matrix.config }}-${{ github.sha }}
+        restore-keys: |
+          widelands-exe-${{ matrix.compiler }}-${{ matrix.config }}-
     - name: Installing dependencies
       run: sh ./.github/scripts/install_deps.sh
     - name: Compile
@@ -80,6 +82,12 @@ jobs:
         grep -v REVDETECT-BROKEN VERSION
         make -k -j$(nproc) VERBOSE=1
         mv src/widelands ..
+    - name: Cache built executable
+      if: steps.Compile.outcome == 'success'
+      uses: actions/cache/save@v4
+      with:
+        path: widelands
+        key: widelands-exe-${{ matrix.compiler }}-${{ matrix.config }}-${{ github.sha }}
     - name: Make install/uninstall
       if: false
       run: |
