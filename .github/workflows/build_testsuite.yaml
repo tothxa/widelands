@@ -83,7 +83,7 @@ jobs:
         make -k -j$(nproc) VERBOSE=1
         mv src/widelands ..
     - name: Cache built executable
-      if: steps.Compile.outcome == 'success'
+      if: ${{ steps.Compile.outcome == 'success' }}
       uses: actions/cache/save@v4
       with:
         path: widelands
