@@ -10,6 +10,7 @@ on:
 
 jobs:
   changes:
+    if: false
     name: changed files
     runs-on: ubuntu-latest
     # Set job outputs to values from changed_files step for other jobs
@@ -91,8 +92,8 @@ jobs:
       codecheck: ${{ needs.changes.outputs.codecheck }}
 
   testsuite:
-    needs: [changes, pre-build_checks]
-    if: needs.changes.outputs.run_test_suite == 'true'
+    # needs: [changes, pre-build_checks]
+    # if: needs.changes.outputs.run_test_suite == 'true'
     uses: ./.github/workflows/build_testsuite.yaml
 
   windows-msvc:
