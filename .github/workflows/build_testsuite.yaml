@@ -72,7 +72,7 @@ jobs:
         fi
     - name: Compile
       id: compile
-      if: ${{ env.cache_restored != "true" }}
+      if: ${{ env.cache_restored != 'true' }}
       run: |
         if [ "${CXX:0:1}" == "c" ]
         then
