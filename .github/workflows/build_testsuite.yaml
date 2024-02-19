@@ -53,6 +53,7 @@ jobs:
       with:
         fetch-depth: 1
     - name: Restore executable from cache
+      id: cache
       uses: actions/cache/restore@v4
       with:
         path: widelands
@@ -62,13 +63,9 @@ jobs:
     - name: Installing dependencies
       run: sh ./.github/scripts/install_deps.sh
     - name: Compile
+      if: ${{ steps.cache.outputs.cache-hit != 'true' }}
       id: compile
       run: |
-        if [ -x widelands ]
-        then
-          # cache restore was successful
-          exit 0
-        fi
         if [ "${CXX:0:1}" == "c" ]
         then
           export CC="/usr/bin/${{ matrix.compiler }}"  # clang-10
