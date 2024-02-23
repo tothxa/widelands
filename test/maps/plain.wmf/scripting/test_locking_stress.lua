@@ -128,23 +128,23 @@ test_duration = 200000  -- gametime
 
 mv:add_plugin_timer("open_window()", 511)
 
-run(function()
-   while true do
-      sleep(math.random(400, 1600))
-      open_window()
-   end
-end)
+-- run(function()
+--    while true do
+--       sleep(math.random(400, 1600))
+--       open_window()
+--    end
+-- end)
 
 mv:add_plugin_timer("close_window()", 1003)
 
-run(function()
-   while true do
-      sleep(math.random(600, 1500))
-      close_window()
-   end
-end)
+-- run(function()
+--    while true do
+--       sleep(math.random(600, 1500))
+--       close_window()
+--    end
+-- end)
 
-mv:add_plugin_timer("replace_building()", 1319)
+-- mv:add_plugin_timer("replace_building()", 1319)
 
 run(function()
    while true do
@@ -157,15 +157,15 @@ run(function()
    sleep(math.random(500, 1500))
    mv:add_plugin_timer("start_stop_building()", 257)
 
-   while true do
-      sleep(math.random(200, 1000))
-      start_stop_building()
-   end
+--    while true do
+--       sleep(math.random(200, 1000))
+--       start_stop_building()
+--    end
 end)
 
 run(function()
    sleep(math.random(500, 1500))
-   mv:add_plugin_timer("change_inputs()", 263)
+--    mv:add_plugin_timer("change_inputs()", 263)
 
    while true do
       sleep(math.random(200, 1000))
