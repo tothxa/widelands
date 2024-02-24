@@ -1,3 +1,26 @@
+local mv = wl.ui.MapView()
+
+local port_window = nil
+
+local function check_window()
+   if mv.windows == nil then
+      return false
+   end
+
+   local nw = 0
+   for n,w in pairs(mv.windows) do
+      port_window = w
+      nw = nw + 1
+   end
+
+   if nw == 0 then
+      return false
+   end
+
+   assert_equal(1, nw)
+   return true
+end
+
 run(function()
    port:set_wares {
       blackwood = 100,
@@ -14,14 +37,13 @@ run(function()
    port:start_expedition()
    wait_for_message("Expedition")
 
-   local mv = wl.ui.MapView()
    local pf = port.fields[1]
-   assert_nil(mv.windows.building_window)
+   assert_false(check_window())
    mv:click(pf)
-   while(mv.windows.building_window == nil) do
+   while(not check_window()) do
       sleep(100)
    end
-   local port_window = mv.windows.building_window
+
    assert_nil(port_window.tabs.expedition)
 
    port:start_expedition()

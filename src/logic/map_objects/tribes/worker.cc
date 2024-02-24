@@ -1189,6 +1189,12 @@ Worker::Worker(const WorkerDescr& worker_descr) : Bob(worker_descr) {
 Worker::~Worker() {
 	assert(!location_.is_set());
 	assert(!transfer_);
+
+	// From Bob::~Bob()
+	if (get_position().field != nullptr) {
+		molog(owner().egbase().get_gametime(), "Bob::~Bob: pos_.field != 0, cleanup() not called!\n");
+		abort();
+	}
 }
 
 /// Log basic information.
