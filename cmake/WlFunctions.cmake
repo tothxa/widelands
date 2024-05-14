@@ -182,7 +182,9 @@ macro(_common_compile_tasks)
   endif()
 
   if(ARG_USES_STD_FS)
-    target_link_libraries(${NAME} ${TARGET_LINK_FLAGS} stdc++fs)
+    if (NOT MSVC AND NOT APPLE)
+      target_link_libraries(${NAME} ${TARGET_LINK_FLAGS} stdc++fs)
+    endif()
   endif()
 
   if(ARG_USES_TINYGETTEXT)
