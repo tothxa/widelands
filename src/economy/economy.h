@@ -20,8 +20,8 @@
 #define WL_ECONOMY_ECONOMY_H
 
 #include <functional>
-#include <memory>
 #include <limits>
+#include <memory>
 
 #include "base/macros.h"
 #include "economy/supply.h"
