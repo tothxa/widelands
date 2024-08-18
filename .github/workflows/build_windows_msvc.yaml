@@ -93,4 +93,5 @@ jobs:
       if: ${{ matrix.arch == 'x64' && matrix.config == 'Debug' }}
       shell: bash
       run: |
-        ./regression_test.py -r plain
+        cd $GITHUB_WORKSPACE
+        ./regression_test.py -r plain -b build/src/widelands.exe

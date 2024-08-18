@@ -60,4 +60,4 @@ jobs:
       if: ${{ matrix.bits == 64 && matrix.config == 'Debug' }}
       shell: bash
       run: |
-        ./regression_test.py -r plain
+        ./regression_test.py -r plain -b build/src/widelands.exe
