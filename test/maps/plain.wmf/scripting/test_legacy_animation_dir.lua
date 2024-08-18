@@ -22,6 +22,6 @@ run(function()
    sleep(5 * 40000)
 
    -- print("# All Tests passed.")
-   print("ERROR")
+   print("ERROR: for demonstration only")
    wl.ui.MapView():close()
 end)

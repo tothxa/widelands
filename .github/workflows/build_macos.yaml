@@ -45,5 +45,5 @@ jobs:
         path: ${{ github.workspace }}/Widelands-${{ github.sha }}-${{ matrix.config }}-${{ matrix.compiler }}-${{ matrix.arch }}.dmg
     - name: Regression testing
       if: ${{ matrix.arch == 'arm64' && matrix.config == 'debug' }}
-      run:
+      run: |
         ./regression_test.py
