@@ -56,3 +56,8 @@ jobs:
       with:
         name: Widelands ${{ matrix.config }} ${{ matrix.arch }} Installer (MinGW)
         path: ${{ github.workspace }}\Widelands-${{ github.sha }}-mingw-${{ matrix.config }}-${{ matrix.arch }}.exe
+    - name: Regression testing
+      if: ${{ matrix.bits == 64 && matrix.config == 'Debug' }}
+      shell: bash
+      run: |
+        ./regression_test.py -r anim -b build/src/widelands.exe
