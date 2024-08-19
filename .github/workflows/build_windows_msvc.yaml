@@ -94,4 +94,4 @@ jobs:
       shell: bash
       run: |
         cd $GITHUB_WORKSPACE
-        ./regression_test.py -r plain -b build/src/widelands.exe
+        ./regression_test.py -r anim -b build/src/widelands.exe

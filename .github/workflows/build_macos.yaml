@@ -46,4 +46,4 @@ jobs:
     - name: Regression testing
       if: ${{ matrix.arch == 'arm64' && matrix.config == 'debug' }}
       run: |
-        ./regression_test.py
+        ./regression_test.py -r anim

@@ -154,12 +154,20 @@ class WidelandsTestCase():
                 stdout_txt_name = os.path.join(self.run_dir, 'stdout.txt')
                 stdout_file.write('\n')
                 stdout_file.write(colorize('stdout.txt:', info_color))
-                with open(stdout_txt_name, 'r') as stdout_txt:
-                    for line in stdout_txt:
-                        stdout_file.write(line)
+                try:
+                    with open(stdout_txt_name, 'r') as stdout_txt:
+                        for line in stdout_txt:
+                            stdout_file.write(line)
+                    # delete it in case we have other passes for created savegames
+                    os.unlink(stdout_txt_name)
+                except:
+                    message = f'Error copying stdout from {stdout_txt_name}'
+                    self.out_status('FAIL ', message)
+                    stdout_file.flush()
+                    stdout_file.write('\n')
+                    stdout_file.write(message)
+                    stdout_file.write('\n')
                 stdout_file.flush()
-                # delete it in case we have other passes for created savegames
-                os.unlink(stdout_txt_name)
 
             if self.wl_timed_out:
                 stdout_file.write('\n')
