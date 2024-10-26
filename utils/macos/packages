@@ -2,7 +2,7 @@ asio
 git
 cmake
 glew
-icu4c@75
+icu4c
 jpeg
 libogg
 libpng
