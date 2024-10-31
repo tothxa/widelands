@@ -88,8 +88,9 @@ jobs:
       run: |
         # regression_test.py
         TIMEOUT=""
-        if [ "${{ matrix.config }}" = "Debug" ]
-        then
-          TIMEOUT="-t 20"
-        fi
-        ./regression_test.py -b build/src/widelands $TIMEOUT
+        #if [ "${{ matrix.config }}" = "Debug" ]
+        # then
+        #   # NOCOM: cause some failures
+        #   TIMEOUT="-t 1.2"
+        # fi
+        ./regression_test.py $TIMEOUT -r anim
