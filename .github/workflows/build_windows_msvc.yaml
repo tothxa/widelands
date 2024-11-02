@@ -77,7 +77,7 @@ jobs:
           strip -sv ./src/widelands.exe
         }
         cd src
-        "C:\Program Files\7-Zip\7z.exe" a -tzip ../../widelands_exe.zip widelands.*
+        C:\"Program Files"\7-Zip\7z.exe a -tzip ../../widelands_exe.zip widelands.*
     - name: Uploading executable
       uses: actions/upload-artifact@v4
       with:
