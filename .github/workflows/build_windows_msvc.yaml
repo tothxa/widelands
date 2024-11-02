@@ -77,12 +77,14 @@ jobs:
           strip -sv ./src/widelands.exe
         }
         cd src
-        C:\"Program Files"\7-Zip\7z.exe a -tzip ../../widelands_exe.zip widelands.*
     - name: Uploading executable
       uses: actions/upload-artifact@v4
       with:
         name: Widelands_exe_${{ matrix.config }}_${{ matrix.arch }}_MSVC
-        path: ${{ github.workspace }}\widelands_exe.zip
+        path: |
+          ${{ github.workspace }}\build\src\widelands.exe
+          ${{ github.workspace }}\build\src\widelands.pdb
+        if-no-files-found: ignore
     - name: InnoSetup
       run: |
         cd $env:GITHUB_WORKSPACE
