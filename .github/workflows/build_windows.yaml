@@ -42,6 +42,11 @@ jobs:
         if ("${{ matrix.config }}" -Match "Release") {
           strip -sv ./src/widelands.exe
         }
+    - name: Uploading executable
+      uses: actions/upload-artifact@v4
+      with:
+        name: Widelands_exe_${{ matrix.config }}_${{ matrix.arch }}_MinGW
+        path: ${{ github.workspace }}\build\src\widelands.exe
     - name: InnoSetup
       run: |
         cd $env:GITHUB_WORKSPACE
