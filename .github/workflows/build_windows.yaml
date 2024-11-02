@@ -5,6 +5,7 @@ on:
 jobs:
   windows:
     strategy:
+      fail-fast: false
       matrix:
         config: [Debug, Release]
         arch: [x64, x86]
