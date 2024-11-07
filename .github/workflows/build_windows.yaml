@@ -18,7 +18,8 @@ jobs:
             archname: i686
     name: Windows ${{ matrix.config }} ${{ matrix.arch }} Build (MinGW)
     runs-on: windows-2022
-    env:ARTIFACT_NAME = "Widelands-${{ github.sha }}-mingw-${{ matrix.config }}-${{ matrix.arch }}"
+    env:
+      ARTIFACT_NAME: Widelands-${{ github.sha }}-mingw-${{ matrix.config }}-${{ matrix.arch }}
     steps:
     - name: Checkout
       uses: actions/checkout@v4
