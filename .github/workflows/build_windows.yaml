@@ -18,6 +18,7 @@ jobs:
             archname: i686
     name: Windows ${{ matrix.config }} ${{ matrix.arch }} Build (MinGW)
     runs-on: windows-2022
+    env:ARTIFACT_NAME = "Widelands-${{ github.sha }}-mingw-${{ matrix.config }}-${{ matrix.arch }}"
     steps:
     - name: Checkout
       uses: actions/checkout@v4
@@ -43,11 +44,13 @@ jobs:
         if ("${{ matrix.config }}" -Match "Release") {
           strip -sv ./src/widelands.exe
         }
+        # C:\"Program Files"\7-Zip\7z.exe a -tzip ../../Widelands-${{ github.sha }}-mingw-${{ matrix.config }}-${{ matrix.arch }}.zip widelands.exe
+        C:\"Program Files"\7-Zip\7z.exe a -tzip ../../${ARTIFACT_NAME}.zip widelands.exe
     - name: Uploading executable
       uses: actions/upload-artifact@v4
       with:
         name: Widelands ${{ matrix.config }} ${{ matrix.arch }} Binary Only (MinGW)
-        path: ${{ github.workspace }}\build\src\widelands.exe
+        path: ${{ github.workspace }}\${ARTIFACT_NAME}.zip
     - name: InnoSetup
       run: |
         cd $env:GITHUB_WORKSPACE
