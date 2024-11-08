@@ -91,8 +91,6 @@ jobs:
 
   pre-build_checks:
     needs: [changes]
-    # NOCOM: speed up testing
-    if: needs.changes.outputs.run_test_suite == 'true'
     uses: ./.github/workflows/pre-build_checks.yaml
     with:
       clang_tidy: ${{ needs.changes.outputs.clang_tidy }}
@@ -133,11 +131,11 @@ jobs:
     needs: [windows, windows-msvc, macos, appimage]
     runs-on: "ubuntu-latest"
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 15
-          token: '${{ secrets.WIDELANDS_FORMAT_TOKEN }}'
+      # - name: Checkout
+      #   uses: actions/checkout@v4
+      #   with:
+      #     fetch-depth: 15
+      #     token: '${{ secrets.WIDELANDS_FORMAT_TOKEN }}'
       - name: Download artifacts
         uses: actions/download-artifact@v4
       - name: Check missing artifacts
