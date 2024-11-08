@@ -34,9 +34,6 @@ jobs:
         choco install innosetup
     - name: Compiler
       run: |
-        # NOCOM: debug
-        if ( $null -eq $env:ARTIFACT_NAME ) { exit 1 }
-        echo /$env:ARTIFACT_NAME.zip
         $env:Path = "C:/msys64/mingw${{ matrix.bits }}/include;C:/msys64/mingw${{ matrix.bits }}/lib;C:/msys64/mingw${{ matrix.bits }}/bin;C:/msys64/usr/bin;$env:Path"
         $env:CC = "C:/msys64/mingw${{ matrix.bits }}/bin/gcc.exe"
         $env:CXX = "C:/msys64/mingw${{ matrix.bits }}/bin/g++.exe"
@@ -55,7 +52,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: Widelands ${{ matrix.config }} ${{ matrix.arch }} Binary Only (MinGW)
-        path: ${{ github.workspace }}\$env:ARTIFACT_NAME.zip
+        path: ${{ github.workspace }}\${{ env.ARTIFACT_NAME }}.zip
     - name: InnoSetup
       run: |
         cd $env:GITHUB_WORKSPACE
@@ -65,9 +62,9 @@ jobs:
         $env:CONFIGURATION = "${{ matrix.config }}"
         $env:APPVEYOR_BUILD_FOLDER = $env:GITHUB_WORKSPACE
         $env:APPVEYOR_BUILD_VERSION = "Widelands-${{ github.sha }}-${{ matrix.config }}-${{ matrix.arch }}"
-        ISCC.exe /o$env:GITHUB_WORKSPACE /fWidelands-${{ github.sha }}-mingw-${{ matrix.config }}-${{ matrix.arch }} $env:GITHUB_WORKSPACE\utils\windows\innosetup\Widelands.iss
+        ISCC.exe /o$env:GITHUB_WORKSPACE /f$env:ARTIFACT_NAME $env:GITHUB_WORKSPACE\utils\windows\innosetup\Widelands.iss
     - name: Uploading installer
       uses: actions/upload-artifact@v4
       with:
         name: Widelands ${{ matrix.config }} ${{ matrix.arch }} Installer (MinGW)
-        path: ${{ github.workspace }}\Widelands-${{ github.sha }}-mingw-${{ matrix.config }}-${{ matrix.arch }}.exe
+        path: ${{ github.workspace }}\${{ env.ARTIFACT_NAME }}.exe

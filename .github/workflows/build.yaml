@@ -149,7 +149,7 @@ jobs:
           # NOCOM: debug
           echo "Listing job directory:"
           ls -l
-          ls -l Widelands-*
+          ls -l Widelands*
           echo "End of directory listing."
           # end NOCOM
           mkdir Widelands-latest
