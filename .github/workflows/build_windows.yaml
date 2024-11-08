@@ -46,7 +46,6 @@ jobs:
           strip -sv ./src/widelands.exe
         }
         cd src
-        # C:\"Program Files"\7-Zip\7z.exe a -tzip ../../Widelands-${{ github.sha }}-mingw-${{ matrix.config }}-${{ matrix.arch }}.zip widelands.exe
         C:\"Program Files"\7-Zip\7z.exe a -tzip ..\..\$env:ARTIFACT_NAME.zip widelands.exe
     - name: Uploading executable
       uses: actions/upload-artifact@v4

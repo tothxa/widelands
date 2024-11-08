@@ -143,15 +143,7 @@ jobs:
         # artifacts.list lists all attachments of the pre-release. In case a build step failed, we detect
         # that a file is missing and download the last successful build from the pre-release.
         run: |
-          # NOCOM: for testing in fork
-          # RELEASE_URL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/download/latest"
-          RELEASE_URL="$GITHUB_SERVER_URL/widelands/widelands/releases/download/latest"
-          # NOCOM: debug
-          echo "Listing job directory:"
-          ls -l
-          ls -l Widelands*
-          echo "End of directory listing."
-          # end NOCOM
+          RELEASE_URL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/download/latest"
           mkdir Widelands-latest
           cd Widelands-latest
           curl -L -O "$RELEASE_URL/artifacts.list"
@@ -162,9 +154,6 @@ jobs:
             ls ../Widelands*/Widelands*${MATRIX} || \
               curl -L -o $ARTIFACT "$RELEASE_URL/Widelands-daily-${MATRIX}"
           done
-          # NOCOM: debug
-          echo "Downloaded from previous release:"
-          ls -l
       - name: List and rename artifacts
         run: |
           sudo apt-get update
@@ -183,11 +172,6 @@ jobs:
             echo "Calculate checksum for \"$ARTIFACT\""
             md5sum "${ARTIFACT}" > "${ARTIFACT}.md5"
           done
-          # NOCOM: debug
-          ls -l
-          cat artifacts.list
-          exit 1
-          # end NOCOM
           # curl exits 23 because grep will kill it after the first match
           set +e
           latest=$(curl -i "https://api.github.com/repos/${GITHUB_REPOSITORY}/commits/master" | grep -m 1 "\"sha\": ")
