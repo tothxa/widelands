@@ -34,6 +34,9 @@ jobs:
         choco install innosetup
     - name: Compiler
       run: |
+        # NOCOM: debug
+        if [ -z "$env:ARTIFACT_NAME" ]; then exit 1; fi
+        echo /$env:ARTIFACT_NAME.zip
         $env:Path = "C:/msys64/mingw${{ matrix.bits }}/include;C:/msys64/mingw${{ matrix.bits }}/lib;C:/msys64/mingw${{ matrix.bits }}/bin;C:/msys64/usr/bin;$env:Path"
         $env:CC = "C:/msys64/mingw${{ matrix.bits }}/bin/gcc.exe"
         $env:CXX = "C:/msys64/mingw${{ matrix.bits }}/bin/g++.exe"
@@ -45,13 +48,14 @@ jobs:
         if ("${{ matrix.config }}" -Match "Release") {
           strip -sv ./src/widelands.exe
         }
+        cd src
         # C:\"Program Files"\7-Zip\7z.exe a -tzip ../../Widelands-${{ github.sha }}-mingw-${{ matrix.config }}-${{ matrix.arch }}.zip widelands.exe
-        C:\"Program Files"\7-Zip\7z.exe a -tzip ../../${ARTIFACT_NAME}.zip widelands.exe
+        C:\"Program Files"\7-Zip\7z.exe a -tzip ../../$env:ARTIFACT_NAME.zip widelands.exe
     - name: Uploading executable
       uses: actions/upload-artifact@v4
       with:
         name: Widelands ${{ matrix.config }} ${{ matrix.arch }} Binary Only (MinGW)
-        path: ${{ github.workspace }}\${ARTIFACT_NAME}.zip
+        path: ${{ github.workspace }}\$env:ARTIFACT_NAME.zip
     - name: InnoSetup
       run: |
         cd $env:GITHUB_WORKSPACE

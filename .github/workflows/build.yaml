@@ -91,6 +91,8 @@ jobs:
 
   pre-build_checks:
     needs: [changes]
+    # NOCOM: speed up testing
+    if: needs.changes.outputs.run_test_suite == 'true'
     uses: ./.github/workflows/pre-build_checks.yaml
     with:
       clang_tidy: ${{ needs.changes.outputs.clang_tidy }}
@@ -127,6 +129,7 @@ jobs:
     name: Automated development pre-release
     # NOCOM: allow testing
     # if: ${{ github.repository == 'widelands/widelands' && github.ref == 'refs/heads/master' && always() }}
+    if: ${{ always() }}
     needs: [windows, windows-msvc, macos, appimage]
     runs-on: "ubuntu-latest"
     steps:
