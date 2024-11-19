@@ -72,7 +72,7 @@ function MakeDMG {
    HDI_RESULT=0
    while true; do
       HDI_TRY=$(( ++HDI ))
-      hdiutil create -fs HFS+ -volname "Widelands $WLVERSION" -srcfolder "$DESTINATION" \
+      hdiutil create -verbose -fs HFS+ -volname "Widelands $WLVERSION" -srcfolder "$DESTINATION" \
               "$UP/widelands_${OSX_MIN_VERSION}_${WLVERSION}.dmg" || HDI_RESULT=$?
       if [ $HDI_RESULT -eq 0 ]; then
          return
@@ -84,6 +84,7 @@ function MakeDMG {
       if [ -n "$GITHUB_ACTION" ]; then
          echo "::warning::hdiutil resource busy error... retrying"
       fi
+      sudo killall XProtectBehaviorService
       echo "  will retry after 10 seconds..."
       sleep 10
    done
