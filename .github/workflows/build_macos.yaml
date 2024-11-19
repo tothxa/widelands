@@ -21,7 +21,8 @@ jobs:
         fetch-depth: 1
     - name: Installing dependencies
       run: |
-        echo ::debug:: arch: $(uname -m)
+        uname -m
+        echo "::debug:: arch: $(uname -m)"
         exit 1
         export ICU_ROOT="$(brew --prefix icu4c)"
         # Suppress warnings about installing formulas instead of casks. Casks would raise another
