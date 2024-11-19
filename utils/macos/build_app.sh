@@ -69,24 +69,24 @@ function MakeDMG {
       HDI_MAX_TRIES=1
    fi
    HDI_TRY=0
-   HDI_RESULT=0
-   while true; do
+      while true; do
       HDI_TRY=$(( ++HDI ))
-      hdiutil create -verbose -fs HFS+ -volname "Widelands $WLVERSION" -srcfolder "$DESTINATION" \
+      HDI_RESULT=0
+      sudo hdiutil create -verbose -fs APFS -volname "Widelands $WLVERSION" -srcfolder "$DESTINATION" \
               "$UP/widelands_${OSX_MIN_VERSION}_${WLVERSION}.dmg" || HDI_RESULT=$?
       if [ $HDI_RESULT -eq 0 ]; then
          return
       fi
       # EBUSY is error code 16. We only allow that, all others should fail immediately.
-      if [ $HDI_RESULT -ne 16 -o $HDI_TRY -eq $HDI_MAX_TRIES ]; then
+      if [ $HDI_TRY -eq $HDI_MAX_TRIES ]; then
          exit $HDI_RESULT
       fi
       if [ -n "$GITHUB_ACTION" ]; then
          echo "::warning::hdiutil resource busy error... retrying"
       fi
       sudo pkill -9 XProtect
-      echo "  will retry after 10 seconds..."
-      sleep 10
+      echo "  will retry after 20 seconds..."
+      sleep 20
    done
 }
 
