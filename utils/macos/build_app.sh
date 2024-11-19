@@ -84,7 +84,7 @@ function MakeDMG {
       if [ -n "$GITHUB_ACTION" ]; then
          echo "::warning::hdiutil resource busy error... retrying"
       fi
-      sudo killall XProtectBehaviorService
+      sudo pkill -9 XProtect
       echo "  will retry after 10 seconds..."
       sleep 10
    done
