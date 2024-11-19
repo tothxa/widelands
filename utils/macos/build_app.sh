@@ -62,17 +62,22 @@ function MakeDMG {
    cp "$SOURCE_DIR"/COPYING  "$DESTINATION"/COPYING.txt
 
    echo "Creating DMG ..."
+   SUDO=""
    if [ -n "$GITHUB_ACTION" ]; then
       # Sometimes we get resource busy errors in the github actions
       HDI_MAX_TRIES=3
+      # Also supposed to help avoid the resource busy errors
+      if [ "$MATRIX_OS" = 13 ]; then
+         SUDO=sudo
+      fi
    else
       HDI_MAX_TRIES=1
    fi
    HDI_TRY=0
-      while true; do
+   while true; do
       HDI_TRY=$(( ++HDI ))
       HDI_RESULT=0
-      sudo hdiutil create -verbose -fs APFS -volname "Widelands $WLVERSION" -srcfolder "$DESTINATION" \
+      $SUDO hdiutil create -verbose -fs APFS -volname "Widelands $WLVERSION" -srcfolder "$DESTINATION" \
               "$UP/widelands_${OSX_MIN_VERSION}_${WLVERSION}.dmg" || HDI_RESULT=$?
       if [ $HDI_RESULT -eq 0 ]; then
          return
