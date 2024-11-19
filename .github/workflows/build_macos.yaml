@@ -14,6 +14,9 @@ jobs:
     name: MacOS ${{ matrix.os }} ${{ matrix.config }} ${{ matrix.compiler }}
     # ${{ matrix.arch }}
     runs-on: macos-${{ matrix.os }}
+    env:
+      # Export for build_app.sh
+      MATRIX_OS: ${{ matrix.os }}
     steps:
     - name: Get architecture
       run: |
