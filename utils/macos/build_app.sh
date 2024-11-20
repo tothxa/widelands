@@ -68,6 +68,7 @@ function MakeDMG {
       HDI_MAX_TRIES=3
       # Also supposed to help avoid the resource busy errors
       if [ "$MATRIX_OS" = 13 ]; then
+         echo "Running on MacOS 13, run hdiutil as root"
          SUDO=sudo
       fi
    else
