@@ -18,17 +18,12 @@ jobs:
       # Export for build_app.sh
       MATRIX_OS: ${{ matrix.os }}
     steps:
-    - name: Get architecture
-      run: |
-        echo "runner_arch=$(uname -m)" >>"$GITHUB_ENV"
     - name: Checkout
       uses: actions/checkout@v4
       with:
         fetch-depth: 1
     - name: Installing dependencies
       run: |
-        echo "::notice::arch: $runner_arch"
-        if [ -z "$runner_arch" ] ; then exit 1 ; fi
         export ICU_ROOT="$(brew --prefix icu4c)"
         # Suppress warnings about installing formulas instead of casks. Casks would raise another
         # warning about disabling macos gatekeeper.
@@ -43,11 +38,15 @@ jobs:
         grep -v REVDETECT-BROKEN ../build/VERSION
         DMGPATH="$(pwd)"
         DMGFILE="$(ls *.dmg)"
-        echo "DMG file is: $DMGPATH/$DMGFILE"
-        mv "$DMGFILE" "${{ github.workspace }}/Widelands-${{ github.sha }}-${{ matrix.config }}-${{ matrix.compiler }}-macos${{ matrix.os }}-${runner_arch}.dmg"
-
+        ARCH="$(uname -m)"
+        DMGNEWNAME="${{ github.workspace }}/Widelands-${{ github.sha }}-${{ matrix.config }}-${{ matrix.compiler }}-macos${{ matrix.os }}-${ARCH}.dmg"
+        echo "Found DMG file: $DMGPATH/$DMGFILE"
+        echo "Moving to: $DMGNEWNAME"
+        mv "$DMGFILE" "$DMGNEWNAME"
+        echo "arch=$ARCH" >>"$GITHUB_ENV"
+        echo "dmg_name=$DMGNEWNAME" >>"$GITHUB_ENV"
     - name: Uploading DMG
       uses: actions/upload-artifact@v4
       with:
-        name: Widelands ${{ matrix.config }} ${{ matrix.compiler }} MacOS ${{ matrix.os }} ${{ env.runner_arch }} AppImage
-        path: ${{ github.workspace }}/Widelands-${{ github.sha }}-${{ matrix.config }}-${{ matrix.compiler }}-macos${{ matrix.os }}-${{ env.runner_arch }}.dmg
+        name: Widelands ${{ matrix.config }} ${{ matrix.compiler }} MacOS ${{ matrix.os }} ${{ env.arch }} AppImage
+        path: ${{ env.dmg_name }}
