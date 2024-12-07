@@ -46,7 +46,7 @@ jobs:
               CHECK_MD5="$(md5sum "${ARTIFACT}" | cut -d ' ' -f 1)"
               OLD_MD5="$(cut -d ' ' -f 1 <"${ARTIFACT}".md5)"
               if [ "$OLD_MD5" != "$CHECK_MD5" ] ; then
-                echo "::error::MD5 checksum mismatch for artifact $ARTIFACT"
+                echo "::error::MD5 checksum mismatch for artifact $ARTIFACT old:<${OLD_MD5}> current:<${CHECK_MD5}>"
                 exit 1
               fi
             else
