@@ -9,7 +9,8 @@ on:
 jobs:
   delete_old_artifacts:
     name: Automated development pre-release
-    if: ${{ github.repository == 'widelands/widelands' && github.ref == 'refs/heads/master' }}
+    # if: ${{ github.repository == 'widelands/widelands' && github.ref == 'refs/heads/master' }}
+    if: ${{ github.repository == 'tothxa/widelands' && github.ref == 'refs/heads/windows-dbgsyms-test' }}
     runs-on: "ubuntu-latest"
     steps:
       - name: Checkout
@@ -21,14 +22,24 @@ jobs:
         # This step ensures that we only keep artifacts that were really generated from latest
         # master, not carried over from old runs.
         run: |
-          RELEASE_URL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/download/latest"
+          # RELEASE_URL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/download/latest"
+          RELEASE_URL="$GITHUB_SERVER_URL/widelands/widelands/releases/download/latest"
+          # we need the SHA from the main repo too
+          # curl exits 23 because grep will kill it after the first match
+          set +e
+          MASTER_SHA=$(curl -i "https://api.github.com/repos/widelands/widelands/commits/master" | grep -m 1 "\"sha\": ")
+          set -e
+          MASTER_SHA=${MASTER_SHA#*: \"}
+          MASTER_SHA=${MASTER_SHA%\",}
+
           mkdir Widelands-latest
           cd Widelands-latest
           curl -L -O "$RELEASE_URL/artifacts.list"
           for ARTIFACT in $(cat artifacts.list)
           do
             ARTIFACT_SHA=$(echo "$ARTIFACT" | sed -E 's/Widelands-([0-9a-f]*)-.*/\1/')
-            if [ "$ARTIFACT_SHA" = "$GITHUB_SHA" ] ; then
+            # if [ "$ARTIFACT_SHA" = "$GITHUB_SHA" ] ; then
+            if [ "$ARTIFACT_SHA" = "$MASTER_SHA" ] ; then
               MATRIX=$(echo "$ARTIFACT" | sed 's/Widelands-[0-9a-f]*-//')
               curl -o "$ARTIFACT" "$RELEASE_URL/Widelands-daily-${MATRIX}"
               curl -o "$ARTIFACT".md5 "$RELEASE_URL/Widelands-daily-${MATRIX}.md5"
@@ -59,7 +70,7 @@ jobs:
           done
           # curl exits 23 because grep will kill it after the first match
           set +e
-          latest=$(curl -i "https://api.github.com/repos/${GITHUB_REPOSITORY}/commits/master" | grep -m 1 "\"sha\": ")
+          latest=$(curl -i "https://api.github.com/repos/${GITHUB_REPOSITORY}/commits/windows-dbgsyms-test" | grep -m 1 "\"sha\": ")
           set -e
           latest=${latest#*: \"}
           latest=${latest%\",}
