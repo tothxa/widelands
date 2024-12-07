@@ -40,7 +40,7 @@ jobs:
             ARTIFACT_SHA=$(echo "$ARTIFACT" | sed -E 's/Widelands-([0-9a-f]*)-.*/\1/')
             # if [ "$ARTIFACT_SHA" = "$GITHUB_SHA" ] ; then
             if [ "$ARTIFACT_SHA" = "$MASTER_SHA" ] ; then
-              MATRIX="$(echo "$ARTIFACT" | sed 's/Widelands-[0-9a-f]*-//' -)"
+              MATRIX="$(echo "$ARTIFACT" | sed 's/Widelands-[0-9a-f]*-//')"
               echo "Downloading $RELEASE_URL/Widelands-daily-${MATRIX}"
               curl -L -o "$ARTIFACT" "$RELEASE_URL/Widelands-daily-${MATRIX}"
               curl -L -o "$ARTIFACT".md5 "$RELEASE_URL/Widelands-daily-${MATRIX}.md5"
