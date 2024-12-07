@@ -125,15 +125,17 @@ jobs:
 
   dev_release:
     name: Automated development pre-release
-    if: ${{ github.repository == 'widelands/widelands' && github.ref == 'refs/heads/master' && always() }}
+    # NOCOM: allow testing
+    # if: ${{ github.repository == 'widelands/widelands' && github.ref == 'refs/heads/master' && always() }}
+    if: ${{ always() }}
     needs: [windows, windows-msvc, macos, appimage]
     runs-on: "ubuntu-latest"
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 15
-          token: '${{ secrets.WIDELANDS_FORMAT_TOKEN }}'
+      # - name: Checkout
+      #   uses: actions/checkout@v4
+      #   with:
+      #     fetch-depth: 15
+      #     token: '${{ secrets.WIDELANDS_FORMAT_TOKEN }}'
       - name: Download artifacts
         uses: actions/download-artifact@v4
       - name: Check missing artifacts
@@ -141,7 +143,7 @@ jobs:
         # artifacts.list lists all attachments of the pre-release. In case a build step failed, we detect
         # that a file is missing and download the last successful build from the pre-release.
         run: |
-          RELEASE_URL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/download/latest"
+          RELEASE_URL="$GITHUB_SERVER_URL/widelands/widelands/releases/download/latest"
           mkdir Widelands-latest
           cd Widelands-latest
           curl -L -O "$RELEASE_URL/artifacts.list"
@@ -149,8 +151,10 @@ jobs:
           do
             [ "${ARTIFACT%%-*}" != "Widelands" ] && continue
             MATRIX=$(echo $ARTIFACT | sed 's/Widelands-[0-9a-f]*-//' -)
-            ls ../Widelands*/Widelands*${MATRIX} || \
+            if ! ls ../Widelands*/Widelands*${MATRIX} ; then
+              echo "::warning::Falling back to old artifact $ARTIFACT"
               curl -L -o $ARTIFACT "$RELEASE_URL/Widelands-daily-${MATRIX}"
+            fi
           done
       - name: List and rename artifacts
         run: |
@@ -182,10 +186,13 @@ jobs:
             exit 1
           fi
       - name: Updating latest pre-release
+        # NOCOM: not for testing
+        if: ${{ github.repository == 'widelands/widelands' && github.ref == 'refs/heads/master' && always() }}
         # Creates a new pre-release with the "latest" tag and all gathered artifacts.
         # Because all older artifacts are removed, we have to reupload the missing ones detected in the previous step
-        env:
-          GH_TOKEN: "${{ secrets.WIDELANDS_FORMAT_TOKEN }}"
+        # NOCOM: extra safety
+        #env:
+        #  GH_TOKEN: "${{ secrets.WIDELANDS_FORMAT_TOKEN }}"
         run: |
           gh release delete latest --yes    || echo "No old release to delete"
           git push --delete origin latest   || echo "No latest tag to delete"
