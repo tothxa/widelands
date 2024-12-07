@@ -44,7 +44,6 @@ jobs:
               echo "Downloading $RELEASE_URL/Widelands-daily-${MATRIX}"
               curl -L -o "$ARTIFACT" "$RELEASE_URL/Widelands-daily-${MATRIX}"
               curl -L -o "$ARTIFACT".md5 "$RELEASE_URL/Widelands-daily-${MATRIX}.md5"
-              ls -l
               CHECK_MD5="$(md5sum "${ARTIFACT}" | cut -d ' ' -f 1)"
               OLD_MD5="$(cut -d ' ' -f 1 <"${ARTIFACT}".md5)"
               if [ "$OLD_MD5" != "$CHECK_MD5" ] ; then
@@ -63,12 +62,10 @@ jobs:
             FILENAME=$(basename "$ARTIFACT")
             # Move all artifacts to the current folder
             mv "$ARTIFACT" "$FILENAME"
-            mv "$ARTIFACT".md5 "$FILENAME".md5
             # Store original file names
             echo $FILENAME | tee -a artifacts.list
             # Rename artifacts to have a fixed url
             prename 's/Widelands-[0-9a-f]*-/Widelands-daily-/' "$FILENAME" \;
-            prename 's/Widelands-[0-9a-f]*-/Widelands-daily-/' "$FILENAME".md5 \;
           done
           # curl exits 23 because grep will kill it after the first match
           set +e
