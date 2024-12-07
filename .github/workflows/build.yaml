@@ -143,7 +143,7 @@ jobs:
         # artifacts.list lists all attachments of the pre-release. In case a build step failed, we detect
         # that a file is missing and download the last successful build from the pre-release.
         run: |
-          RELEASE_URL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/download/latest"
+          RELEASE_URL="$GITHUB_SERVER_URL/widelands/widelands/releases/download/latest"
           mkdir Widelands-latest
           cd Widelands-latest
           curl -L -O "$RELEASE_URL/artifacts.list"
