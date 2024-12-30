@@ -100,7 +100,7 @@ jobs:
         gh variable set VCPKG_REF -b "${{ needs.vcpkg-packages.outputs.vcpkg_ref }}"
   refresh_ref_cache:
     needs: update
-    if: ${{ vars.VCPKG_REF != '' && always }}
+    if: ${{ vars.VCPKG_REF != '' && always() }}
     name: Store ref in cache
     runs-on: windows-2022
     steps:
