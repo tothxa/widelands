@@ -74,6 +74,7 @@ jobs:
       id: cache-hit
       if: steps.lookup.outputs.cache-hit == 'true'
       run: |
+        echo "::notice:: Cache hit, reporting success immediately."
         echo "result-${{ matrix.arch }}=true" >> $env:GITHUB_OUTPUT
   update:
     needs: vcpkg-packages
