@@ -20,7 +20,7 @@ jobs:
     runs-on: windows-2022
     # Don't waste cycles in forks that don't use it.
     # Initialise the variable manually in your fork to enable caching.
-    if: ${{ vars.VCPKG_REF != '' }}
+    if: ${{ vars.VCPKG_REF_NOT != '' }}
     env:
       VCPKG_ROOT: C:\vcpkg
       VCPKG_TARGET_TRIPLET: ${{ matrix.arch }}-windows-static
@@ -100,7 +100,7 @@ jobs:
         gh variable set VCPKG_REF -b "${{ needs.vcpkg-packages.outputs.vcpkg_ref }}"
   refresh_ref_cache:
     needs: update
-    if: ${{ vars.VCPKG_REF != '' && always() }}
+    if: ${{ vars.VCPKG_REF_NOT != '' && always() }}
     name: Store ref in cache
     runs-on: windows-2022
     steps:
