@@ -69,6 +69,12 @@ jobs:
         cmake.exe -G "NMake Makefiles" .. -DVCPKG_TARGET_TRIPLET=${{ env.VCPKG_TARGET_TRIPLET }} -DCMAKE_TOOLCHAIN_FILE="${{ env.VCPKG_ROOT }}/scripts/buildsystems/vcpkg.cmake" -DOPTION_BUILD_WEBSITE_TOOLS=OFF -DOPTION_BUILD_TESTS=ON -DOPTION_ASAN=OFF -DOPTION_BUILD_CODECHECK=OFF -DOPTION_BUILD_WINSTATIC=ON -DOPTION_USE_GLBINDING=ON -DOPTION_FORCE_EMBEDDED_MINIZIP=ON
         nmake
         echo "result-${{ matrix.arch }}=true" >> $env:GITHUB_OUTPUT
+    - name: Report cache hit as success
+      # This makes sure that the vcpkg_ref cache is refreshed every week
+      id: cache-hit
+      if: steps.lookup.outputs.cache-hit == 'true'
+      run: |
+        echo "result-${{ matrix.arch }}=true" >> $env:GITHUB_OUTPUT
   update:
     needs: vcpkg-packages
     if: ${{ github.repository == 'widelands/widelands' && needs.vcpkg-packages.outputs.result-x64 && needs.vcpkg-packages.outputs.result-x86 }}
