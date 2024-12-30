@@ -9,6 +9,9 @@ on:
     - cron: '0 2 * * 5'
 
 jobs:
+  # Don't waste cycles in forks that don't use it.
+  # Initialise the variable manually in your fork to enable caching.
+  if ${{ vars.VCPKG_REF != '' }}
   vcpkg-packages:
     # Checks for new vcpkg version and tries to build the update package versions
     # On success it updates the vcpkg_ref file so the main builds use the cache
@@ -48,6 +51,10 @@ jobs:
         path: C:\vcpkg\installed
         key: |
           ${{ steps.prepare.outputs.vcpkg_key }}-${{ matrix.arch }}
+    - name: Simulate error
+      if: steps.lookup.outputs.cache-hit == 'true'
+      run: |
+        exit 1
     - name: Building packages
       if: steps.lookup.outputs.cache-hit != 'true'
       run: |
@@ -91,9 +98,15 @@ jobs:
       shell: bash
       run: |
         gh variable set VCPKG_REF -b "${{ needs.vcpkg-packages.outputs.vcpkg_ref }}"
-        echo "${{ needs.vcpkg-packages.outputs.vcpkg_ref }}" > vcpkg_ref
+  refresh_ref_cache:
+    name: Store ref in cache
+    runs-on: windows-2022
+    - name: Create ref file
+      shell: bash
+      run: |
+        echo "${{ vars.VCPKG_REF }}" > vcpkg_ref
     - name: Store in cache
       uses: actions/cache/save@v4
       with:
         path: vcpkg_ref
-        key: vcpkg_ref-${{ github.run_id }}-${{ needs.vcpkg-packages.outputs.vcpkg_ref }}
+        key: vcpkg_ref-${{ github.run_id }}-${{ needs.vcpkg-packages.outputs.vcpkg_ref }
