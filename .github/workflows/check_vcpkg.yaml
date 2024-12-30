@@ -58,11 +58,6 @@ jobs:
       uses: ilammy/msvc-dev-cmd@v1
       with:
         arch: ${{ matrix.arch }}
-    - name: Simulate error
-      id: error
-      if: steps.lookup.outputs.cache-hit == 'true'
-      run: |
-        exit 1
     - name: Compiler
       id: build
       if: steps.lookup.outputs.cache-hit != 'true'
