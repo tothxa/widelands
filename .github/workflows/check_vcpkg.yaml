@@ -9,9 +9,6 @@ on:
     - cron: '0 2 * * 5'
 
 jobs:
-  # Don't waste cycles in forks that don't use it.
-  # Initialise the variable manually in your fork to enable caching.
-  if: ${{ vars.VCPKG_REF != '' }}
   vcpkg-packages:
     # Checks for new vcpkg version and tries to build the update package versions
     # On success it updates the vcpkg_ref file so the main builds use the cache
@@ -21,6 +18,9 @@ jobs:
         arch: [x64, x86]
     name: Build vcpkg packages for ${{ matrix.arch }}
     runs-on: windows-2022
+    # Don't waste cycles in forks that don't use it.
+    # Initialise the variable manually in your fork to enable caching.
+    if: ${{ vars.VCPKG_REF != '' }}
     env:
       VCPKG_ROOT: C:\vcpkg
       VCPKG_TARGET_TRIPLET: ${{ matrix.arch }}-windows-static
@@ -100,7 +100,7 @@ jobs:
         gh variable set VCPKG_REF -b "${{ needs.vcpkg-packages.outputs.vcpkg_ref }}"
   refresh_ref_cache:
     needs: update
-    if: ${{ always }}
+    if: ${{ vars.VCPKG_REF != '' }} && ${{ always }}
     name: Store ref in cache
     runs-on: windows-2022
     steps:
