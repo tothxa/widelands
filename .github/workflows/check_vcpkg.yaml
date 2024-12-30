@@ -79,12 +79,13 @@ jobs:
     name: Update vcpkg_ref
     runs-on: windows-2022
     env:
-      GH_TOKEN: ${{ secrets.WIDELANDS_FORMAT_TOKEN }}
+      # GH_TOKEN: ${{ secrets.WIDELANDS_FORMAT_TOKEN }}
+      GH_TOKEN: ${{ secrets.VARIABLES_TOKEN }}
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 1
+    # - name: Checkout
+    #   uses: actions/checkout@v4
+    #   with:
+    #     fetch-depth: 1
     - name: Set variable
       shell: bash
       run: |
