@@ -82,7 +82,7 @@ SUPPRESSED_CHECKS = {
     'bugprone-not-null-terminated-result',
     'bugprone-signed-char-misuse',
     'bugprone-too-small-loop-variable',
-    'bugprone-unused-return-value',
+    # 'bugprone-unused-return-value',
     'cert-err33-c',
     'cert-err58-cpp',
     'cert-msc32-c',
@@ -133,8 +133,8 @@ SUPPRESSED_CHECKS = {
     'readability-magic-numbers',
     'readability-named-parameter',
     'readability-redundant-casting',
-    'readability-redundant-member-init',
-    'readability-static-accessed-through-instance',
+    # 'readability-redundant-member-init',
+    # 'readability-static-accessed-through-instance',
     'readability-suspicious-call-argument',
 }
 
