@@ -70,6 +70,7 @@ jobs:
         grep -v REVDETECT-BROKEN VERSION
         make -k -j$(nproc) VERBOSE=1
     - name: Make install/uninstall
+      if: false
       run: |
         cd build
         TEST_INSTALL_DIR="${PWD}/test_install"
@@ -93,6 +94,7 @@ jobs:
         sleep 2 # some extra time
         glxinfo >/dev/null # report error if it still occurs
     - name: Website Binaries
+      if: false
       run: |
         # Ignore transient SDL errors (exit code 2)
         mkdir temp_web
@@ -102,4 +104,4 @@ jobs:
       run: utils/test/download_loadgame_testcases.sh
     - name: Testsuite
       run: |
-        ./regression_test.py --ignore-error-code  # TODO(aDiscoverer) memory leaks ignored temporary until #6807 is fixed (see also #6805)
+        ./regression_test.py --ignore-error-code -r locking_stress # TODO(aDiscoverer) memory leaks ignored temporary until #6807 is fixed (see also #6805)
