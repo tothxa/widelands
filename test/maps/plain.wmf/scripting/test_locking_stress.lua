@@ -126,49 +126,49 @@ test_duration = 600000  -- gametime
 
 -- ### End of helper functions, now the fun starts ### --
 
-mv:add_plugin_timer("open_window()", 189)
-
--- run(function()
---    while true do
---       sleep(math.random(400, 1600))
---       open_window()
---    end
--- end)
-
-mv:add_plugin_timer("close_window()", 973)
-
--- run(function()
---    while true do
---       sleep(math.random(600, 1500))
---       close_window()
---    end
--- end)
-
--- mv:add_plugin_timer("replace_building()", 1319)
+mv:add_plugin_timer("open_window()", 511)
 
 run(function()
    while true do
-      sleep(math.random(400, 1000))
+      sleep(math.random(400, 1600))
+      open_window()
+   end
+end)
+
+mv:add_plugin_timer("close_window()", 1003)
+
+run(function()
+   while true do
+      sleep(math.random(600, 1500))
+      close_window()
+   end
+end)
+
+mv:add_plugin_timer("replace_building()", 1319)
+
+run(function()
+   while true do
+      sleep(math.random(1000, 3000))
       replace_building()
    end
 end)
 
 run(function()
-   sleep(math.random(350, 700))
-   mv:add_plugin_timer("start_stop_building()", 97)
+   sleep(math.random(500, 1500))
+   mv:add_plugin_timer("start_stop_building()", 257)
 
---    while true do
---       sleep(math.random(200, 1000))
---       start_stop_building()
---    end
+   while true do
+      sleep(math.random(200, 1000))
+      start_stop_building()
+   end
 end)
 
 run(function()
-   sleep(math.random(350, 700))
---    mv:add_plugin_timer("change_inputs()", 263)
+   sleep(math.random(500, 1500))
+   mv:add_plugin_timer("change_inputs()", 263)
 
    while true do
-      sleep(math.random(100, 300))
+      sleep(math.random(200, 1000))
       change_inputs()
    end
 end)
@@ -181,7 +181,7 @@ run(function()
    close_window = function() end
    start_stop_building = function() end
    change_inputs = function() end
-   sleep(1000)
+   sleep(2000)
    print("# All Tests passed.")
    mv:close()
 end)
