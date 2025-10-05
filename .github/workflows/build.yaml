@@ -106,8 +106,8 @@ jobs:
       codecheck: ${{ needs.changes.outputs.codecheck }}
 
   testsuite:
-    # needs: [changes, pre-build_checks]
-    # if: needs.changes.outputs.run_test_suite == 'true'
+    needs: [changes, pre-build_checks]
+    if: needs.changes.outputs.run_test_suite == 'true'
     uses: ./.github/workflows/build_testsuite.yaml
 
   windows-msvc:
@@ -133,7 +133,7 @@ jobs:
     uses: ./.github/workflows/build_appimage.yaml
 
   emscripten:
-    #TODO(tothxa): dependencies
+    # TODO(tothxa): dependencies
     uses ./.github/workflows/build_emscripten.yaml
 
   dev_release:
