@@ -7,8 +7,8 @@ jobs:
     runs-on: ubuntu-24.04
     env:
       # TODO(tothxa): run testuite?
-      # SDL_VIDEODRIVER: 'x11'
-      # DISPLAY: ':99.0'
+      SDL_VIDEODRIVER: 'x11'
+      DISPLAY: ':99.0'
     steps:
     - name: Checkout
       uses: actions/checkout@v4
