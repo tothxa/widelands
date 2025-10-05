@@ -19,7 +19,7 @@ jobs:
       # TODO(tothxa): is this necessary for emscripten build?
       run: sh ./.github/scripts/install_deps.sh
     - name: Installing emscripten
-      run: apt-get install emscripten
+      run: sudo apt-get install emscripten
     - name: Compile
       run: |
         mkdir build
