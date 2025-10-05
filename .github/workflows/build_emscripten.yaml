@@ -1,0 +1,69 @@
+name: build - emscripten
+on:
+  workflow_call:
+
+jobs:
+  emscripten:
+    runs-on: ubuntu-24.04
+    env:
+      # TODO(tothxa): run testuite?
+      # SDL_VIDEODRIVER: 'x11'
+      # DISPLAY: ':99.0'
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 1
+    - name: Installing dependencies
+      # TODO(tothxa): is this necessary for emscripten build?
+      run: sh ./.github/scripts/install_deps.sh
+    - name: Installing emscripten
+      run: apt-get install emscripten
+    - name: Compile
+      run: |
+        mkdir build
+        pushd build
+        emcmake cmake .. -DCMAKE_BUILD_PLATFORM=emscripten -DCMAKE_BUILD_TYPE=Release -DOPTION_BUILD_WEBSITE_TOOLS="OFF" -DOPTION_ASAN="OFF" -DOPTION_BUILD_CODECHECK="OFF" -DCMAKE_EXE_LINKER_FLAGS="-sMODULARIZE -sEXPORTED_RUNTIME_METHODS=callMain -sEXPORT_ALL -sEXPORT_NAME=widelands" -DOPTION_BUILD_TESTS=OFF -DOPTION_BUILD_WEBSITE_TOOLS=OFF
+        grep -v REVDETECT-BROKEN VERSION
+        emmake make -k -j$(nproc) VERBOSE=1
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: Widelands WebASM binary
+        path: ${{ github.workspace }}/build/widelands
+    - name: Make install/uninstall
+      # TODO(tothxa): ??? -- package it
+      if: false
+      run: |
+        cd build
+        TEST_INSTALL_DIR="${PWD}/test_install"
+        make -j$(nproc) DESTDIR=${TEST_INSTALL_DIR} install
+        make -j$(nproc) DESTDIR=${TEST_INSTALL_DIR} uninstall
+        test ! -d ${TEST_INSTALL_DIR}
+    - name: Start xvfb
+      # TODO(tothxa): run testuite?
+      if: false
+      run: |
+        /sbin/start-stop-daemon --start --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -screen 0 800x600x24 -ac +extension GLX
+        # wait for start of xvfb:
+        i=0
+        while [ $(( i++ )) -lt 60 ]
+        do
+          sleep 1
+          # glxinfo is installed by .github/scrips/install_deps.sh
+          if glxinfo 2>/dev/null >/dev/null || [ $? -eq 127 ]
+          then  # successful or command not found
+            break
+          fi
+        done
+        sleep 2 # some extra time
+        glxinfo >/dev/null # report error if it still occurs
+    - name: download savegame testcases
+      # TODO(tothxa): run testuite?
+      if: false
+      run: utils/test/download_loadgame_testcases.sh
+    - name: Testsuite
+      # TODO(tothxa): run testuite?
+      if: false
+      run: |
+        ./regression_test.py
