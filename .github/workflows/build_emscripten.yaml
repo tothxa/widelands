@@ -1,6 +1,7 @@
 name: build - emscripten
 on:
   workflow_call:
+  workflow_dispatch:
 
 jobs:
   emscripten:
