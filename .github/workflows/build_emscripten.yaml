@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  emscripten:
+  emscripten_native:
     runs-on: ubuntu-24.04
     env:
       # TODO(tothxa): run testuite?
@@ -31,7 +31,69 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: Widelands WebASM binary
-        path: ${{ github.workspace }}/build/widelands
+        path: ${{ github.workspace }}/build/src/widelands
+    - name: Make install/uninstall
+      # TODO(tothxa): ??? -- package it
+      if: false
+      run: |
+        cd build
+        TEST_INSTALL_DIR="${PWD}/test_install"
+        make -j$(nproc) DESTDIR=${TEST_INSTALL_DIR} install
+        make -j$(nproc) DESTDIR=${TEST_INSTALL_DIR} uninstall
+        test ! -d ${TEST_INSTALL_DIR}
+    - name: Start xvfb
+      # TODO(tothxa): run testuite?
+      if: false
+      run: |
+        /sbin/start-stop-daemon --start --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -screen 0 800x600x24 -ac +extension GLX
+        # wait for start of xvfb:
+        i=0
+        while [ $(( i++ )) -lt 60 ]
+        do
+          sleep 1
+          # glxinfo is installed by .github/scrips/install_deps.sh
+          if glxinfo 2>/dev/null >/dev/null || [ $? -eq 127 ]
+          then  # successful or command not found
+            break
+          fi
+        done
+        sleep 2 # some extra time
+        glxinfo >/dev/null # report error if it still occurs
+    - name: download savegame testcases
+      # TODO(tothxa): run testuite?
+      if: false
+      run: utils/test/download_loadgame_testcases.sh
+    - name: Testsuite
+      # TODO(tothxa): run testuite?
+      if: false
+      run: |
+        ./regression_test.py
+
+  emscripten_emsdk:
+    runs-on: ubuntu-24.04
+    env:
+      # TODO(tothxa): run testuite?
+      SDL_VIDEODRIVER: 'x11'
+      DISPLAY: ':99.0'
+    steps:
+    - name: Installing emsdk
+      uses: mymindstorm/setup-emsdk@v14
+      actions-cache-folder: 'emsdk-cache'
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 1
+    # name: Installing dependencies
+    # # TODO(tothxa): is this necessary for emscripten build?
+    # run: sh ./.github/scripts/install_deps.sh
+    - name: Compile
+      run: |
+        docker run -v "$PWD":/src emscripten/emsdk:4.0.2 utils/build_emscripten.sh
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: Widelands WebASM binary emsdk
+        path: ${{ github.workspace }}/build_emscripten/src/widelands
     - name: Make install/uninstall
       # TODO(tothxa): ??? -- package it
       if: false
