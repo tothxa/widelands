@@ -78,7 +78,8 @@ jobs:
     steps:
     - name: Installing emsdk
       uses: mymindstorm/setup-emsdk@v14
-      actions-cache-folder: 'emsdk-cache'
+      with:
+        actions-cache-folder: 'emsdk-cache'
     - name: Checkout
       uses: actions/checkout@v4
       with:

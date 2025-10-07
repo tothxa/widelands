@@ -134,7 +134,7 @@ jobs:
 
   emscripten:
     # TODO(tothxa): dependencies
-    uses ./.github/workflows/build_emscripten.yaml
+    uses: ./.github/workflows/build_emscripten.yaml
 
   dev_release:
     name: Automated development pre-release
