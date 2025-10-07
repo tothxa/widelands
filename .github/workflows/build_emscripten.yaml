@@ -89,7 +89,7 @@ jobs:
     # run: sh ./.github/scripts/install_deps.sh
     - name: Compile
       run: |
-        docker run -v "$PWD":/src emscripten/emsdk:4.0.2 utils/build_emscripten.sh
+        docker run -v "$PWD":/src emscripten/emsdk utils/build_emscripten.sh
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
