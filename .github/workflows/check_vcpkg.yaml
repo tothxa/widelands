@@ -20,7 +20,7 @@ jobs:
     runs-on: windows-2022
     # Don't waste cycles in forks that don't use it.
     # Initialise the variable manually in your fork to enable caching.
-    if: ${{ vars.VCPKG_REF != '' && secrets.WIDELANDS_FORMAT_TOKEN != '' }}
+    if: ${{ vars.VCPKG_REF != '' }}
     env:
       VCPKG_ROOT: C:\vcpkg
       VCPKG_TARGET_TRIPLET: ${{ matrix.arch }}-windows-static
