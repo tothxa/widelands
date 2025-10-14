@@ -10,7 +10,7 @@ on:
 
 jobs:
   vcpkg-packages:
-    # Checks for new vcpkg version and tries to build the update package versions
+    # Checks for new vcpkg version and tries to build the updated package versions
     # On success it updates the vcpkg_ref file so the main builds use the cache
     # with the latest version.
     strategy:
@@ -20,7 +20,7 @@ jobs:
     runs-on: windows-2022
     # Don't waste cycles in forks that don't use it.
     # Initialise the variable manually in your fork to enable caching.
-    if: ${{ vars.VCPKG_REF != '' }}
+    if: ${{ vars.VCPKG_REF != '' && secrets.WIDELANDS_FORMAT_TOKEN != '' }}
     env:
       VCPKG_ROOT: C:\vcpkg
       VCPKG_TARGET_TRIPLET: ${{ matrix.arch }}-windows-static
@@ -74,7 +74,7 @@ jobs:
         echo "result-${{ matrix.arch }}=true" >> $env:GITHUB_OUTPUT
   update:
     needs: vcpkg-packages
-    if: ${{ github.repository == 'widelands/widelands' && needs.vcpkg-packages.outputs.result-x64 && needs.vcpkg-packages.outputs.result-x86 }}
+    if: ${{ needs.vcpkg-packages.outputs.result-x64 && needs.vcpkg-packages.outputs.result-x86 }}
     name: Update vcpkg_ref
     runs-on: windows-2022
     env:
