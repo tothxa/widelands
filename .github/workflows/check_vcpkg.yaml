@@ -71,10 +71,6 @@ jobs:
         echo "vcpkg_key=vcpkg_cache-${{ hashFiles( 'utils/windows/vcpkg_deps' ) }}-${HEAD}" >> $GITHUB_OUTPUT
         echo "vcpkg_ref=$HEAD" >> $GITHUB_OUTPUT
       shell: bash
-    - name: test error
-      shell: bash
-      run: |
-        exit 1
     - name: Check whether cache exists
       id: lookup
       uses: actions/cache@v4
