@@ -30,7 +30,6 @@ jobs:
       id: check_setup
       shell: bash
       run: |
-        set -e
         if [ -z "$GH_TOKEN" ]; then
           exit 1
         fi
@@ -54,8 +53,8 @@ jobs:
       VCPKG_ROOT: C:\vcpkg
       VCPKG_TARGET_TRIPLET: ${{ matrix.arch }}-windows-static
     outputs:
-      result-x64: ${{ steps.build.outputs.result-x64 }}
-      result-x86: ${{ steps.build.outputs.result-x86 }}
+      result-x64: ${{ steps.signal.outputs.result-x64 }}
+      result-x86: ${{ steps.signal.outputs.result-x86 }}
       vcpkg_ref: ${{ steps.prepare.outputs.vcpkg_ref }}
     steps:
     - name: Checkout
@@ -101,6 +100,7 @@ jobs:
         cmake.exe -G "NMake Makefiles" .. -DVCPKG_TARGET_TRIPLET=${{ env.VCPKG_TARGET_TRIPLET }} -DCMAKE_TOOLCHAIN_FILE="${{ env.VCPKG_ROOT }}/scripts/buildsystems/vcpkg.cmake" -DOPTION_BUILD_WEBSITE_TOOLS=OFF -DOPTION_BUILD_TESTS=ON -DOPTION_ASAN=OFF -DOPTION_BUILD_CODECHECK=OFF -DOPTION_BUILD_WINSTATIC=ON -DOPTION_USE_GLBINDING=ON -DOPTION_FORCE_EMBEDDED_MINIZIP=ON
         nmake
     - name: Signal success
+      id: signal
       # We need this on cache hit too
       run: |
         echo "result-${{ matrix.arch }}=true" >> $env:GITHUB_OUTPUT
