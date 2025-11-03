@@ -125,7 +125,7 @@ set -x
 
 # Pull All translations from Transifex
 # use force to make sure really all files get pulled
-tx pull -a -f
+echo tx pull -a -f
 
 # Undo one-liner diffs of pure timestamps with no other content
 # for fetched translations (*.po) (in case something plays tricks, see #5937)
@@ -164,12 +164,12 @@ undo_oneliner_diffs
 if [ -n "$(git status -s)" ]; then
   # Only upload to Transifex if anything changed
   # Push source catalogs to Transifex
-  tx push -s
+  echo tx push -s
   sleep 65 # wait for translation files to be updated
 
   # Pull All translations from Transifex
   # use force to make sure really all files get pulled
-  tx pull -a -f
+  echo tx pull -a -f
 
   # Undo one-liner diffs of pure timestamps with no other content
   # for fetched translations (*.po) (in case something plays tricks, see #5937)
